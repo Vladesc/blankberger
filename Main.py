@@ -294,7 +294,7 @@ def sample(sample_nr):
     return (data)  # Funktion gibt bei Aufruf als Wert den Vektor 'data' zuruek
 
 
-def position_check(level):  # todo ggf. überflüssig
+def position_check(level):
     # Funktion zur Ueberpruefung, ob auf der aktuellen Position in der Matrix eine 1 oder eine 0 ist
     # Je nach player_nr wird auch geprueft, ob die rechte oder linke Position der aktuellen 1 oder 0 ist
     # Dies ist wichtig, da sonst in einer LED beide Farben leuchten koennen
@@ -570,7 +570,7 @@ def change_active_position(pos_new: int, pos_old: int):
     data[pos_old] = 0
 
 
-def stone_set_and_fall(pos_new: int, pos_old: int) -> int: ##todo fallanimation fehlt + Stein wird überschrieben
+def stone_set_and_fall(pos_new: int, pos_old: int) -> int:
     """
     Senden der Informationen des Buttons, ausführen der FallAnimation (leeres Feld = 0).
     :param pos_new: Neue Position des Steins
