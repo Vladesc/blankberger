@@ -584,9 +584,9 @@ def stone_set_and_fall(pos_new: int, pos_old: int) -> int:
     global pos
     last_empty_field = 0  # Zaehlvariable zum Durchsuchen der Zeilen einer Spalte nach dem untersten leeren Feld
     data[pos_new] = 0
-    pos = pos_new + (rows) * columns  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
+    pos = pos_new + (rows - 1) * columns  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
 
-    while last_empty_field < rows:  # Solange die obere Zeile nicht ueberschritten wird:
+    while last_empty_field <= rows:  # Solange die obere Zeile nicht ueberschritten wird:
         if position_check(1):  # Wenn 'data' an der aktuellen Position 1 ist:
             last_empty_field = last_empty_field + 1  # -> Erhoehe Zaehlvariable um 1
             pos = pos - columns  # → Erhoehe die aktuelle Position um eine Zeile nach oben
