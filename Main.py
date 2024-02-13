@@ -666,6 +666,7 @@ def switch_player_set_start():
     while pos <= pos_max + player_nr:
         if position_check(1):
             #pos = pos + 2 ##todo no draw
+            pass
         else:
             #data[pos] = 1 ##todo no draw
             break
