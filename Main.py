@@ -555,7 +555,9 @@ def handle_button_input(btn_nr: int, pos_old: int) -> int:
             or type(pos_old) is not int
             or type(player_nr) is not int
             or data[btn_nr] == 1 or data[btn_nr + 1] == 1):
+        print("error_something_went_wrong")
         return 1
+    print("SetStone")
     change_active_position(pos_new, pos_old)
     return check_game_over(stone_set_and_fall(pos_new, pos_old))
 
