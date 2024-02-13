@@ -610,9 +610,12 @@ def check_game_over(last_empty_field: int) -> int:
     """
     global player_nr
     if not is_win(last_empty_field):
+        print("win") #todo rem print
         return 0
     pos_new: int = switch_player_set_start()
+    print("pos_new", pos_new) #todo rem print
     if not is_patt(pos_new):
+        print("patt") #todo rem print
         return 0
     return 1
 
@@ -656,7 +659,6 @@ def switch_player_set_start() -> int:
     global player_nr
     player_nr = (0 if player_nr == 1 else 1)
     pos_new = 0 + player_nr
-
 
     while pos_new <= pos_max + player_nr:
         if position_check(1):
