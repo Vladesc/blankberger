@@ -669,8 +669,7 @@ def switch_player_set_start():
             pos = pos + 2
             pass
         else:
-            data[pos] = 0
-            ##data[pos] = 1 #todo old value
+            data[pos] = 0 ## hier auf 1 setzen, playerstein zu beleuchten.
             break
 
 
@@ -690,6 +689,7 @@ while 1:
     pos = 0  # position zuruecksetzen (nachdem Reset ausgeloest wurde)
     player_nr = 0  # player_nr zuruecksetzen (nachdem Reset ausgeloest wurde)
     data = sample(0)  # Funktionsaufruf, schreibe Startbildschirm (Sample(0)) auf 'data'
+    data[pos] = 0 ## hier auf 1 setzen, playerstein zu beleuchten.
 
     while reset:  # Spiel läuft bis abgeschlossen (reset wird durch Reset-Funktion, Spielgewinn oder Unentschieden ausgeloest)
         send_data(data)  # Funktionsaufruf, Sende 'data' an LED-Matrix
