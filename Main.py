@@ -663,7 +663,7 @@ def switch_player_set_start():
     global data
     player_nr = (0 if player_nr == 1 else 1)
     pos = 0 + player_nr
-    
+
     while pos <= pos_max + player_nr:
         if position_check(1):
             pos = pos + 2
