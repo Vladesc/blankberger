@@ -569,8 +569,8 @@ def change_active_position(pos_new: int, pos_old: int):
     :return: None
     """
     global data
-    ##data[pos_new] = 1 ##todo no draw
-    ##data[pos_old] = 0 ##todo no draw
+    data[pos_new] = 1
+    data[pos_old] = 0
 
 
 def stone_set_and_fall(pos_new: int, pos_old: int) -> int:
@@ -660,15 +660,17 @@ def switch_player_set_start():
     """
     global player_nr
     global pos
+    global data
     player_nr = (0 if player_nr == 1 else 1)
-    #pos = 0 + player_nr ##todo no draw
-    pos = 0
+    pos = 0 + player_nr
+    
     while pos <= pos_max + player_nr:
         if position_check(1):
-            #pos = pos + 2 ##todo no draw
+            pos = pos + 2
             pass
         else:
-            #data[pos] = 1 ##todo no draw
+            data[pos] = 0
+            ##data[pos] = 1 #todo old value
             break
 
 
