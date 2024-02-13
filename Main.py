@@ -554,6 +554,7 @@ def handle_button_input(button_nr: int, pos_old: int) -> int:
             or type(player_nr) is not int):
         return 1
     pos_new = button_nr + player_nr
+    print("handle pos_new", pos_new)
     change_active_position(pos_new, pos_old)
     return check_game_over(stone_set_and_fall(pos_new, pos_old))
 
@@ -577,7 +578,7 @@ def stone_set_and_fall(pos_new: int, pos_old: int) -> int: ##todo fallanimation 
     :param pos_old: Alte Position des Steins
     :return: unterstes, leeres Feld
     """
-    #global data
+    global data
     last_empty_field = 0  # Zaehlvariable zum Durchsuchen der Zeilen einer Spalte nach dem untersten leeren Feld
     data[pos_new] = 0
     pos_new = pos_new + (rows - 1) * columns  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
@@ -607,7 +608,7 @@ def check_game_over(last_empty_field: int) -> int:
     :param last_empty_field:
     :return: 1 = true 0 = false
     """
-    #global player_nr
+    global player_nr
     if not is_win(last_empty_field):
         print("win") #todo rem print
         return 0
@@ -656,8 +657,9 @@ def switch_player_set_start() -> int:
     :return: 1 = true 0 = false
     """
     global player_nr
+    global pos
     player_nr = (0 if player_nr == 1 else 1)
-    pos_new = 0 + player_nr
+    pos = pos_new = 0 + player_nr
 
     while pos_new <= pos_max + player_nr:
         if position_check(1):
