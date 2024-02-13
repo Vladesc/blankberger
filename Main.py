@@ -184,7 +184,7 @@ def sample(sample_nr):
     if sample_nr == 0:  # Startbildschirm
         #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
         #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
-        data = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile1
+        data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile1 erste 0 zu 1 um Initial Stein anzuzeigen
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile2
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile3
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile4
@@ -584,7 +584,7 @@ def stone_set_and_fall(pos_new: int, pos_old: int) -> int:
     global pos
     last_empty_field = 0  # Zaehlvariable zum Durchsuchen der Zeilen einer Spalte nach dem untersten leeren Feld
     data[pos_new] = 0
-    pos = pos_new + (rows - 1) * columns  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
+    pos = pos_new + (rows) * columns  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
 
     while last_empty_field < rows:  # Solange die obere Zeile nicht ueberschritten wird:
         if position_check(1):  # Wenn 'data' an der aktuellen Position 1 ist:
@@ -689,7 +689,6 @@ while 1:
     pos = 0  # position zuruecksetzen (nachdem Reset ausgeloest wurde)
     player_nr = 0  # player_nr zuruecksetzen (nachdem Reset ausgeloest wurde)
     data = sample(0)  # Funktionsaufruf, schreibe Startbildschirm (Sample(0)) auf 'data'
-    data[pos] = 0 ## hier auf 1 setzen, playerstein zu beleuchten.
 
     while reset:  # Spiel läuft bis abgeschlossen (reset wird durch Reset-Funktion, Spielgewinn oder Unentschieden ausgeloest)
         send_data(data)  # Funktionsaufruf, Sende 'data' an LED-Matrix
