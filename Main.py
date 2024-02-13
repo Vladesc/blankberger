@@ -554,7 +554,6 @@ def handle_button_input(button_nr: int, pos_old: int) -> int:
             or type(player_nr) is not int):
         return 1
     pos_new = button_nr + player_nr
-    print("handle pos_new", pos_new)
     change_active_position(pos_new, pos_old)
     return check_game_over(stone_set_and_fall(pos_new, pos_old))
 
@@ -579,22 +578,23 @@ def stone_set_and_fall(pos_new: int, pos_old: int) -> int: ##todo fallanimation 
     :return: unterstes, leeres Feld
     """
     global data
+    global pos
     last_empty_field = 0  # Zaehlvariable zum Durchsuchen der Zeilen einer Spalte nach dem untersten leeren Feld
     data[pos_new] = 0
-    pos_new = pos_new + (rows - 1) * columns  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
+    pos = pos_new + (rows - 1) * columns  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
 
     while last_empty_field < rows:  # Solange die obere Zeile nicht ueberschritten wird:
         if position_check(1):  # Wenn 'data' an der aktuellen Position 1 ist:
             last_empty_field = last_empty_field + 1  # -> Erhoehe Zaehlvariable um 1
-            pos_new = pos_new - columns  # → Erhoehe die aktuelle Position um eine Zeile nach oben
+            pos = pos - columns  # → Erhoehe die aktuelle Position um eine Zeile nach oben
         else:  # Sonst:
             # Diese If-Anweisung prueft, ob die aktuell erreichte Position der urspruenglichen Position (oberste Zeile) entspricht
             # Diese Abfage ist wichtig, da sonst die Matrix an der aktuellen Position auf 1 und danach gleich wieder auf 0 gesetzt wird
             # dadurch koennte man niemals die obere Zeile beschreiben
-            if pos_new != pos_old:  # Wenn die aktuelle Position nicht der urspruenglichen Position entspricht (heisst: aktuelle Position hat noch nicht wieder die obere Zeile erreicht):
+            if pos != pos_old:  # Wenn die aktuelle Position nicht der urspruenglichen Position entspricht (heisst: aktuelle Position hat noch nicht wieder die obere Zeile erreicht):
                 data[pos_old] = 0  # -> Setze 'data' der alten Position auf 0 (LED in der oberen Zeile ausschalten, ausser diese ist das letzte freie Feld in der Spalte)
                 fall_animation(last_empty_field)  # -> Funktionsaufruf, Fallanimation
-            data[pos_new] = 1  # -> Setze 'data' der aktuellen Position auf 1
+            data[pos] = 1  # -> Setze 'data' der aktuellen Position auf 1
             break  # -> Beende Schleife
     return last_empty_field
 
@@ -610,12 +610,9 @@ def check_game_over(last_empty_field: int) -> int:
     """
     global player_nr
     if not is_win(last_empty_field):
-        print("win") #todo rem print
         return 0
-    pos_new: int = switch_player_set_start()
-    print("pos_new", pos_new) #todo rem print
-    if not is_patt(pos_new):
-        print("patt") #todo rem print
+    switch_player_set_start()
+    if not is_patt():
         return 0
     return 1
 
@@ -634,7 +631,7 @@ def is_win(last_empty_field: int) -> int:
     return 1
 
 
-def is_patt(pos_new: int) -> int:
+def is_patt() -> int:
     """
     Pruefe, ob die Matrix bereits komplett ausgefuellt wurde (ohne dass bereits ein Sieg errungen wurde).
     Sollte die Position beim 'Ueberpruefen der aktuellen Position auf eine 1' den rechten Rand der Matrix
@@ -643,13 +640,14 @@ def is_patt(pos_new: int) -> int:
     :param pos_new:
     :return: 1 = true 0 = false
     """
-    if pos_new > pos_max + player_nr:
+    global pos
+    if pos > pos_max + player_nr:
         draw_screen()
         return 0
     return 1
 
 
-def switch_player_set_start() -> int:
+def switch_player_set_start():
     """
     Toogle Player Number ( 0...Player 1, 1...Player 2) and reset aktuelle Position zurueck auf Startposition (oben links).
     Beachten des Sonderfalls, dass das obere linke Feld bereits belegt ist.
@@ -659,15 +657,14 @@ def switch_player_set_start() -> int:
     global player_nr
     global pos
     player_nr = (0 if player_nr == 1 else 1)
-    pos = pos_new = 0 + player_nr
+    pos = 0 + player_nr
 
-    while pos_new <= pos_max + player_nr:
+    while pos <= pos_max + player_nr:
         if position_check(1):
-            pos_new = pos_new + 2
-        else:  # Sonst:
-            data[pos_new] = 1
+            pos = pos + 2
+        else:
+            data[pos] = 1
             break
-    return pos_new
 
 
 # ------------------------------------------------------------------------#
