@@ -184,7 +184,7 @@ def sample(sample_nr):
     if sample_nr == 0:  # Startbildschirm
         #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
         #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
-        data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile1 erste 0 zu 1 um Initial Stein anzuzeigen
+        data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile1 erste 0 zu 1 um Initial Playerstein anzuzeigen
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile2
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile3
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile4
@@ -555,9 +555,7 @@ def handle_button_input(btn_nr: int, pos_old: int) -> int:
             or type(pos_old) is not int
             or type(player_nr) is not int
             or pos_new != pos_old and (data[btn_nr] == 1 or data[btn_nr + 1] == 1)):
-        print("error_something_went_wrong")
         return 1
-    print("SetStone")
     change_active_position(pos_new, pos_old)
     return check_game_over(stone_set_and_fall(pos_new, pos_old))
 
@@ -570,8 +568,9 @@ def change_active_position(pos_new: int, pos_old: int):
     """
     global data
     data[pos_new] = 1
-    data[pos_old] = 0
-
+    if pos_new != pos_old:
+        data[pos_old] = 0
+    send_data(data)
 
 def stone_set_and_fall(pos_new: int, pos_old: int) -> int:
     """
@@ -586,7 +585,7 @@ def stone_set_and_fall(pos_new: int, pos_old: int) -> int:
     data[pos_new] = 0
     pos = pos_new + (rows - 1) * columns  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
 
-    while last_empty_field <= rows:  # Solange die obere Zeile nicht ueberschritten wird:
+    while last_empty_field < rows:  # Solange die obere Zeile nicht ueberschritten wird:
         if position_check(1):  # Wenn 'data' an der aktuellen Position 1 ist:
             last_empty_field = last_empty_field + 1  # -> Erhoehe Zaehlvariable um 1
             pos = pos - columns  # → Erhoehe die aktuelle Position um eine Zeile nach oben
@@ -682,8 +681,7 @@ def switch_player_set_start():
 output_enable()  # Funktionsaufruf, aktiviere Ausgaenge der Schieberegisterbausteine
 clear_shift_register()  # Funktionsaufruf, loesche aktuellen Inhalt der Shift-Register
 set_storage_register()  # Funktionsaufruf, Ausgabe des leeren Shift-Registers
-##todo animation einkommentieren
-#send_running_text(sample(7))  # Funktionsaufruf, Ausgabe des Startbildschirms ('4 Gewinnt')
+send_running_text(sample(7))  # Funktionsaufruf, Ausgabe des Startbildschirms ('4 Gewinnt')
 while 1:
     reset = 1  # reset zuruecksetzen (nachdem Reset ausgeloest wurde)
     pos = 0  # position zuruecksetzen (nachdem Reset ausgeloest wurde)
