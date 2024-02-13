@@ -541,19 +541,21 @@ def reset_button(button_nr):
 # ------------------------------------------------------------------------#
 #                          BtnHandling (new)                              #
 # ------------------------------------------------------------------------#
-def handle_button_input(button_nr: int, pos_old: int) -> int:
+def handle_button_input(pos_new: int, pos_old: int) -> int:
     """
     Verarbeiten der Eingabe eines Buttons. Dabei wird kombiniert die Position der aktiven LED auf die Position des Buttons gesetzt
     sowie die Anzeige der Fallanimation gestartet.
-    :param button_nr: Nummer des gedrückten Buttons
+    :param pos_new: Nummer des gedrückten Buttons
     :param pos_old: Alte, aktive Position, die resettet werden muss.
     :return: None
     """
-    if (type(button_nr) is not int
+    if (type(pos_new) is not int
             or type(pos_old) is not int
             or type(player_nr) is not int):
         return 1
-    pos_new = button_nr + player_nr
+    while data[pos_new] or data[pos_new-1]:
+        pos_new += 2
+    pos_new = pos_new + player_nr
     change_active_position(pos_new, pos_old)
     return check_game_over(stone_set_and_fall(pos_new, pos_old))
 
@@ -568,7 +570,6 @@ def change_active_position(pos_new: int, pos_old: int):
     global data
     data[pos_new] = 1
     data[pos_old] = 0
-
 
 def stone_set_and_fall(pos_new: int, pos_old: int) -> int:
     """
