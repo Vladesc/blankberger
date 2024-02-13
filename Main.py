@@ -554,11 +554,10 @@ def handle_button_input(btn_nr: int, pos_old: int) -> int:
     if (type(pos_new) is not int
             or type(pos_old) is not int
             or type(player_nr) is not int
-            or data[pos_new]):
+            or data[btn_nr] == 1 or data[btn_nr + 1] == 1):
         return 1
     change_active_position(pos_new, pos_old)
     return check_game_over(stone_set_and_fall(pos_new, pos_old))
-
 
 def change_active_position(pos_new: int, pos_old: int):
     """
@@ -570,6 +569,7 @@ def change_active_position(pos_new: int, pos_old: int):
     global data
     data[pos_new] = 1
     data[pos_old] = 0
+
 
 def stone_set_and_fall(pos_new: int, pos_old: int) -> int:
     """
@@ -593,7 +593,8 @@ def stone_set_and_fall(pos_new: int, pos_old: int) -> int:
             # Diese Abfage ist wichtig, da sonst die Matrix an der aktuellen Position auf 1 und danach gleich wieder auf 0 gesetzt wird
             # dadurch koennte man niemals die obere Zeile beschreiben
             if pos != pos_old:  # Wenn die aktuelle Position nicht der urspruenglichen Position entspricht (heisst: aktuelle Position hat noch nicht wieder die obere Zeile erreicht):
-                data[pos_old] = 0  # -> Setze 'data' der alten Position auf 0 (LED in der oberen Zeile ausschalten, ausser diese ist das letzte freie Feld in der Spalte)
+                data[
+                    pos_old] = 0  # -> Setze 'data' der alten Position auf 0 (LED in der oberen Zeile ausschalten, ausser diese ist das letzte freie Feld in der Spalte)
                 fall_animation(last_empty_field)  # -> Funktionsaufruf, Fallanimation
             data[pos] = 1  # -> Setze 'data' der aktuellen Position auf 1
             break  # -> Beende Schleife
