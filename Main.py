@@ -570,14 +570,14 @@ def change_active_position(pos_new: int, pos_old: int):
     data[pos_old] = 0
 
 
-def stone_set_and_fall(pos_new: int, pos_old: int) -> int:
+def stone_set_and_fall(pos_new: int, pos_old: int) -> int: ##todo fallanimation fehlt + Stein wird überschrieben
     """
     Senden der Informationen des Buttons, ausführen der FallAnimation (leeres Feld = 0).
     :param pos_new: Neue Position des Steins
     :param pos_old: Alte Position des Steins
     :return: unterstes, leeres Feld
     """
-    global data
+    #global data
     last_empty_field = 0  # Zaehlvariable zum Durchsuchen der Zeilen einer Spalte nach dem untersten leeren Feld
     data[pos_new] = 0
     pos_new = pos_new + (rows - 1) * columns  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
@@ -591,8 +591,7 @@ def stone_set_and_fall(pos_new: int, pos_old: int) -> int:
             # Diese Abfage ist wichtig, da sonst die Matrix an der aktuellen Position auf 1 und danach gleich wieder auf 0 gesetzt wird
             # dadurch koennte man niemals die obere Zeile beschreiben
             if pos_new != pos_old:  # Wenn die aktuelle Position nicht der urspruenglichen Position entspricht (heisst: aktuelle Position hat noch nicht wieder die obere Zeile erreicht):
-                data[
-                    pos_old] = 0  # -> Setze 'data' der alten Position auf 0 (LED in der oberen Zeile ausschalten, ausser diese ist das letzte freie Feld in der Spalte)
+                data[pos_old] = 0  # -> Setze 'data' der alten Position auf 0 (LED in der oberen Zeile ausschalten, ausser diese ist das letzte freie Feld in der Spalte)
                 fall_animation(last_empty_field)  # -> Funktionsaufruf, Fallanimation
             data[pos_new] = 1  # -> Setze 'data' der aktuellen Position auf 1
             break  # -> Beende Schleife
@@ -608,7 +607,7 @@ def check_game_over(last_empty_field: int) -> int:
     :param last_empty_field:
     :return: 1 = true 0 = false
     """
-    global player_nr
+    #global player_nr
     if not is_win(last_empty_field):
         print("win") #todo rem print
         return 0
