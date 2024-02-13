@@ -689,17 +689,17 @@ while 1:
         if button(BUTTON_0):
             reset = handle_button_input(0, pos)
         elif button(BUTTON_1):
-            reset = handle_button_input(1, pos)
-        elif button(BUTTON_2):
             reset = handle_button_input(2, pos)
-        elif button(BUTTON_3):
-            reset = handle_button_input(3, pos)
-        elif button(BUTTON_4):
+        elif button(BUTTON_2):
             reset = handle_button_input(4, pos)
-        elif button(BUTTON_5):
-            reset = handle_button_input(5, pos)
-        elif button(BUTTON_6):
+        elif button(BUTTON_3):
             reset = handle_button_input(6, pos)
+        elif button(BUTTON_4):
+            reset = handle_button_input(8, pos)
+        elif button(BUTTON_5):
+            reset = handle_button_input(10, pos)
+        elif button(BUTTON_6):
+            reset = handle_button_input(12, pos)
 
 ##GPIO.cleanup()             # Setzt die GPIOs zurueck
 ##sys.exit()                 # Apparently sys.exit() allows the program to clean up resources and exit
