@@ -661,11 +661,11 @@ def switch_player_set_start():
     global player_nr
     global pos
     player_nr = (0 if player_nr == 1 else 1)
-    pos = 0 + player_nr
-
+    #pos = 0 + player_nr ##todo no draw
+    pos = 0
     while pos <= pos_max + player_nr:
         if position_check(1):
-            pos = pos + 2
+            #pos = pos + 2 ##todo no draw
         else:
             #data[pos] = 1 ##todo no draw
             break
