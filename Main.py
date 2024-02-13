@@ -554,7 +554,7 @@ def handle_button_input(btn_nr: int, pos_old: int) -> int:
     if (type(pos_new) is not int
             or type(pos_old) is not int
             or type(player_nr) is not int
-            or data[btn_nr] == 1 or data[btn_nr + 1] == 1):
+            or (pos_new != pos_old and data[btn_nr] == 1 or data[btn_nr + 1] == 1)):
         print("error_something_went_wrong")
         return 1
     print("SetStone")
