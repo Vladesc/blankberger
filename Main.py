@@ -302,8 +302,8 @@ def position_check(level):
     #   |g,r|
     #   |1,1|
     state = (data[pos] == level
-             or (data[pos + 1] == level and player_nr == 0)
-             or (data[pos - 1] == level and player_nr == 1))
+             or (player_nr == 0 and data[pos + 1] == level)
+             or (player_nr == 1 and data[pos - 1] == level))
     return (state)  # Funktion gibt bei Aufruf 'state' (1 oder 0) zuruek
 
 
@@ -680,7 +680,8 @@ def switch_player_set_start():
 output_enable()  # Funktionsaufruf, aktiviere Ausgaenge der Schieberegisterbausteine
 clear_shift_register()  # Funktionsaufruf, loesche aktuellen Inhalt der Shift-Register
 set_storage_register()  # Funktionsaufruf, Ausgabe des leeren Shift-Registers
-send_running_text(sample(7))  # Funktionsaufruf, Ausgabe des Startbildschirms ('4 Gewinnt')
+##todo animation einkommentieren
+#send_running_text(sample(7))  # Funktionsaufruf, Ausgabe des Startbildschirms ('4 Gewinnt')
 while 1:
     reset = 1  # reset zuruecksetzen (nachdem Reset ausgeloest wurde)
     pos = 0  # position zuruecksetzen (nachdem Reset ausgeloest wurde)
