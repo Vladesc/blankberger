@@ -553,8 +553,6 @@ def handle_button_input(pos_new: int, pos_old: int) -> int:
             or type(pos_old) is not int
             or type(player_nr) is not int):
         return 1
-    while data[pos_new] or data[pos_new+1]:
-        pos_new += 2
     pos_new = pos_new + player_nr
     change_active_position(pos_new, pos_old)
     return check_game_over(stone_set_and_fall(pos_new, pos_old))
