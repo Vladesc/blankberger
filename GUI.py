@@ -1,13 +1,19 @@
+import time
 import tkinter
 from tkinter import *
 from tkinter import messagebox
 import pygame
+import threading
 import Constants
+from Dummy import Dummy
 
 
 class GUI(object):
 
     def __init__(self):
+        self.game_instance = Dummy()
+        self.active_game_thread = threading.Thread(target=self.game_instance.play)
+
         self.fenster = Tk()
         self.fenster.title(Constants.WINDOW_TITLE)
         self.fenster.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
@@ -25,40 +31,6 @@ class GUI(object):
 
         # in der Eingabeschleife auf die Eingabe durch den Benutzer warten.
         self.fenster.mainloop()
-
-    """
-     __init__ function for class Tk
-            tk.Tk.__init__(self, *args, **kwargs)
-
-            # creating a container
-            container = tk.Frame(self)  
-            container.pack(side = "top", fill = "both", expand = True) 
-
-            container.grid_rowconfigure(0, weight = 1)
-            container.grid_columnconfigure(0, weight = 1)
-
-            # initializing frames to an empty array
-            self.frames = {}  
-
-            # iterating through a tuple consisting
-            # of the different page layouts
-            for F in (StartPage, Page1, Page2):
-
-                frame = F(container, self)
-
-                # initializing frame of that object from
-                # startpage, page1, page2 respectively with 
-                # for loop
-                self.frames[F] = frame 
-
-                frame.grid(row = 0, column = 0, sticky ="nsew")
-
-            self.show_frame(StartPage)   
-            
-    def show_frame(self, cont):
-        frame = self.frames[cont]
-        frame.tkraise()
-    """
 
     def main_window(self):
         @staticmethod
@@ -155,49 +127,49 @@ class GUI(object):
         # todo /JUST FOR DEBUG
 
         radio_oneOnOne = Radiobutton(self.fenster,
-                                          text="Spieler gegen Spieler",
-                                          padx=20,
-                                          variable=self.game_mode_container,
-                                          command=ctrl_game_mode_change,
-                                          value=0)
+                                     text="Spieler gegen Spieler",
+                                     padx=20,
+                                     variable=self.game_mode_container,
+                                     command=ctrl_game_mode_change,
+                                     value=0)
         radio_oneOnCpu = Radiobutton(self.fenster,
-                                          text="Spieler gegen Computer",
-                                          padx=20,
-                                          variable=self.game_mode_container,
-                                          command=ctrl_game_mode_change,
-                                          value=1)
+                                     text="Spieler gegen Computer",
+                                     padx=20,
+                                     variable=self.game_mode_container,
+                                     command=ctrl_game_mode_change,
+                                     value=1)
 
         cpuLevel_Label = Label(self.fenster, text="Wählen sie die Schwierigkeit aus:")
 
         radio_leicht = Radiobutton(self.fenster,
-                                        text="Leicht",
-                                        padx=20,
-                                        variable=self.game_difficulty_container,
-                                        value=0)
+                                   text="Leicht",
+                                   padx=20,
+                                   variable=self.game_difficulty_container,
+                                   value=0)
         radio_mittel = Radiobutton(self.fenster,
-                                        text="Mittel",
-                                        padx=20,
-                                        variable=self.game_difficulty_container,
-                                        value=1)
+                                   text="Mittel",
+                                   padx=20,
+                                   variable=self.game_difficulty_container,
+                                   value=1)
         radio_schwer = Radiobutton(self.fenster,
-                                        text="Schwer",
-                                        variable=self.game_difficulty_container,
-                                        padx=20,
-                                        value=2)
+                                   text="Schwer",
+                                   variable=self.game_difficulty_container,
+                                   padx=20,
+                                   value=2)
 
         start_button = Button(self.fenster, text="Spiel starten", command=self.start_game_instance)
 
         sound_Label = Label(self.fenster, text="Sound: ")
         radio_sound_on = Radiobutton(self.fenster, text="On", padx=20, variable=self.sound_state_container,
-                                          value=0, command=ctrl_sound_state_change)
+                                     value=0, command=ctrl_sound_state_change)
         radio_sound_off = Radiobutton(self.fenster, text="Off", padx=20, variable=self.sound_state_container,
-                                           value=1, command=ctrl_sound_state_change)
+                                      value=1, command=ctrl_sound_state_change)
 
         spielregeln_button = Button(self.fenster, text="Spielregeln", command=action_get_rules_dialog)
         info_button = Button(self.fenster, text="Info", command=action_get_info_dialog)
         end_application_button = Button(self.fenster, text=Constants.GAME_END_BUTTON, command=self.fenster.quit)
         shutdown_system_button = Button(self.fenster, text=Constants.GAME_SHUTDOWN_BUTTON,
-                                             command=self.action_shutdown_system)
+                                        command=self.action_shutdown_system)
 
         # Set Element Position
         build_grid()
@@ -206,14 +178,13 @@ class GUI(object):
         ctrl_sound_state_change()
         reset_game_container_values()
 
-    @staticmethod
-    def action_shutdown_system():
-        print("Shutting down OS")  # todo implement os shutdown function
+    def game_window(self):
+        def action_end_game():
+            self.game_instance.stop()
+            spiele_fenster.quit()
 
-    def game_window(self):  # todo implementieren --> Hier ggf. auch aktuellen Spieler anzeigen
-        def spieler_wechseln():
-            self.current_round_number = self.current_round_number + 1
-            if self.current_round_number % 2:
+        def change_active_player(current_player: int):
+            if current_player:
                 spieler_name_anzeigen_label2.grid_forget()
                 spieler_name_anzeigen_label1.grid(row=0, column=0)
             else:
@@ -224,8 +195,8 @@ class GUI(object):
         spiele_fenster.title("Sie spielen gerade 4 Gewinnt")
         spiele_fenster.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
 
-        erneut_spielen_button = Button(spiele_fenster, text="Spiel erneut Starten", command=spieler_wechseln)
-        beenden_button1 = Button(spiele_fenster, text="Beenden", command=spiele_fenster.quit) #todo umbau -> Hauptmenü
+        erneut_spielen_button = Button(spiele_fenster, text="Spiel erneut Starten", command=change_active_player) ## todo warum hier changePlayer
+        beenden_button1 = Button(spiele_fenster, text="Beenden", command=action_end_game)
         spieler_name_anzeigen_label1 = Label(spiele_fenster,
                                              text="Spieler " + self.spieler1_eingabefeld.get() + " ist dran")
         spieler_name_anzeigen_label2 = Label(spiele_fenster,
@@ -235,10 +206,8 @@ class GUI(object):
         erneut_spielen_button.grid(row=1, column=1)
         beenden_button1.grid(row=1, column=2)
 
-        # todo JUST FOR DEBUG
-        debugBtn = Button(spiele_fenster, text="NächsterSpieler", command=lambda: spieler_wechseln)
-        debugBtn.grid(row=1, column=3)
-        # / todo JUST FOR DEBUG
+        self.game_instance.set_gui_update_method(change_active_player)
+        self.active_game_thread.start()
 
     def start_game_instance(self):
         print("Spiel wird gestartet!")
@@ -255,6 +224,10 @@ class GUI(object):
                 self.game_window()
             else:
                 messagebox.showwarning(message="Der Spieler 1 hat keinen Namen")
+
+    @staticmethod
+    def action_shutdown_system():
+        print("Shutting down OS")  # todo implement os shutdown function
 
 
 if __name__ == "__main__":
