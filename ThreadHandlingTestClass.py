@@ -1,10 +1,10 @@
 import time
 
 
-class Dummy:
+class ThreadHandlingTestClass:
     def __init__(self):
-        self.gui_update_method = None
         self.player_nr: int = 1
+        self.gui_update_method = None
         self.is_running = 1
 
     def stop(self):

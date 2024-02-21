@@ -8,8 +8,13 @@
 import RPi.GPIO as GPIO  # Raspberry Pi Standart GPIO Bibliothek
 import time  # Bibliothek fuer time-Funktionen
 
+
 class GameLogic(object):
     def __init__(self):
+        ### ThreadHandling Methods
+        self.gui_update_method = None
+        self.thread_is_running = 1
+
         ### Initialisierung
         GPIO.setmode(GPIO.BCM)  # Verwendung der , wie sie auf dem Board heissen
         GPIO.setwarnings(False)  # Deaktiviere GPIO-Warnungen
@@ -36,13 +41,20 @@ class GameLogic(object):
         GPIO.setup(self.SCK, GPIO.OUT)  # OUTPUT
         GPIO.setup(self.SCLR_NOT, GPIO.OUT)  # OUTPUT
         GPIO.setup(self.SI, GPIO.OUT)  # OUTPUT
-        GPIO.setup(self.BUTTON_0, GPIO.IN, GPIO.PUD_UP)  # BUTTON_1 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
-        GPIO.setup(self.BUTTON_1, GPIO.IN, GPIO.PUD_UP)  # BUTTON_2 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
-        GPIO.setup(self.BUTTON_2, GPIO.IN, GPIO.PUD_UP)  # BUTTON_3 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
-        GPIO.setup(self.BUTTON_3, GPIO.IN, GPIO.PUD_UP)  # BUTTON_4 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
-        GPIO.setup(self.BUTTON_4, GPIO.IN, GPIO.PUD_UP)  # BUTTON_5 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
-        GPIO.setup(self.BUTTON_5, GPIO.IN, GPIO.PUD_UP)  # BUTTON_6 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
-        GPIO.setup(self.BUTTON_6, GPIO.IN, GPIO.PUD_UP)  # BUTTON_7 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
+        GPIO.setup(self.BUTTON_0, GPIO.IN,
+                   GPIO.PUD_UP)  # BUTTON_1 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
+        GPIO.setup(self.BUTTON_1, GPIO.IN,
+                   GPIO.PUD_UP)  # BUTTON_2 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
+        GPIO.setup(self.BUTTON_2, GPIO.IN,
+                   GPIO.PUD_UP)  # BUTTON_3 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
+        GPIO.setup(self.BUTTON_3, GPIO.IN,
+                   GPIO.PUD_UP)  # BUTTON_4 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
+        GPIO.setup(self.BUTTON_4, GPIO.IN,
+                   GPIO.PUD_UP)  # BUTTON_5 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
+        GPIO.setup(self.BUTTON_5, GPIO.IN,
+                   GPIO.PUD_UP)  # BUTTON_6 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
+        GPIO.setup(self.BUTTON_6, GPIO.IN,
+                   GPIO.PUD_UP)  # BUTTON_7 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
 
         ### Globale Variablen
         # Innerhalb einer Funktion koennen globale Variablen lesend aufgerufen werden
@@ -53,24 +65,24 @@ class GameLogic(object):
         self.button_state = 0  # Variable fuer Button-Funktion (siehe 'def Button(button_nr)')
         self.button_old = 0  # Variable fuer Button-Funktion (siehe 'def Button(button_nr)')
         self.columns = 14  # 7 Spalten mit jeweils zwei Farben -> 14 (eigentlich 16, da Scheiberegister 16 Bits braucht, letzten 2 Bits sind beliebig und werden in der Funktion send_data() seperat mitgesendet)
-        self.columns_unused = [0,0]  # Anzahl der unbenutzten Spalten (=Anzahl der im Schieberegisterbaustein NICHT benutzten Ausgaenge, HIGH-SIDE)
+        self.columns_unused = [0,
+                               0]  # Anzahl der unbenutzten Spalten (=Anzahl der im Schieberegisterbaustein NICHT benutzten Ausgaenge, HIGH-SIDE)
         self.rows = 6  # 6 Zeilen (eigentlich 8, da Schieberegister 8 Bit braucht, letzten 2 Bits sind beliebig und werden in der Funktion send_data() seperat mitgesendet)
         self.rows_unused = [0,
-                       0]  # Anzahl der unbenutzten Zeilen (=Anzahl der im Schieberegisterbaustein nicht benutzten Ausgaenge, LOW-SIDE)
+                            0]  # Anzahl der unbenutzten Zeilen (=Anzahl der im Schieberegisterbaustein nicht benutzten Ausgaenge, LOW-SIDE)
         self.clk_delay = 0.00000001  # Delay zur sicheren Erkennung der Signalflanken (siehe Datenblatt Schieberegister 74HC595), mind. 6ns
         self.data = [0]  # Datenvektor mit den aktuellen Daten des Spielfeldes, Initialwert
         self.row = [1, 0, 0, 0, 0, 0,  # Zeile1
-               0, 1, 0, 0, 0, 0,  # Zeile2
-               0, 0, 1, 0, 0, 0,  # Zeile3
-               0, 0, 0, 1, 0, 0,  # Zeile4
-               0, 0, 0, 0, 1, 0,  # Zeile5
-               0, 0, 0, 0, 0, 1]  # Zeile6
+                    0, 1, 0, 0, 0, 0,  # Zeile2
+                    0, 0, 1, 0, 0, 0,  # Zeile3
+                    0, 0, 0, 1, 0, 0,  # Zeile4
+                    0, 0, 0, 0, 1, 0,  # Zeile5
+                    0, 0, 0, 0, 0, 1]  # Zeile6
         self.pos = 0  # aktuelle Position in der Matrix (im Datenverktor -> pos = Index des Datenvektors data)
         self.pos_max = 12  # maximale Position in einer Zeile (fuer gruen, rot gilt pos_max+1)
         self.player_nr: int = 0  # Player Number (0...Player 1, 1...Player 2)
         self.win_row = [0, 0, 0,
-                   0]  # Initialwert des Gewinnvekors -> Vektor, der die Positionen der zum Sieg fuehrenden Daten speichert, also Positionen der '4 in einer Reihe'
-
+                        0]  # Initialwert des Gewinnvekors -> Vektor, der die Positionen der zum Sieg fuehrenden Daten speichert, also Positionen der '4 in einer Reihe'
 
     # ------------------------------------------------------------------------#
     #                                 Functions                              #
@@ -95,7 +107,6 @@ class GameLogic(object):
             time.sleep(0.01)  # Zeitverzoegerung, um Tasterprellen zu umgehen
             # Erfolgt kein Return-Befehlt, liefert die Funktion den Wert 'none'
 
-
     def send_data(self, data):
         # Funktion sendet 'data' an Shift-Register und aktiviert Ausgabe an das Storage-Register
         # ->Ausgabe der Daten im Storgage-Register auf die LED-Matrix
@@ -108,25 +119,26 @@ class GameLogic(object):
         # (welche LEDs in der entsprechenden Zeile leuchten sollen)
         while r < self.rows:
             self.clear_shift_register()  # Funktionsaufruf, loesche alle Werte im Shift-Register
-            self.set_shift_register(self.row[0 + r * self.rows:self.rows + r * self.rows])  # Funktionsaufruf, sende 6-Bit-Vektor 'row' mit Information, welche Zeile angesteuert werden soll
-            self.set_shift_register(self.rows_unused)  # Vektor [0,0] fuer die NICHT benutzten Ausgaenge der Schieberegister HIGH-Side
-            self.set_shift_register(data[0 + r * self.columns:self.columns + r * self.columns])  # Funktionsaufruf, sende 14-Bit-Vektor 'data' mit Information, was in der entsprechenden Zeile angezeigt werden soll
-            self.set_shift_register(self.columns_unused)  # Vektor [0,0] fuer die NICHT benutzten Ausgaenge der Schieberegister LOW-Side
+            self.set_shift_register(self.row[
+                                    0 + r * self.rows:self.rows + r * self.rows])  # Funktionsaufruf, sende 6-Bit-Vektor 'row' mit Information, welche Zeile angesteuert werden soll
+            self.set_shift_register(
+                self.rows_unused)  # Vektor [0,0] fuer die NICHT benutzten Ausgaenge der Schieberegister HIGH-Side
+            self.set_shift_register(data[
+                                    0 + r * self.columns:self.columns + r * self.columns])  # Funktionsaufruf, sende 14-Bit-Vektor 'data' mit Information, was in der entsprechenden Zeile angezeigt werden soll
+            self.set_shift_register(
+                self.columns_unused)  # Vektor [0,0] fuer die NICHT benutzten Ausgaenge der Schieberegister LOW-Side
             self.set_storage_register()  # Funktionsaufruf, Ausgabe der Daten im Shift-Register an LED-Matrix
             r = r + 1
-
 
     def output_enable(self):
         # Funktion aktiviert Ausgaenge der Scheiberegisterbausteine
         GPIO.output(self.G_NOT, GPIO.LOW)  # Qa bis Qh aktivieren
         time.sleep(self.clk_delay)  # Delay zur sicheren Erkennung der Signalpegel
 
-
     def output_disable(self):
         # Funktion deaktiviert Ausgaenge der Scheiberegisterbausteine
         GPIO.output(self.G_NOT, GPIO.HIGH)  # Qa bis Qh deaktivieren
         time.sleep(self.clk_delay)  # Delay zur sicheren Erkennung der Signalpegel
-
 
     def clear_shift_register(self):
         # Funktion loescht Daten im Shift-Register
@@ -134,7 +146,6 @@ class GameLogic(object):
         time.sleep(self.clk_delay)
         GPIO.output(self.SCLR_NOT, GPIO.HIGH)  # Shift-Register wird nichtmehr geloescht
         time.sleep(self.clk_delay)
-
 
     def set_shift_register(self, data):
         # Funktion senden 'data' an Shift-Register
@@ -156,7 +167,6 @@ class GameLogic(object):
             time.sleep(self.clk_delay)
             i = i + 1
 
-
     def set_storage_register(self):
         # Funktion gibt aktuellen Daten im Shift-Register an Storage-Register weiter bei LOW-HIGH-Flanke an RCK
         # (Das Storage-Register (=Ausgang) gibt Daten direkt auf die LED-Matrix bzw. die Treiberstufen vor der Matrix,
@@ -165,7 +175,6 @@ class GameLogic(object):
         time.sleep(self.clk_delay)
         GPIO.output(self.RCK, GPIO.LOW)
         time.sleep(self.clk_delay)
-
 
     def sample(self, sample_nr):
         # Funktion enthaelt verschiedene Samples, welche mithilfe der Funktion Send_Data() auf der LED-Matrix
@@ -178,115 +187,145 @@ class GameLogic(object):
         if sample_nr == 0:  # Startbildschirm
             #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
             #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
-            self.data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile1 erste 0 zu 1 um Initial Playerstein anzuzeigen
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile2
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile3
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile4
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile5
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Zeile6
+            self.data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         # Zeile1 erste 0 zu 1 um Initial Playerstein anzuzeigen
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile2
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile3
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile4
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile5
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Zeile6
 
         if sample_nr == 1:  # "HI"
             #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
             #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
             self.data = [0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,  # Zeile1
-                    0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,  # Zeile2
-                    0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0,  # Zeile3
-                    0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,  # Zeile4
-                    0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,  # Zeile5
-                    0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0]  # Zeile6
+                         0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,  # Zeile2
+                         0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0,  # Zeile3
+                         0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,  # Zeile4
+                         0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,  # Zeile5
+                         0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0]  # Zeile6
 
         if sample_nr == 2:  # "DU"
             #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
             #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
             self.data = [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,  # Zeile1
-                    1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,  # Zeile2
-                    1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,  # Zeile3
-                    1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,  # Zeile4
-                    1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,  # Zeile5
-                    1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1]  # Zeile6
+                         1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,  # Zeile2
+                         1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,  # Zeile3
+                         1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,  # Zeile4
+                         1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,  # Zeile5
+                         1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1]  # Zeile6
 
         if sample_nr == 3:  # Spieler 1 gewinnt
             #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
             #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
             self.data = [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,  # Zeile1
-                    1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0,  # Zeile2
-                    1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0,  # Zeile3
-                    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,  # Zeile4
-                    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,  # Zeile5
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Zeile6
+                         1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0,  # Zeile2
+                         1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0,  # Zeile3
+                         1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,  # Zeile4
+                         1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,  # Zeile5
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Zeile6
 
         if sample_nr == 4:  # Spieler 2 gewinnt
             #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
             #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
             self.data = [0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,  # Zeile1
-                    0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,  # Zeile2
-                    0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,  # Zeile3
-                    0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,  # Zeile4
-                    0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,  # Zeile5
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Zeile6
+                         0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,  # Zeile2
+                         0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,  # Zeile3
+                         0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,  # Zeile4
+                         0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,  # Zeile5
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Zeile6
 
         if sample_nr == 5:  # Unentschieden
             #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
             #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
             self.data = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,  # Zeile1
-                    1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0,  # Zeile2
-                    1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0,  # Zeile3
-                    1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0,  # Zeile4
-                    1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0,  # Zeile5
-                    1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]  # Zeile6
+                         1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0,  # Zeile2
+                         1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0,  # Zeile3
+                         1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0,  # Zeile4
+                         1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0,  # Zeile5
+                         1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]  # Zeile6
 
         if sample_nr == 6:  # Lauftext, Player 2 Win
             #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|  -->                                                                              |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
             #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|  -->                                                                              |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
-            self.data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0,
-                    0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    # Zeile1
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0,
-                    0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    # Zeile2
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0,
-                    0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    # Zeile3
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-                    0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    # Zeile4
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0,
-                    1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    # Zeile5
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0]  # Zeile6
+            self.data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0,
+                         0, 1, 0,
+                         0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0,
+                         # Zeile1
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+                         0, 1, 0,
+                         0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0,
+                         # Zeile2
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0,
+                         0, 1, 0,
+                         0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0,
+                         # Zeile3
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+                         0, 1, 0,
+                         0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0,
+                         # Zeile4
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0,
+                         0, 0, 0,
+                         1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0,
+                         # Zeile5
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0,
+                         0]  # Zeile6
 
         if sample_nr == 7:  # Lauftext, Start-Screen '4 GEWINNT'
             #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|  -->     																                                          								   |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
             #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|  -->                                                                                                                         	                   |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
-            self.data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0,
-                    0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-                    0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    # Zeile1
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-                    0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    # Zeile2
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0,
-                    0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0,
-                    0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    # Zeile3
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0,
-                    0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0,
-                    0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    # Zeile4
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0,
-                    0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-                    0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    # Zeile5
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0]  # Zeile6
+            self.data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,
+                         0, 1, 0,
+                         0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+                         1, 0, 0,
+                         0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0,
+                         # Zeile1
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                         0, 0, 0,
+                         0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+                         1, 0, 0,
+                         0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0,
+                         # Zeile2
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,
+                         0, 1, 0,
+                         0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0,
+                         1, 0, 0,
+                         0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0,
+                         # Zeile3
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                         0, 1, 0,
+                         0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0,
+                         1, 0, 0,
+                         0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0,
+                         # Zeile4
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,
+                         0, 1, 0,
+                         0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+                         1, 0, 0,
+                         0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0,
+                         # Zeile5
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0,
+                         0]  # Zeile6
 
         return (self.data)  # Funktion gibt bei Aufruf als Wert den Vektor 'data' zuruek
-
 
     def position_check(self, level):
         # Funktion zur Ueberpruefung, ob auf der aktuellen Position in der Matrix eine 1 oder eine 0 ist
@@ -296,10 +335,9 @@ class GameLogic(object):
         #   |g,r|
         #   |1,1|
         self.state = (self.data[pos] == level
-                 or (self.player_nr == 0 and self.data[self.pos + 1] == level)
-                 or (self.player_nr == 1 and self.data[self.pos - 1] == level))
+                      or (self.player_nr == 0 and self.data[self.pos + 1] == level)
+                      or (self.player_nr == 1 and self.data[self.pos - 1] == level))
         return (self.state)  # Funktion gibt bei Aufruf 'state' (1 oder 0) zuruek
-
 
     def win_check(self, r):
         # Funktion ueberprueft, ob sich horizontal, vertikal oder diagonal "4 in einer Reihe" befinden
@@ -315,7 +353,8 @@ class GameLogic(object):
         r = self.rows - r - 1  # r ...in welcher Zeile befinde ich mich aktuell
         x_max = r * self.columns + self.pos_max + self.player_nr  # Abfragegrenze (rechter Rand der Matrix) in x-Richtung
         x_min = r * self.columns + self.player_nr  # Abfragegrenze (linkter Rand der Matrix) in x-Richtung
-        self.win_row = [self.pos, 0, 0,0]  # Speichert die Positionen der LEDs in der Gewinn-Reihe (fuer Blinkende Hervorhebung der Gewinnreihe aud Anzeige)
+        self.win_row = [self.pos, 0, 0,
+                        0]  # Speichert die Positionen der LEDs in der Gewinn-Reihe (fuer Blinkende Hervorhebung der Gewinnreihe aud Anzeige)
 
         # Horizontal nach rechts					  			# |0 0 0 0 0 0|
         while self.pos + i * 2 <= x_max:  # |0 0 0 0 0 0|
@@ -392,14 +431,13 @@ class GameLogic(object):
         # Diagonal nach links steigend
         while self.pos - i * self.columns > 0 and self.pos - i * 2 >= x_min:
             if self.data[self.pos - i * 2 - i * self.columns] == 1:
-                win_row[coins_in_a_row] = pos - i * 2 - i * self.columns
+                win_row[coins_in_a_row] = self.pos - i * 2 - i * self.columns
                 coins_in_a_row = coins_in_a_row + 1
                 if coins_in_a_row == 4:
                     return (1)
                 i = i + 1
             else:
                 break
-
 
     def win_screen(self):
         # Funktion zeigt die "4 in einer Reihe" des Gewinners 10s im Blinkinterval von 0.25s an
@@ -412,17 +450,17 @@ class GameLogic(object):
         for x in range(0, 9):  # Von x=0 bis 9
             self.blink_screen(0.25, 0, data)  # Gib aktuelles Spielfeld aus
             for i in range(0, 4):  # Von i=0 bis 4
-                data[win_row[i]] = not data[win_row[i]]  # Toogle Data der Gewinnreihe => Gewinnreihe auf 1 bzw. 0 setzen
+                data[win_row[i]] = not data[
+                    win_row[i]]  # Toogle Data der Gewinnreihe => Gewinnreihe auf 1 bzw. 0 setzen
 
         self.blink_screen(4, 0.5,
-                     self.sample(3 + self.player_nr))  # Ausgabe der Spielernummer des Gewinners fuer 4s im 0.5s Blinkintervall
-
+                          self.sample(
+                              3 + self.player_nr))  # Ausgabe der Spielernummer des Gewinners fuer 4s im 0.5s Blinkintervall
 
     def draw_screen(self):
         # Funktion ruft fuer 4sec eine blinkende Unentschiedenanzeige (Sample(5))
         # mit 0.5sec Blinkintervall auf
         self.blink_screen(4, 0.5, self.sample(5))
-
 
     def blink_screen(self, time_length, interval, data):
         # Funktion schreibt "data" auf die Matrix und laesst diese fuer die angegebene Dauer 'time_length'
@@ -442,7 +480,6 @@ class GameLogic(object):
                 time.sleep(interval)  # Schlafe fuer die Dauer des Blink-Intervalls
                 self.output_enable()  # Aktiviere Ausgang der Schieberegister
                 time_start_blink = time.time()  # Setze time_start_blink erneut auf die aktuelle Systemzeit
-
 
     def send_running_text(self, text):
         # Funktion sendet eine Lauftext (Textsample, welches laenger als die breite des Displays ist) auf das Display
@@ -472,13 +509,12 @@ class GameLogic(object):
         while i <= columns_length - self.columns:  # Solange rechter Rand des Lauftextes noch nicht erreicht wurde und:
             while r < self.rows:  # solange die letzte Zeile nicht ueberschritten wurde
                 data[r * self.columns:self.columns + r * self.columns] = text[
-                                                          i + r * columns_length:i + columns_length + r * columns_length]  # Schreibe den mit i ausgewaehlten Ausschnitt des Lauftextes auf auf die entsprechende Zeile r in'data'
+                                                                         i + r * columns_length:i + columns_length + r * columns_length]  # Schreibe den mit i ausgewaehlten Ausschnitt des Lauftextes auf auf die entsprechende Zeile r in'data'
                 r = r + 1  # erhoehe Zeile um 1
 
             r = 0  # Zuruecksetzen der Zaehlvariable fuer die aktuelle Zeile
             self.blink_screen(0.15, 0, data)  # Ausgabe des aktuellen Ausschnittes
             i = i + 2  # Verschiebe den Ausschnitt im Vektor 'text' um eine LED-Spalte (=2 Spalten im Lauftext) nach rechts
-
 
     def fall_animation(self, r):
         # Funktion zur Animation einer Fallenden LED auf der LED-Matrix bei betaetigen des Enter-Buttons
@@ -500,8 +536,8 @@ class GameLogic(object):
 
             fall_pos_old = fall_pos  # Setze die alte Fallposition auf die aktuelle
             r = r + 1  # Erhoehe die Zeile um 1
-        self.data[fall_pos_old] = 0  # Zueletzt muss data der letzten Fallposition wieder auf 0 gesetzt werden, danach wird die Animation beendet
-
+        self.data[
+            fall_pos_old] = 0  # Zueletzt muss data der letzten Fallposition wieder auf 0 gesetzt werden, danach wird die Animation beendet
 
     ### ISR Interrupt-Funktion
     # Diese sogenannten Call-Back-Functions (Funktionen, die durch GPIO.add_event_detect aufgerufen werden)
@@ -509,7 +545,7 @@ class GameLogic(object):
     # Es koennen mehrere Callback-Funktionen durch einen GPIO.add_event_detect aufgerufen werden, diese werden jedoch sequenziell
     # abgearbeitet (aber parallel zum Hauptprogramm, siehe https://sourceforge.net/p/raspberry-gpio-python/wiki/Inputs/)
 
-    def reset_button(self, button_nr): ## todo remove?
+    def reset_button(self, button_nr):  ## todo remove?
         # Funktion fuer Reset des Hauptprogramms
         # Wird Enter-Button 2s betaetigt, wird 'reset' auf 1 gesetzt
         # dadurch wird das Hauptprogramm unterbrochen und neu initialisiert
@@ -525,7 +561,6 @@ class GameLogic(object):
                 return  # Beende Funktion, ohne reset auszuloesen
         reset = 1  # Falls Wartezeit erreicht wurde und Enter-Button noch immer betaetigt
         # -> Setze 'reset'
-
 
     ### Interrupt Events
     # GPIO.add_event_detect(BUTTON_ENTER, GPIO.FALLING, callback = Reset, bouncetime = 200)
@@ -550,7 +585,6 @@ class GameLogic(object):
         self.change_active_position(pos_new, pos_old)
         return self.check_game_over(self.stone_set_and_fall(pos_new, pos_old))
 
-
     def change_active_position(self, pos_new: int, pos_old: int):
         """
         Setzen der aktiven Position auf den Wert des Buttons+Playernummer sowie reset der alten Position
@@ -563,7 +597,6 @@ class GameLogic(object):
             self.data[pos_old] = 0
         self.send_data(self.data)
 
-
     def stone_set_and_fall(self, pos_new: int, pos_old: int) -> int:
         """
         Senden der Informationen des Buttons, ausführen der FallAnimation (leeres Feld = 0).
@@ -573,7 +606,8 @@ class GameLogic(object):
         """
         last_empty_field = 0  # Zaehlvariable zum Durchsuchen der Zeilen einer Spalte nach dem untersten leeren Feld
         self.data[pos_new] = 0
-        self.pos = pos_new + (self.rows - 1) * self.columns  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
+        self.pos = pos_new + (
+                    self.rows - 1) * self.columns  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
 
         while last_empty_field < self.rows:  # Solange die obere Zeile nicht ueberschritten wird:
             if self.position_check(1):  # Wenn 'data' an der aktuellen Position 1 ist:
@@ -584,12 +618,12 @@ class GameLogic(object):
                 # Diese Abfage ist wichtig, da sonst die Matrix an der aktuellen Position auf 1 und danach gleich wieder auf 0 gesetzt wird
                 # dadurch koennte man niemals die obere Zeile beschreiben
                 if self.pos != pos_old:  # Wenn die aktuelle Position nicht der urspruenglichen Position entspricht (heisst: aktuelle Position hat noch nicht wieder die obere Zeile erreicht):
-                    self.data[pos_old] = 0  # -> Setze 'data' der alten Position auf 0 (LED in der oberen Zeile ausschalten, ausser diese ist das letzte freie Feld in der Spalte)
+                    self.data[
+                        pos_old] = 0  # -> Setze 'data' der alten Position auf 0 (LED in der oberen Zeile ausschalten, ausser diese ist das letzte freie Feld in der Spalte)
                     self.fall_animation(last_empty_field)  # -> Funktionsaufruf, Fallanimation
                 self.data[self.pos] = 1  # -> Setze 'data' der aktuellen Position auf 1
                 break  # -> Beende Schleife
         return last_empty_field
-
 
     def check_game_over(self, last_empty_field: int) -> int:
         """
@@ -607,7 +641,6 @@ class GameLogic(object):
             return 0
         return 1
 
-
     def is_win(self, last_empty_field: int) -> int:
         """
         Ueberpruefe, ob 4 in einer Reihe (horizontal, vertikal, diagonal)
@@ -620,7 +653,6 @@ class GameLogic(object):
             self.win_screen()
             return 0
         return 1
-
 
     def is_patt(self) -> int:
         """
@@ -636,15 +668,16 @@ class GameLogic(object):
             return 0
         return 1
 
-
     def switch_player_set_start(self):
         """
         Toogle Player Number ( 0...Player 1, 1...Player 2) and reset aktuelle Position zurueck auf Startposition (oben links).
         Beachten des Sonderfalls, dass das obere linke Feld bereits belegt ist.
         → In diesem Fall verschieben des Steins nach rechts, bis Feld frei
+        Ebenfalls setzen der Spielernummer in der GUI
         :return: 1 = true 0 = false
         """
         self.player_nr = (0 if self.player_nr == 1 else 1)
+        self.gui_update_method(self.player_nr)
         self.pos = 0 + self.player_nr
 
         while self.pos <= self.pos_max + self.player_nr:
@@ -655,10 +688,15 @@ class GameLogic(object):
                 self.data[self.pos] = 0  ## hier auf 1 setzen, playerstein zu beleuchten.
                 break
 
-
     # ------------------------------------------------------------------------#
     #                                 Main                                   #
     # ------------------------------------------------------------------------#
+
+    def stop(self):
+        self.thread_is_running = not self.thread_is_running
+
+    def set_gui_update_method(self, gui_update_method):
+        self.gui_update_method = gui_update_method
 
     ### Initialisierung"
     def run_game(self):
@@ -666,13 +704,14 @@ class GameLogic(object):
         self.clear_shift_register()  # Funktionsaufruf, loesche aktuellen Inhalt der Shift-Register
         self.set_storage_register()  # Funktionsaufruf, Ausgabe des leeren Shift-Registers
         self.send_running_text(self.sample(7))  # Funktionsaufruf, Ausgabe des Startbildschirms ('4 Gewinnt')
-        while 1:
+
+        while self.thread_is_running:
             self.reset = 1  # reset zuruecksetzen (nachdem Reset ausgeloest wurde)
             self.pos = 0  # position zuruecksetzen (nachdem Reset ausgeloest wurde)
-            player_nr = 0  # player_nr zuruecksetzen (nachdem Reset ausgeloest wurde)
+            self.player_nr = 0  # player_nr zuruecksetzen (nachdem Reset ausgeloest wurde)
             self.data = self.sample(0)  # Funktionsaufruf, schreibe Startbildschirm (Sample(0)) auf 'data'
 
-            while self.reset:  # Spiel läuft bis abgeschlossen (reset wird durch Reset-Funktion, Spielgewinn oder Unentschieden ausgeloest)
+            while self.reset and self.thread_is_running:  # Spiel läuft bis abgeschlossen (reset wird durch Reset-Funktion, Spielgewinn oder Unentschieden ausgeloest)
                 self.send_data(self.data)  # Funktionsaufruf, Sende 'data' an LED-Matrix
                 ## Verarbeiten der Eingabe des Nutzers
                 if self.button(self.BUTTON_0):

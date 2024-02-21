@@ -5,14 +5,14 @@ from tkinter import messagebox
 import pygame
 import threading
 import Constants
-from Dummy import Dummy
+from GameLogic import GameLogic
 
 
 class GUI(object):
 
     def __init__(self):
-        self.game_instance = Dummy()
-        self.active_game_thread = threading.Thread(target=self.game_instance.play)
+        self.game_instance = GameLogic()
+        self.active_game_thread = threading.Thread(target=self.game_instance.run_game)
 
         self.fenster = Tk()
         self.fenster.title(Constants.WINDOW_TITLE)
@@ -202,6 +202,7 @@ class GUI(object):
         spieler_name_anzeigen_label2 = Label(spiele_fenster,
                                              text="Spieler " + self.spieler2_eingabefeld.get() + " ist dran")
         spiele_fenster.wm_overrideredirect(True)
+        change_active_player(0)
 
         erneut_spielen_button.grid(row=1, column=1)
         beenden_button1.grid(row=1, column=2)
