@@ -184,12 +184,14 @@ class GUI(object):
             spiele_fenster.quit()
 
         def change_active_player(current_player: int):
-            if current_player:
+            if not current_player:
                 spieler_name_anzeigen_label2.grid_forget()
                 spieler_name_anzeigen_label1.grid(row=0, column=0)
             else:
                 spieler_name_anzeigen_label1.grid_forget()
                 spieler_name_anzeigen_label2.grid(row=0, column=0)
+        def close_top_window():
+            spiele_fenster.destroy()
 
         spiele_fenster = tkinter.Toplevel(self.fenster)
         spiele_fenster.title("Sie spielen gerade 4 Gewinnt")
@@ -208,6 +210,7 @@ class GUI(object):
         beenden_button1.grid(row=1, column=2)
 
         self.game_instance.set_gui_update_method(change_active_player)
+        self.game_instance.set_destroy_game_gui(close_top_window)
         self.active_game_thread.start()
 
     def start_game_instance(self):

@@ -12,6 +12,7 @@ import time  # Bibliothek fuer time-Funktionen
 class GameLogic(object):
     def __init__(self):
         ### ThreadHandling Methods
+        self.close_game_gui_method = None
         self.gui_update_method = None
         self.thread_is_running = 1
 
@@ -91,18 +92,16 @@ class GameLogic(object):
         # Funktion gibt ein Signal button_state aus, wenn der geforderte Taster gedrueckt wird"
         # Dieses Signal kann nur ausgegeben werden, wenn button_state zuvor 0 war"
         # -> dadurch werden wiederholte Aufrufe der Funktion bei laenger betaetigtem Taster vermieden"
-        global button_state
-        global button_old
 
         # Setze button_state auf 1, wenn BUTTON gedrueckt (GPIO.input == 0 wegen Pull-Up) und button_state == 0
-        if GPIO.input(button_nr) == 0 and button_state == 0:
+        if GPIO.input(button_nr) == 0 and self.button_state == 0:
             self.button_old = button_nr  # Merke aktuelle button_nr
             self.button_state = 1  # Setze button_state auf 1
             time.sleep(0.01)  # Zeitverzoegerung, um Tasterprellen zu umgehen
-            return button_state  # Gib den Wert button_state zurueck
+            return self.button_state  # Gib den Wert button_state zurueck
 
         # Setze button_state auf 0, sobald zuvor betaetigte BUTTON (button_old) losgelassen wird
-        elif GPIO.input(button_nr) == 1 and button_state == 1 and button_old == button_nr:
+        elif GPIO.input(button_nr) == 1 and self.button_state == 1 and self.button_old == button_nr:
             self.button_state = 0  # Diese elif-Anweisung verhindert, dass der Taster bei durchgehendem Druecken neu ausgeloest wird
             time.sleep(0.01)  # Zeitverzoegerung, um Tasterprellen zu umgehen
             # Erfolgt kein Return-Befehlt, liefert die Funktion den Wert 'none'
@@ -334,7 +333,7 @@ class GameLogic(object):
         # ->|LD1|
         #   |g,r|
         #   |1,1|
-        self.state = (self.data[pos] == level
+        self.state = (self.data[self.pos] == level
                       or (self.player_nr == 0 and self.data[self.pos + 1] == level)
                       or (self.player_nr == 1 and self.data[self.pos - 1] == level))
         return (self.state)  # Funktion gibt bei Aufruf 'state' (1 oder 0) zuruek
@@ -346,7 +345,6 @@ class GameLogic(object):
         # Sobald diese den Wert 4 erreicht, endet die Funktion und gibt den Wert '1' zurueck
         # Sollten keine 4 in einer Reihe gefunden werden, endet die Funktion ohne Rueckgabewert
         # "4 in einer Reihe" entspricht 4 LEDs der gleichen Farbe in einer Reihe (horizontal, vertikal oder diagonal) auf der LED-Anzeige
-        global win_row
 
         i = 1  # Zaehlvariable zum aendern der Position horizontal, vertikal oder diagonal
         coins_in_a_row = 1  # Zaehler fuer Anzahl der LEDs in einer Reihe (horizontal, vertikal oder diagonal)
@@ -370,7 +368,7 @@ class GameLogic(object):
         # Horizontal nach links
         while self.pos - i * 2 >= x_min:
             if self.data[self.pos - i * 2] == 1:
-                win_row[coins_in_a_row] = self.pos - i * 2
+                self.win_row[coins_in_a_row] = self.pos - i * 2
                 coins_in_a_row = coins_in_a_row + 1
                 if coins_in_a_row == 4:
                     return (1)
@@ -383,7 +381,7 @@ class GameLogic(object):
         # Vertikal nach unten								# |0 x 0 0 0 0|
         while self.pos + i * self.columns < self.rows * self.columns:  # |0 x 0 0 0 0|
             if self.data[self.pos + i * self.columns] == 1:  # |0 x 0 0 0 0|
-                win_row[coins_in_a_row] = self.pos + i * self.columns  # |0 x 0 0 0 0|
+                self.win_row[coins_in_a_row] = self.pos + i * self.columns  # |0 x 0 0 0 0|
                 coins_in_a_row = coins_in_a_row + 1
                 if coins_in_a_row == 4:
                     return (1)
@@ -420,7 +418,7 @@ class GameLogic(object):
         # Diagonal nach rechts fallend 										# |0 x 0 0 0 0|
         while self.pos + i * self.columns < self.rows * self.columns and self.pos + i * 2 <= x_max:  # |0 0 x 0 0 0|
             if self.data[self.pos + i * 2 + i * self.columns] == 1:  # |0 0 0 x 0 0|
-                win_row[coins_in_a_row] = self.pos + i * 2 + i * self.columns  # |0 0 0 0 x 0|
+                self.win_row[coins_in_a_row] = self.pos + i * 2 + i * self.columns  # |0 0 0 0 x 0|
                 coins_in_a_row = coins_in_a_row + 1
                 if coins_in_a_row == 4:
                     return (1)
@@ -431,7 +429,7 @@ class GameLogic(object):
         # Diagonal nach links steigend
         while self.pos - i * self.columns > 0 and self.pos - i * 2 >= x_min:
             if self.data[self.pos - i * 2 - i * self.columns] == 1:
-                win_row[coins_in_a_row] = self.pos - i * 2 - i * self.columns
+                self.win_row[coins_in_a_row] = self.pos - i * 2 - i * self.columns
                 coins_in_a_row = coins_in_a_row + 1
                 if coins_in_a_row == 4:
                     return (1)
@@ -448,10 +446,10 @@ class GameLogic(object):
         # Dabei wird fuer 10*0.25s = 2,5s das Spielfeld angezeigt
         # und alle 0.25s die Gewinnreihe ein- und ausgeschaltet
         for x in range(0, 9):  # Von x=0 bis 9
-            self.blink_screen(0.25, 0, data)  # Gib aktuelles Spielfeld aus
+            self.blink_screen(0.25, 0, self.data)  # Gib aktuelles Spielfeld aus
             for i in range(0, 4):  # Von i=0 bis 4
-                data[win_row[i]] = not data[
-                    win_row[i]]  # Toogle Data der Gewinnreihe => Gewinnreihe auf 1 bzw. 0 setzen
+                self.data[self.win_row[i]] = not self.data[
+                    self.win_row[i]]  # Toogle Data der Gewinnreihe => Gewinnreihe auf 1 bzw. 0 setzen
 
         self.blink_screen(4, 0.5,
                           self.sample(
@@ -508,12 +506,12 @@ class GameLogic(object):
 
         while i <= columns_length - self.columns:  # Solange rechter Rand des Lauftextes noch nicht erreicht wurde und:
             while r < self.rows:  # solange die letzte Zeile nicht ueberschritten wurde
-                data[r * self.columns:self.columns + r * self.columns] = text[
+                self.data[r * self.columns:self.columns + r * self.columns] = text[
                                                                          i + r * columns_length:i + columns_length + r * columns_length]  # Schreibe den mit i ausgewaehlten Ausschnitt des Lauftextes auf auf die entsprechende Zeile r in'data'
                 r = r + 1  # erhoehe Zeile um 1
 
             r = 0  # Zuruecksetzen der Zaehlvariable fuer die aktuelle Zeile
-            self.blink_screen(0.15, 0, data)  # Ausgabe des aktuellen Ausschnittes
+            self.blink_screen(0.15, 0, self.data)  # Ausgabe des aktuellen Ausschnittes
             i = i + 2  # Verschiebe den Ausschnitt im Vektor 'text' um eine LED-Spalte (=2 Spalten im Lauftext) nach rechts
 
     def fall_animation(self, r):
@@ -521,8 +519,6 @@ class GameLogic(object):
         # Dazu wird eine 1 (LED AN) innerhalb der aktuellen Spalte einmal durch alle Zeilen geschoben und fuer jeweils 0,05s pro Zeile ausgegeben
         # Dabei ist die aktuelle Position 'pos' bereits an der Zielposition, also an der Position, wo die LED "hinfaellt"
         # Diese Zielposition ist abhaengig davon, wieweit die ausgewaehlte Spalte bereits beim Spielen "aufgefuellt" wurde
-
-        global data  # Aufruf der globalen Variable 'data' (da diese innerhalb der Funktion veraendert wird)
 
         r_start = self.rows - r - 1  # Berechnung der Startreihe aus der akteullen Zeile
         fall_pos_old = self.pos - r_start * self.columns  # Initialwert der zuletzt akteullen Position in der Spalte
@@ -549,7 +545,6 @@ class GameLogic(object):
         # Funktion fuer Reset des Hauptprogramms
         # Wird Enter-Button 2s betaetigt, wird 'reset' auf 1 gesetzt
         # dadurch wird das Hauptprogramm unterbrochen und neu initialisiert
-        global reset
         time_start = time.time()  # Funktionsaufruf, Return the time in seconds since the epoch as a floating point number from the system clock.
         time_reset = 2  # [t] = seconds, Zeit die gewartet werden soll (Die der Enterbutton betaetigt werden soll)
 
@@ -651,6 +646,8 @@ class GameLogic(object):
         """
         if self.win_check(last_empty_field) == 1:
             self.win_screen()
+            self.stop()
+            self.close_game_gui_method()
             return 0
         return 1
 
@@ -694,6 +691,9 @@ class GameLogic(object):
 
     def stop(self):
         self.thread_is_running = not self.thread_is_running
+
+    def set_destroy_game_gui(self, close_game_gui_method):
+        self.close_game_gui_method = close_game_gui_method
 
     def set_gui_update_method(self, gui_update_method):
         self.gui_update_method = gui_update_method
