@@ -559,6 +559,7 @@ def handle_button_input(btn_nr: int, pos_old: int) -> int:
     change_active_position(pos_new, pos_old)
     return check_game_over(stone_set_and_fall(pos_new, pos_old))
 
+
 def change_active_position(pos_new: int, pos_old: int):
     """
     Setzen der aktiven Position auf den Wert des Buttons+Playernummer sowie reset der alten Position
@@ -571,6 +572,7 @@ def change_active_position(pos_new: int, pos_old: int):
     if pos_new != pos_old:
         data[pos_old] = 0
     send_data(data)
+
 
 def stone_set_and_fall(pos_new: int, pos_old: int) -> int:
     """
@@ -668,7 +670,7 @@ def switch_player_set_start():
             pos = pos + 2
             pass
         else:
-            data[pos] = 0 ## hier auf 1 setzen, playerstein zu beleuchten.
+            data[pos] = 0  ## hier auf 1 setzen, playerstein zu beleuchten.
             break
 
 
