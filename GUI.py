@@ -12,7 +12,7 @@ class GUI(object):
 
     def __init__(self):
         self.game_instance = GameLogic()
-        self.active_game_thread = threading.Thread(target=self.game_instance.run_game)
+        self.active_game_thread = None
 
         self.fenster = Tk()
         self.fenster.title(Constants.WINDOW_TITLE)
@@ -209,6 +209,7 @@ class GUI(object):
         erneut_spielen_button.grid(row=1, column=1)
         beenden_button1.grid(row=1, column=2)
 
+        self.active_game_thread = threading.Thread(target=self.game_instance.run_game)
         self.game_instance.set_gui_update_method(change_active_player)
         self.game_instance.set_destroy_game_gui(close_top_window)
         self.active_game_thread.start()

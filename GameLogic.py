@@ -8,7 +8,6 @@
 import RPi.GPIO as GPIO  # Raspberry Pi Standart GPIO Bibliothek
 import time  # Bibliothek fuer time-Funktionen
 
-
 class GameLogic(object):
     def __init__(self):
         ### ThreadHandling Methods
@@ -646,8 +645,7 @@ class GameLogic(object):
         """
         if self.win_check(last_empty_field) == 1:
             self.win_screen()
-            self.stop()
-            self.close_game_gui_method()
+            self.end_game()
             return 0
         return 1
 
@@ -662,8 +660,13 @@ class GameLogic(object):
         """
         if self.pos > self.pos_max + self.player_nr:
             self.draw_screen()
+            self.end_game()
             return 0
         return 1
+
+    def end_game(self):
+            self.stop()
+            self.close_game_gui_method()
 
     def switch_player_set_start(self):
         """
@@ -700,6 +703,7 @@ class GameLogic(object):
 
     ### Initialisierung"
     def run_game(self):
+        self.thread_is_running = 1
         self.output_enable()  # Funktionsaufruf, aktiviere Ausgaenge der Schieberegisterbausteine
         self.clear_shift_register()  # Funktionsaufruf, loesche aktuellen Inhalt der Shift-Register
         self.set_storage_register()  # Funktionsaufruf, Ausgabe des leeren Shift-Registers
