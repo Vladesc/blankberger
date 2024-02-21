@@ -237,5 +237,6 @@ class GUI(object):
 ## todo (optional) Check how to show Bildschirmtastatur
 ## todo (optional) Check how to fullscreen (ohne Titelleiste und ohne Icons)
 ## todo (optional) Check how to hide mouse
+## todo Add EasterEgg...
 if __name__ == "__main__":
     gui = GUI()
