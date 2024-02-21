@@ -33,7 +33,6 @@ class GUI(object):
         self.fenster.mainloop()
 
     def main_window(self):
-        @staticmethod
         def action_get_info_dialog():
             m_text = "\
                 ************************\n\
@@ -43,7 +42,6 @@ class GUI(object):
                 ************************"
             messagebox.showinfo(message=m_text, title="Infos")
 
-        @staticmethod
         def action_get_rules_dialog():
             m_text = "\
                 ************************\n\
@@ -121,10 +119,8 @@ class GUI(object):
         self.spieler1_eingabefeld = Entry(self.fenster, bd=5, width=40)
         self.spieler2_eingabefeld = Entry(self.fenster, bd=5, width=40)
 
-        # todo JUST FOR DEBUG
-        self.spieler1_eingabefeld.insert(0, "TEST_1")
-        self.spieler2_eingabefeld.insert(0, "TEST_2")
-        # todo /JUST FOR DEBUG
+        self.spieler1_eingabefeld.insert(0, "Spieler 1")
+        self.spieler2_eingabefeld.insert(0, "Spieler 2")
 
         radio_oneOnOne = Radiobutton(self.fenster,
                                      text="Spieler gegen Spieler",
@@ -178,7 +174,7 @@ class GUI(object):
         ctrl_sound_state_change()
         reset_game_container_values()
 
-    def game_window(self):
+    def game_window(self): ## todo GUI Schick machen... Schrift größer, Hintergrundfarbe f. Spieler setzen
         def action_end_game():
             self.game_instance.stop()
             spiele_fenster.quit()
@@ -196,8 +192,6 @@ class GUI(object):
         spiele_fenster = tkinter.Toplevel(self.fenster)
         spiele_fenster.title("Sie spielen gerade 4 Gewinnt")
         spiele_fenster.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
-
-        erneut_spielen_button = Button(spiele_fenster, text="Spiel erneut Starten", command=change_active_player) ## todo warum hier changePlayer
         beenden_button1 = Button(spiele_fenster, text="Beenden", command=action_end_game)
         spieler_name_anzeigen_label1 = Label(spiele_fenster,
                                              text="Spieler " + self.spieler1_eingabefeld.get() + " ist dran")
@@ -205,8 +199,6 @@ class GUI(object):
                                              text="Spieler " + self.spieler2_eingabefeld.get() + " ist dran")
         spiele_fenster.wm_overrideredirect(True)
         change_active_player(0)
-
-        erneut_spielen_button.grid(row=1, column=1)
         beenden_button1.grid(row=1, column=2)
 
         self.active_game_thread = threading.Thread(target=self.game_instance.run_game)
@@ -234,6 +226,16 @@ class GUI(object):
     def action_shutdown_system():
         print("Shutting down OS")  # todo implement os shutdown function
 
-
+## todo Die drei Sounds implementieren
+## todo In GUI und GameLogic alle Methoden, die nicht von außen gebraucht werden mit __ verstecken
+## todo Konstanten auslagern
+## todo Methoden Doku und Kommentare weg
+## todo Spielregeln und Info Buttons aktivieren und weitere Ansichten hierfür implementieren (mit "Back" Button)
+## todo RadioButton für Schwierigkeitsstufe MITTEL kann gelöscht werden
+## todo Add Computer Player Actions... in zwei Schwierigkeitsgraden
+## todo Fix Durchlauftext bei Start des Spiels (oder schauen, wie er mit Musik wirkt)
+## todo (optional) Check how to show Bildschirmtastatur
+## todo (optional) Check how to fullscreen (ohne Titelleiste und ohne Icons)
+## todo (optional) Check how to hide mouse
 if __name__ == "__main__":
     gui = GUI()

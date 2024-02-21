@@ -534,28 +534,6 @@ class GameLogic(object):
         self.data[
             fall_pos_old] = 0  # Zueletzt muss data der letzten Fallposition wieder auf 0 gesetzt werden, danach wird die Animation beendet
 
-    ### ISR Interrupt-Funktion
-    # Diese sogenannten Call-Back-Functions (Funktionen, die durch GPIO.add_event_detect aufgerufen werden)
-    # laufen PARALLEL zum Hauptprogramm
-    # Es koennen mehrere Callback-Funktionen durch einen GPIO.add_event_detect aufgerufen werden, diese werden jedoch sequenziell
-    # abgearbeitet (aber parallel zum Hauptprogramm, siehe https://sourceforge.net/p/raspberry-gpio-python/wiki/Inputs/)
-
-    def reset_button(self, button_nr):  ## todo remove?
-        # Funktion fuer Reset des Hauptprogramms
-        # Wird Enter-Button 2s betaetigt, wird 'reset' auf 1 gesetzt
-        # dadurch wird das Hauptprogramm unterbrochen und neu initialisiert
-        time_start = time.time()  # Funktionsaufruf, Return the time in seconds since the epoch as a floating point number from the system clock.
-        time_reset = 2  # [t] = seconds, Zeit die gewartet werden soll (Die der Enterbutton betaetigt werden soll)
-
-        # Schleife ueberprueft, ob die aktuelle Systemzeit die Startsystemzeit + den zu wartenden Wert in sec bereits erreicht hat
-        # Dabei wird alle 200ms ueberprueft, ob der Enter-Butten bereits wieder losgelassen wurde
-        while time.time() < time_start + time_reset:  # Wenn die Wartezeit von 2s noch nicht erreicht wurde:
-            time.sleep(0.2)  # -> schalfe 200ms
-            if GPIO.input(self.BUTTON_1) == 1:  # Ueberpruefe, ob Enter-Butten losgelassen wurde, wenn ja:
-                return  # Beende Funktion, ohne reset auszuloesen
-        reset = 1  # Falls Wartezeit erreicht wurde und Enter-Button noch immer betaetigt
-        # -> Setze 'reset'
-
     ### Interrupt Events
     # GPIO.add_event_detect(BUTTON_ENTER, GPIO.FALLING, callback = Reset, bouncetime = 200)
 
@@ -701,7 +679,6 @@ class GameLogic(object):
     def set_gui_update_method(self, gui_update_method):
         self.gui_update_method = gui_update_method
 
-    ### Initialisierung"
     def run_game(self):
         self.thread_is_running = 1
         self.output_enable()  # Funktionsaufruf, aktiviere Ausgaenge der Schieberegisterbausteine
