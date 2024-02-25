@@ -27,10 +27,10 @@ class GUI(object):
         self.game_difficulty_container = IntVar()
         self.sound_state_container = IntVar()
 
-        self.main_window()
+        self.__main_window()
         self.fenster.mainloop()
 
-    def main_window(self) -> None:
+    def __main_window(self) -> None:
         """
         Generate initial main window.
         :return: None
@@ -171,7 +171,7 @@ class GUI(object):
                                    padx=20,
                                    value=2)
 
-        start_button = Button(self.fenster, text=Constants.GAME_START_BUTTON, command=self.start_game_instance)
+        start_button = Button(self.fenster, text=Constants.GAME_START_BUTTON, command=self.__start_game_instance)
 
         sound_Label = Label(self.fenster, text=Constants.GAME_SOUND_LABEL)
         radio_sound_on = Radiobutton(self.fenster, text=Constants.GAME_SOUND_LABEL_ON, padx=20, variable=self.sound_state_container,
@@ -183,13 +183,13 @@ class GUI(object):
         info_button = Button(self.fenster, text=Constants.GAME_INFO_BUTTON, command=action_get_info_dialog)
         end_application_button = Button(self.fenster, text=Constants.GAME_END_BUTTON, command=self.fenster.quit)
         shutdown_system_button = Button(self.fenster, text=Constants.GAME_SHUTDOWN_BUTTON,
-                                        command=self.action_shutdown_system)
+                                        command=self.__action_shutdown_system)
 
         build_grid()
         ctrl_sound_state_change()
         reset_game_container_values()
 
-    def game_window(self) -> None:
+    def __game_window(self) -> None:
         """
         Generate and set the window content of a running game instance.
         Start the game instance thread and react on player actions.
@@ -241,21 +241,21 @@ class GUI(object):
         self.game_instance.set_destroy_game_gui(close_top_window)
         self.active_game_thread.start()
 
-    def start_game_instance(self):
+    def __start_game_instance(self):
         spieler_namen = (self.spieler1_eingabefeld.get(), self.spieler2_eingabefeld.get())
         if self.game_mode_container.get() == 0:
             if (len(spieler_namen[0]) > 0) & (len(spieler_namen[1]) > 0):
-                self.game_window()
+                self.__game_window()
             else:
                 messagebox.showwarning(message=Constants.GAME_PVE_MSG_MISSING_NAME)
         else:
             if len(spieler_namen[0]) > 0:
-                self.game_window()
+                self.__game_window()
             else:
                 messagebox.showwarning(message=Constants.GAME_PVE_MSG_MISSING_NAME)
 
     @staticmethod
-    def action_shutdown_system() -> None:
+    def __action_shutdown_system() -> None:
         """
         Shutdown the running operating system.
         :return: None

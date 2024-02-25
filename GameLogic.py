@@ -29,7 +29,7 @@ class GameLogic(object):
         self.output_si_serial_data = 24
         self.input_button_from_left = [2, 3, 4, 17, 27, 22, 10]
 
-        self.gpio_setup()
+        self.__gpio_setup()
 
         self.reset_game = 0
         self.button_is_pressed = 0
@@ -55,7 +55,7 @@ class GameLogic(object):
         self.current_player_number: int = 0
         self.win_check_container = [0, 0, 0, 0]
 
-    def gpio_setup(self) -> None:
+    def __gpio_setup(self) -> None:
         ### Setup GPIOs (Declare GPIOs as INPUT or OUTPUT)
         # WICHTIG: Da mit PULL-UP-Widerstand gearbeitet wird, muss der Button den PIN auf LOW ziehen
         #          -> Durch Buttondruck wird Pin auf GND gelegt! -> HIGH-Signal in Python
@@ -71,7 +71,7 @@ class GameLogic(object):
     # ------------------------------------------------------------------------#
     #                                 Functions                              #
     # ------------------------------------------------------------------------#
-    def button(self, button_nr) -> int | None:
+    def __button(self, button_nr) -> int | None:
         """
         Funktion gibt das Signal button_is_pressed aus, wenn der geforderte Taster gedrueckt wird.
         Dieses Signal kann nur ausgegeben werden, wenn button_state zuvor 0 war.
@@ -91,7 +91,7 @@ class GameLogic(object):
             time.sleep(0.01)
             return None
 
-    def send_data(self, data) -> None:
+    def __send_data(self, data) -> None:
         """
         Funktion sendet 'data' an Shift-Register und aktiviert Ausgabe an das Storage-Register
         → Ausgabe der Daten im Storgage-Register auf die LED-Matrix
@@ -111,17 +111,17 @@ class GameLogic(object):
 
         row_in_vector_data = 0
         while row_in_vector_data < self.rows:
-            self.clear_shift_register()
-            self.set_shift_register(self.row[
+            self.__clear_shift_register()
+            self.__set_shift_register(self.row[
                                     0 + row_in_vector_data * self.rows:self.rows + row_in_vector_data * self.rows])
-            self.set_shift_register(self.rows_unused)
-            self.set_shift_register(data[
+            self.__set_shift_register(self.rows_unused)
+            self.__set_shift_register(data[
                                     0 + row_in_vector_data * self.columns_total: self.columns_total + row_in_vector_data * self.columns_total])
-            self.set_shift_register(self.columns_unused)
-            self.set_storage_register()
+            self.__set_shift_register(self.columns_unused)
+            self.__set_storage_register()
             row_in_vector_data = row_in_vector_data + 1
 
-    def output_enable(self) -> None:
+    def __output_enable(self) -> None:
         """
         Activate output of shift register blocks.
         Activate Qa to Qh and set delay for secure registration of signal level.
@@ -130,7 +130,7 @@ class GameLogic(object):
         GPIO.output(self.output_enable_pin, GPIO.LOW)
         time.sleep(self.clk_delay)
 
-    def output_disable(self) -> None:
+    def __output_disable(self) -> None:
         """
         Deactivate output of shift register blocks.
         Deactivate Qa to Qh and set delay for secure registration of signal level.
@@ -139,7 +139,7 @@ class GameLogic(object):
         GPIO.output(self.output_enable_pin, GPIO.HIGH)
         time.sleep(self.clk_delay)
 
-    def clear_shift_register(self) -> None:
+    def __clear_shift_register(self) -> None:
         """
         Clear data in shift register until SCLR_NOT_LOW.
         :return: None
@@ -149,7 +149,7 @@ class GameLogic(object):
         GPIO.output(self.output_sclr_not_shift_register_clear, GPIO.HIGH)
         time.sleep(self.clk_delay)
 
-    def set_shift_register(self, data) -> None:
+    def __set_shift_register(self, data) -> None:
         """
         Send data vector to shift register.
         → If data is 1 set SERIAL DATA OUTPUT (SI) to high.
@@ -177,7 +177,7 @@ class GameLogic(object):
             time.sleep(self.clk_delay)
             data_index = data_index + 1
 
-    def set_storage_register(self) -> None:
+    def __set_storage_register(self) -> None:
         """
         Funktion gibt aktuellen Daten im Shift-Register an Storage-Register weiter bei LOW-HIGH-Flanke an RCK
         (Das Storage-Register (=Ausgang) gibt Daten direkt auf die LED-Matrix bzw. die Treiberstufen vor der Matrix,
@@ -189,7 +189,7 @@ class GameLogic(object):
         GPIO.output(self.output_rck_storage_register_clock, GPIO.LOW)
         time.sleep(self.clk_delay)
 
-    def sample(self, sample_nr) -> list[int]:
+    def __sample(self, sample_nr) -> list[int]:
         """
         Funktion enthaelt verschiedene Samples, welche mithilfe der Funktion Send_Data() auf der LED-Matrix
         angezeigt werden koennen, z.B.: Send_Data(Sample(2)).
@@ -329,7 +329,7 @@ class GameLogic(object):
                                 0]  # Zeile6
         return self.data_vector
 
-    def position_check(self, level: int) -> int:
+    def __position_check(self, level: int) -> int:
         """
         Funktion zur Ueberpruefung, ob auf der aktuellen Position in der Matrix eine 1 oder eine 0 ist.
         Je nach player_nr wird auch geprueft, ob die rechte oder linke Position der aktuellen 1 oder 0 ist.
@@ -345,7 +345,7 @@ class GameLogic(object):
                       or (self.current_player_number == 1 and self.data_vector[self.current_index_in_data - 1] == level))
         return (self.state)
 
-    def win_check(self, current_row: int) -> int:
+    def __win_check(self, current_row: int) -> int:
         """
         Funktion ueberprueft, ob sich horizontal, vertikal oder diagonal "4 in einer Reihe" befinden.
         Dazu wird ausgehend von der aktuellen Position in allen Richtungen gesucht und die Variable 'led_in_a_row' hochgezaehlt.
@@ -443,7 +443,7 @@ class GameLogic(object):
             else:
                 break
 
-    def win_screen(self) -> None:
+    def __win_screen(self) -> None:
         """
         Funktion zeigt die "4 in einer Reihe" des Gewinners 10s im Blinkinterval von 0.25s an und ruft danach für
         4s eine blinkende Gewinnanzeige (Sample(3+player_nr)) mit der Spielernummer des Gewinner
@@ -455,21 +455,21 @@ class GameLogic(object):
         :return:
         """
         for x in range(0, 9):
-            self.blink_screen(0.25, 0, self.data_vector)
+            self.__blink_screen(0.25, 0, self.data_vector)
             for i in range(0, 4):
                 self.data_vector[self.win_check_container[i]] = not self.data_vector[self.win_check_container[i]]
 
-        self.blink_screen(4, 0.5,
-                          self.sample(3 + self.current_player_number))
+        self.__blink_screen(4, 0.5,
+                            self.__sample(3 + self.current_player_number))
 
-    def draw_screen(self) -> None:
+    def __draw_screen(self) -> None:
         """
         Funktion ruft fuer 4sec eine blinkende Unentschiedenanzeige (Sample(5)) mit 0.5sec Blinkintervall auf
         :return: None
         """
-        self.blink_screen(4, 0.5, self.sample(5))
+        self.__blink_screen(4, 0.5, self.__sample(5))
 
-    def blink_screen(self, time_length: float|int, interval: float|int, data: list[int]) -> None:
+    def __blink_screen(self, time_length: float | int, interval: float | int, data: list[int]) -> None:
         """
         Funktion schreibt "data" auf die Matrix und lässt diese für die angegebene Dauer 'time_length'
         im entsprechenden Intervall 'interval' blinken.
@@ -484,14 +484,14 @@ class GameLogic(object):
         time_start = time.time()
         time_start_blink = time.time()
         while time.time() < time_start + time_length:
-            self.send_data(data)
+            self.__send_data(data)
             if time.time() > time_start_blink + interval:
-                self.output_disable()
+                self.__output_disable()
                 time.sleep(interval)
-                self.output_enable()
+                self.__output_enable()
                 time_start_blink = time.time()
 
-    def send_running_text(self, text:list[int]) -> None:
+    def __send_running_text(self, text:list[int]) -> None:
         """
         Funktion sendet eine Lauftext (Textsample, welches länger als die Breite des Displays ist) auf das Display.
         Dabei wird der Text von rechts nach links über die Anzeige geschoben, sodass ein bewegtes Bild entsteht.
@@ -523,10 +523,10 @@ class GameLogic(object):
                                                                               text_move_column + current_row * total_columns_length:text_move_column + total_columns_length + current_row * total_columns_length]  # Schreibe den mit i ausgewaehlten Ausschnitt des Lauftextes auf auf die entsprechende Zeile r in'data'
                 current_row = current_row + 1
             current_row = 0
-            self.blink_screen(0.15, 0, self.data_vector)
+            self.__blink_screen(0.15, 0, self.data_vector)
             text_move_column = text_move_column + 2
 
-    def fall_animation(self, current_row) -> None:
+    def __fall_animation(self, current_row) -> None:
         """
         Funktion zur Animation einer Fallenden LED auf der LED-Matrix bei betaetigen des Enter-Buttons.
         Dazu wird eine 1 (LED AN) innerhalb der aktuellen Spalte einmal durch alle Zeilen geschoben und fuer jeweils 0,05s pro Zeile ausgegeben.
@@ -543,7 +543,7 @@ class GameLogic(object):
             fall_pos = self.current_index_in_data - row_start * self.columns_total + current_row * self.columns_total
             self.data_vector[fall_pos] = 1
             self.data_vector[fall_pos_old] = 0
-            self.blink_screen(0.05, 0, self.data_vector)
+            self.__blink_screen(0.05, 0, self.data_vector)
 
             fall_pos_old = fall_pos
             current_row = current_row + 1
@@ -553,7 +553,7 @@ class GameLogic(object):
     # ------------------------------------------------------------------------#
     #                          BtnHandling (new)                              #
     # ------------------------------------------------------------------------#
-    def handle_button_input(self, btn_nr: int, pos_old: int) -> int:
+    def __handle_button_input(self, btn_nr: int, pos_old: int) -> int:
         """
         Verarbeiten der Eingabe eines Buttons. Dabei wird kombiniert die Position der aktiven LED auf die Position des Buttons gesetzt
         sowie die Anzeige der Fallanimation gestartet.
@@ -567,10 +567,10 @@ class GameLogic(object):
                 or type(self.current_player_number) is not int
                 or pos_new != pos_old and (self.data_vector[btn_nr] == 1 or self.data_vector[btn_nr + 1] == 1)):
             return 1
-        self.change_active_position(pos_new, pos_old)
-        return self.check_game_over(self.stone_set_and_fall(pos_new, pos_old))
+        self.__change_active_position(pos_new, pos_old)
+        return self.__check_game_over(self.__stone_set_and_fall(pos_new, pos_old))
 
-    def change_active_position(self, pos_new: int, pos_old: int):
+    def __change_active_position(self, pos_new: int, pos_old: int):
         """
         Setzen der aktiven Position auf den Wert des Buttons+Playernummer sowie reset der alten Position
         :param pos_new: Nummer des gedrückten Buttons
@@ -580,9 +580,9 @@ class GameLogic(object):
         self.data_vector[pos_new] = 1
         if pos_new != pos_old:
             self.data_vector[pos_old] = 0
-        self.send_data(self.data_vector)
+        self.__send_data(self.data_vector)
 
-    def stone_set_and_fall(self, pos_new: int, pos_old: int) -> int:
+    def __stone_set_and_fall(self, pos_new: int, pos_old: int) -> int:
         """
         Senden der Informationen des Buttons, ausführen der FallAnimation (leeres Feld = 0).
         :param pos_new: Neue Position des Steins
@@ -595,7 +595,7 @@ class GameLogic(object):
                 self.rows - 1) * self.columns_total  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
 
         while last_empty_field < self.rows:  # Solange die obere Zeile nicht ueberschritten wird:
-            if self.position_check(1):  # Wenn 'data' an der aktuellen Position 1 ist:
+            if self.__position_check(1):  # Wenn 'data' an der aktuellen Position 1 ist:
                 last_empty_field = last_empty_field + 1  # -> Erhoehe Zaehlvariable um 1
                 self.current_index_in_data = self.current_index_in_data - self.columns_total  # → Erhoehe die aktuelle Position um eine Zeile nach oben
             else:  # Sonst:
@@ -605,12 +605,12 @@ class GameLogic(object):
                 if self.current_index_in_data != pos_old:  # Wenn die aktuelle Position nicht der urspruenglichen Position entspricht (heisst: aktuelle Position hat noch nicht wieder die obere Zeile erreicht):
                     self.data_vector[
                         pos_old] = 0  # -> Setze 'data' der alten Position auf 0 (LED in der oberen Zeile ausschalten, ausser diese ist das letzte freie Feld in der Spalte)
-                    self.fall_animation(last_empty_field)  # -> Funktionsaufruf, Fallanimation
+                    self.__fall_animation(last_empty_field)  # -> Funktionsaufruf, Fallanimation
                 self.data_vector[self.current_index_in_data] = 1  # -> Setze 'data' der aktuellen Position auf 1
                 break  # -> Beende Schleife
         return last_empty_field
 
-    def check_game_over(self, last_empty_field: int) -> int:
+    def __check_game_over(self, last_empty_field: int) -> int:
         """
         Prüfen ob der Spieler gewonnen hat.
         Switch des aktiven Spielers.
@@ -619,14 +619,14 @@ class GameLogic(object):
         :param last_empty_field:
         :return: 1 = true 0 = false
         """
-        if not self.is_win(last_empty_field):
+        if not self.__is_win(last_empty_field):
             return 0
-        self.switch_player_set_start()
-        if not self.is_patt():
+        self.__switch_player_set_start()
+        if not self.__is_patt():
             return 0
         return 1
 
-    def is_win(self, last_empty_field: int) -> int:
+    def __is_win(self, last_empty_field: int) -> int:
         """
         Ueberpruefe, ob 4 in einer Reihe (horizontal, vertikal, diagonal)
         Funktionsaufruf, Starte Gewinner-Bildschirm
@@ -634,13 +634,13 @@ class GameLogic(object):
         :param last_empty_field:
         :return: 1 = true 0 = false
         """
-        if self.win_check(last_empty_field) == 1:
-            self.win_screen()
-            self.end_game()
+        if self.__win_check(last_empty_field) == 1:
+            self.__win_screen()
+            self.__end_game()
             return 0
         return 1
 
-    def is_patt(self) -> int:
+    def __is_patt(self) -> int:
         """
         Pruefe, ob die Matrix bereits komplett ausgefuellt wurde (ohne dass bereits ein Sieg errungen wurde).
         Sollte die Position beim 'Ueberpruefen der aktuellen Position auf eine 1' den rechten Rand der Matrix
@@ -649,12 +649,12 @@ class GameLogic(object):
         :return: 1 = true 0 = false
         """
         if self.current_index_in_data > self.max_index_in_data_row + self.current_player_number:
-            self.draw_screen()
-            self.end_game()
+            self.__draw_screen()
+            self.__end_game()
             return 0
         return 1
 
-    def end_game(self) -> None:
+    def __end_game(self) -> None:
         """
         Stop the game instance and close the game gui window
         :return: None
@@ -662,7 +662,7 @@ class GameLogic(object):
         self.stop()
         self.close_game_gui_method()
 
-    def switch_player_set_start(self) -> None:
+    def __switch_player_set_start(self) -> None:
         """
         Toogle Player Number ( 0...Player 1, 1...Player 2) and reset aktuelle Position zurueck auf Startposition (oben links).
         Beachten des Sonderfalls, dass das obere linke Feld bereits belegt ist.
@@ -675,7 +675,7 @@ class GameLogic(object):
         self.current_index_in_data = 0 + self.current_player_number
 
         while self.current_index_in_data <= self.max_index_in_data_row + self.current_player_number:
-            if self.position_check(1):
+            if self.__position_check(1):
                 self.current_index_in_data = self.current_index_in_data + 2
                 pass
             else:
@@ -709,7 +709,7 @@ class GameLogic(object):
         """
         self.gui_update_method = gui_update_method
 
-    def reset_game_instance(self) -> None:
+    def __reset_game_instance(self) -> None:
         """
         nachdem Reset ausgeloest wurde:
         → reset zuruecksetzen
@@ -721,30 +721,30 @@ class GameLogic(object):
         self.reset_game = 1
         self.current_index_in_data = 0
         self.current_player_number = 0
-        self.data_vector = self.sample(0)
+        self.data_vector = self.__sample(0)
 
-    def init_game(self) -> None:
+    def __init_game(self) -> None:
         """
         Activate output of shift register blocks, clear actual content of shift register,
         clean output of shift register and send sample(7) to output.
         :return: None
         """
         self.thread_is_running = 1
-        self.output_enable()
-        self.clear_shift_register()
-        self.set_storage_register()
-        self.send_running_text(self.sample(7))
+        self.__output_enable()
+        self.__clear_shift_register()
+        self.__set_storage_register()
+        self.__send_running_text(self.__sample(7))
 
     def run_game(self) -> None:
         """
         Run the game from outside.
         :return: None
         """
-        self.init_game()
+        self.__init_game()
         while self.thread_is_running:
-            self.reset_game_instance()
+            self.__reset_game_instance()
             while self.reset_game and self.thread_is_running:
-                self.send_data(self.data_vector)
+                self.__send_data(self.data_vector)
                 for btn_index in range(len(self.data_vector)):
-                    if self.button(self.input_button_from_left[btn_index]):
-                        self.reset_game = self.handle_button_input(btn_index, self.current_index_in_data)
+                    if self.__button(self.input_button_from_left[btn_index]):
+                        self.reset_game = self.__handle_button_input(btn_index, self.current_index_in_data)
