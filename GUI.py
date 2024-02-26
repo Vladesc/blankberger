@@ -213,11 +213,11 @@ class GUI(object):
             :return: None
             """
             if not current_player:
-                spieler_name_anzeigen_label['text'] = "Spieler " + self.spieler1_eingabefeld.get() + " ist dran"
+                spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(cplayer=self.spieler1_eingabefeld.get())
                 spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
                 spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
             else:
-                spieler_name_anzeigen_label['text'] = "Spieler " + self.spieler2_eingabefeld.get() + " ist dran"
+                spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(cplayer=self.spieler2_eingabefeld.get())
                 spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
                 spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
 
@@ -276,10 +276,10 @@ class GUI(object):
 
 
 ## todo Die drei Sounds implementieren
-## todo GUI Schick machen... Schrift größer, Hintergrundfarbe f. Spieler setzen
-## todo In GUI und GameLogic alle Methoden, die nicht von außen gebraucht werden mit __ verstecken
+## todo [done] GUI Schick machen... Schrift größer, Hintergrundfarbe f. Spieler setzen
+## todo [done] In GUI und GameLogic alle Methoden, die nicht von außen gebraucht werden mit __ verstecken
 ## todo Konstanten auslagern
-## todo Methoden Doku und Kommentare weg
+## todo [done] Methoden Doku und Kommentare weg
 ## todo Spielregeln und Info Buttons aktivieren und weitere Ansichten hierfür implementieren (mit "Back" Button)
 ## todo RadioButton für Schwierigkeitsstufe MITTEL kann gelöscht werden
 ## todo Add Computer Player Actions... in zwei Schwierigkeitsgraden

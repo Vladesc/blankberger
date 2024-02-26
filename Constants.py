@@ -32,6 +32,7 @@ GAME_END_BUTTON: Final = "Beenden"
 
 GAME_PVE_MSG_MISSING_NAME: Final = "Spieler 1 hat keinen Namen."
 GAME_PVP_MSG_MISSING_NAME: Final = "Es sind nicht für alle Spieler Namen eingetragen."
+GAME_CURRENT_PLAYER_LABEL: Final = "Spieler {cplayer:none} ist dran"
 GAME_COLOR_BACKGROUND_PLAYER_1: Final = "red"
 GAME_COLOR_BACKGROUND_PLAYER_2: Final = "green"
 
