@@ -261,7 +261,7 @@ class GUI(object):
         beenden_button1 = Button(game_rules, text=Constants.GAME_MAIN_MENU_BUTTON, command=game_rules.destroy)
         beenden_button1.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
         spieler_name_anzeigen_label = Label(game_rules, text=Constants.GAME_RULES_CONTENT, font=("Arial", 12),
-                                            anchor="w")
+                                            anchor="w", justify=LEFT)
         game_rules.wm_overrideredirect(True)
         build_grid()
 
