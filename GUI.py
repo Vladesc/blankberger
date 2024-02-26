@@ -261,7 +261,7 @@ class GUI(object):
         game_rules.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
         beenden_button1 = Button(game_rules, text=Constants.GAME_MAIN_MENU_BUTTON, command=game_rules.destroy)
         beenden_button1.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
-        spieler_name_anzeigen_label = Label(game_rules,text="SPIELREGELN", font=("Arial", 25))
+        spieler_name_anzeigen_label = Label(game_rules,text=Constants.GAME_RULES_CONTENT, font=("Arial", 12))
         game_rules.wm_overrideredirect(True)
         build_grid()
 
@@ -312,15 +312,15 @@ class GUI(object):
         print("Shutting down OS")  # todo implement os shutdown function
 
 
-## todo Die drei Sounds implementieren
 ## todo [done] GUI Schick machen... Schrift größer, Hintergrundfarbe f. Spieler setzen
 ## todo [done] In GUI und GameLogic alle Methoden, die nicht von außen gebraucht werden mit __ verstecken
 ## todo [done] Konstanten auslagern
 ## todo [done] Methoden Doku und Kommentare weg
 ## todo [done] Spielregeln und Info Buttons aktivieren und weitere Ansichten hierfür implementieren (mit "Back" Button)
+## todo [done] InfoPage formatieren
+## todo [done] RadioButton für Schwierigkeitsstufe MITTEL kann gelöscht werden
+## todo die drei Sounds implementieren
 ## todo Spielregeln einbinden
-## todo InfoPage formatieren
-## todo RadioButton für Schwierigkeitsstufe MITTEL kann gelöscht werden
 ## todo Add Computer Player Actions... in zwei Schwierigkeitsgraden
 ## todo Fix Durchlauftext bei Start des Spiels (oder schauen, wie er mit Musik wirkt)
 ## todo (optional) Check how to show Bildschirmtastatur
