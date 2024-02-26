@@ -10,8 +10,8 @@ GAME_WELCOME_LABEL: Final = "Willkommen bei 4 Gewinnt. Bitte wählen sie ihr Spi
 GAME_PLAYER_1_LABEL: Final = "Spieler 1: "
 GAME_PLAYER_2_LABEL: Final = "Spieler 2: "
 
-GAME_PLAYER_1_PLACEHOLDER:Final = "Spieler 1"
-GAME_PLAYER_2_PLACEHOLDER:Final = "Spieler 2"
+GAME_PLAYER_1_PLACEHOLDER: Final = "Spieler 1"
+GAME_PLAYER_2_PLACEHOLDER: Final = "Spieler 2"
 
 GAME_MODE_PVE_LABEL: Final = "Spieler gegen Computer"
 GAME_MODE_PVP_LABEL: Final = "Spieler gegen Spieler"
@@ -36,10 +36,9 @@ GAME_CURRENT_PLAYER_LABEL: Final = "Spieler {cplayer} ist dran"
 GAME_COLOR_BACKGROUND_PLAYER_1: Final = "red"
 GAME_COLOR_BACKGROUND_PLAYER_2: Final = "green"
 
-GAME_INFO_CONTENT ="\
+GAME_INFO_CONTENT = "\
                 ************************\n\
                 Autoren: OFR Sonnberger und OFRzS Blank\n\
                 Date: Schuljahr 2023/2024\n\
                 Version: 2.0\n\
                 ************************"
-

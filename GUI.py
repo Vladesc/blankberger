@@ -101,7 +101,6 @@ class GUI(object):
 
                 cpuLevel_Label.grid_forget()
                 radio_leicht.grid_forget()
-                radio_mittel.grid_forget()
                 radio_schwer.grid_forget()
             else:
                 spieler1_label.grid(row=3, column=0)
@@ -110,8 +109,7 @@ class GUI(object):
                 self.spieler2_eingabefeld.grid_forget()
 
                 cpuLevel_Label.grid(row=5, column=1)
-                radio_leicht.grid(row=6, column=0)
-                radio_mittel.grid(row=6, column=1)
+                radio_leicht.grid(row=6, column=1)
                 radio_schwer.grid(row=6, column=2)
 
         spielmodus_label = Label(self.fenster, text=Constants.GAME_MODE_LABEL)
@@ -146,11 +144,6 @@ class GUI(object):
                                    padx=20,
                                    variable=self.game_difficulty_container,
                                    value=0)
-        radio_mittel = Radiobutton(self.fenster,
-                                   text=Constants.GAME_MODE_PVP_DIFFICULTY_MEDIUM,
-                                   padx=20,
-                                   variable=self.game_difficulty_container,
-                                   value=1)
         radio_schwer = Radiobutton(self.fenster,
                                    text=Constants.GAME_MODE_PVP_DIFFICULTY_HARD,
                                    variable=self.game_difficulty_container,
@@ -316,7 +309,9 @@ class GUI(object):
 ## todo [done] In GUI und GameLogic alle Methoden, die nicht von außen gebraucht werden mit __ verstecken
 ## todo [done] Konstanten auslagern
 ## todo [done] Methoden Doku und Kommentare weg
-## todo Spielregeln und Info Buttons aktivieren und weitere Ansichten hierfür implementieren (mit "Back" Button)
+## todo [done] Spielregeln und Info Buttons aktivieren und weitere Ansichten hierfür implementieren (mit "Back" Button)
+## todo Spielregeln einbinden
+## todo InfoPage formatieren
 ## todo RadioButton für Schwierigkeitsstufe MITTEL kann gelöscht werden
 ## todo Add Computer Player Actions... in zwei Schwierigkeitsgraden
 ## todo Fix Durchlauftext bei Start des Spiels (oder schauen, wie er mit Musik wirkt)
