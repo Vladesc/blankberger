@@ -285,7 +285,7 @@ class GUI(object):
         game_info.title(Constants.WINDOW_TITLE_RUNNING_GAME)
         game_info.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
         beenden_button1 = Button(game_info, text=Constants.GAME_END_BUTTON, command=game_info.destroy)
-        spieler_name_anzeigen_label = Label(game_info,text=Constants.GAME_INFO_CONTENT, font=("Arial", 25))
+        spieler_name_anzeigen_label = Label(game_info,text=Constants.GAME_INFO_CONTENT, font=("Arial", 20))
         game_info.wm_overrideredirect(True)
         build_grid()
 
