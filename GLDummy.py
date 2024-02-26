@@ -32,9 +32,10 @@ class GLDummy(object):
         self.gui_update_method = gui_update_method
 
     def run_game(self) -> None:
-        while self.thread_is_running:
+        counter =0
+        while self.thread_is_running and counter <5:
             self.gui_update_method(self.current_player)
             self.current_player = 0 if self.current_player == 1 else 1
-            print("Spieler: ", self.current_player)
             time.sleep(1)
+            counter +=1
         self.close_game_gui_method()
