@@ -243,7 +243,7 @@ class GUI(object):
         spiele_fenster.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
         beenden_button1 = Button(spiele_fenster, text=Constants.GAME_END_BUTTON, command=action_end_game)
         spieler_name_anzeigen_label = Label(spiele_fenster)
-        spiele_fenster.wm_attributes('-transparentcolor', 'black') #todo new
+        spiele_fenster.configure(bg='transparent') ##todo new
         spiele_fenster.wm_overrideredirect(True)
         build_grid()
         change_active_player(0)
