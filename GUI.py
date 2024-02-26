@@ -151,6 +151,7 @@ class GUI(object):
                                    value=2)
 
         start_button = Button(self.fenster, text=Constants.GAME_START_BUTTON, command=self.__start_game_instance)
+        start_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
 
         sound_Label = Label(self.fenster, text=Constants.GAME_SOUND_LABEL)
         radio_sound_on = Radiobutton(self.fenster, text=Constants.GAME_SOUND_LABEL_ON, padx=20,
@@ -161,10 +162,14 @@ class GUI(object):
                                       value=1, command=ctrl_sound_state_change)
 
         spielregeln_button = Button(self.fenster, text=Constants.GAME_RULES_BUTTON, command=self.__rules_window)
+        spielregeln_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
         info_button = Button(self.fenster, text=Constants.GAME_INFO_BUTTON, command=self.__info_window)
+        info_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
         end_application_button = Button(self.fenster, text=Constants.GAME_END_BUTTON, command=self.fenster.quit)
+        end_application_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
         shutdown_system_button = Button(self.fenster, text=Constants.GAME_SHUTDOWN_BUTTON,
                                         command=self.__action_shutdown_system)
+        shutdown_system_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
 
         build_grid()
         ctrl_sound_state_change()
@@ -224,6 +229,7 @@ class GUI(object):
         spiele_fenster.title(Constants.WINDOW_TITLE_RUNNING_GAME)
         spiele_fenster.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
         beenden_button1 = Button(spiele_fenster, text=Constants.GAME_END_BUTTON, command=action_end_game)
+        beenden_button1.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
         spieler_name_anzeigen_label = Label(spiele_fenster, font=("Arial", 25))
         spiele_fenster.wm_overrideredirect(True)
         build_grid()
@@ -254,6 +260,7 @@ class GUI(object):
         game_rules.title(Constants.WINDOW_TITLE_RUNNING_GAME)
         game_rules.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
         beenden_button1 = Button(game_rules, text=Constants.GAME_MAIN_MENU_BUTTON, command=game_rules.destroy)
+        beenden_button1.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
         spieler_name_anzeigen_label = Label(game_rules,text="SPIELREGELN", font=("Arial", 25))
         game_rules.wm_overrideredirect(True)
         build_grid()
@@ -278,6 +285,7 @@ class GUI(object):
         game_info.title(Constants.WINDOW_TITLE_RUNNING_GAME)
         game_info.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
         beenden_button1 = Button(game_info, text=Constants.GAME_MAIN_MENU_BUTTON, command=game_info.destroy)
+        beenden_button1.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
         spieler_name_anzeigen_label = Label(game_info,text=Constants.GAME_INFO_CONTENT, font=("Arial", 20))
         game_info.wm_overrideredirect(True)
         build_grid()

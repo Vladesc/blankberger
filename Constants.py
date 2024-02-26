@@ -30,6 +30,8 @@ GAME_START_BUTTON: Final = "Spiel Starten"
 GAME_SHUTDOWN_BUTTON: Final = "Shutdown System"
 GAME_MAIN_MENU_BUTTON: Final = "Hauptmenü"
 GAME_END_BUTTON: Final = "Beenden"
+GAME_BTN_SIZE_HEIGHT:Final = 200
+GAME_BTN_SIZE_WIDTH:Final = 200
 
 GAME_PVE_MSG_MISSING_NAME: Final = "Spieler 1 hat keinen Namen."
 GAME_PVP_MSG_MISSING_NAME: Final = "Es sind nicht für alle Spieler Namen eingetragen."
