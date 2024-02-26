@@ -214,9 +214,11 @@ class GUI(object):
             """
             if not current_player:
                 spieler_name_anzeigen_label['text'] = "Spieler " + self.spieler1_eingabefeld.get() + " ist dran"
+                spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
                 spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
             else:
                 spieler_name_anzeigen_label['text'] = "Spieler " + self.spieler2_eingabefeld.get() + " ist dran"
+                spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
                 spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
 
         def close_top_window() -> None:
@@ -242,8 +244,7 @@ class GUI(object):
         spiele_fenster.title(Constants.WINDOW_TITLE_RUNNING_GAME)
         spiele_fenster.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
         beenden_button1 = Button(spiele_fenster, text=Constants.GAME_END_BUTTON, command=action_end_game)
-        spieler_name_anzeigen_label = Label(spiele_fenster)
-        spieler_name_anzeigen_label.configure(bg='transparent') ##todo new
+        spieler_name_anzeigen_label = Label(spiele_fenster, font=("Arial", 25))
         spiele_fenster.wm_overrideredirect(True)
         build_grid()
         change_active_player(0)
