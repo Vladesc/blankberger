@@ -213,11 +213,13 @@ class GUI(object):
             :return: None
             """
             if not current_player:
-                spieler_name_anzeigen_label2.grid_forget()
-                spieler_name_anzeigen_label1.grid(row=0, column=0)
+                spieler_name_anzeigen_label.text = "Spieler " + self.spieler1_eingabefeld.get() + " ist dran"
+                #spieler_name_anzeigen_label2.grid_forget()
+                #spieler_name_anzeigen_label1.grid(row=0, column=0)
             else:
-                spieler_name_anzeigen_label1.grid_forget()
-                spieler_name_anzeigen_label2.grid(row=0, column=0)
+                spieler_name_anzeigen_label.text = "Spieler " + self.spieler2_eingabefeld.get() + " ist dran"
+                #spieler_name_anzeigen_label1.grid_forget()
+                #spieler_name_anzeigen_label2.grid(row=0, column=0)
 
         def close_top_window() -> None:
             """
@@ -226,17 +228,26 @@ class GUI(object):
             """
             spiele_fenster.destroy()
 
+        def build_grid() -> None:
+            """
+            Set position of gui elements inside the grid.
+            :return: None
+            """
+            beenden_button1.grid(row=1, column=2)
+            spieler_name_anzeigen_label.grid(row=0, column=0)
+
         spiele_fenster = tkinter.Toplevel(self.fenster)
         spiele_fenster.title(Constants.WINDOW_TITLE_RUNNING_GAME)
         spiele_fenster.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
         beenden_button1 = Button(spiele_fenster, text=Constants.GAME_END_BUTTON, command=action_end_game)
-        spieler_name_anzeigen_label1 = Label(spiele_fenster,
-                                             text="Spieler " + self.spieler1_eingabefeld.get() + " ist dran")
-        spieler_name_anzeigen_label2 = Label(spiele_fenster,
-                                             text="Spieler " + self.spieler2_eingabefeld.get() + " ist dran")
+        spieler_name_anzeigen_label = Label(spiele_fenster)
+        #spieler_name_anzeigen_label1 = Label(spiele_fenster,
+        #                                     text="Spieler " + self.spieler1_eingabefeld.get() + " ist dran")
+        #spieler_name_anzeigen_label2 = Label(spiele_fenster,
+        #                                     text="Spieler " + self.spieler2_eingabefeld.get() + " ist dran")
         spiele_fenster.wm_overrideredirect(True)
+        build_grid()
         change_active_player(0)
-        beenden_button1.grid(row=1, column=2)
 
         self.active_game_thread = threading.Thread(target=self.game_instance.run_game)
         self.game_instance.set_gui_update_method(change_active_player)
