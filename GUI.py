@@ -213,11 +213,11 @@ class GUI(object):
             :return: None
             """
             if not current_player:
-                spieler_name_anzeigen_label.text = "Spieler " + self.spieler1_eingabefeld.get() + " ist dran"
+                spieler_name_anzeigen_label['text'] = "Spieler " + self.spieler1_eingabefeld.get() + " ist dran"
                 #spieler_name_anzeigen_label2.grid_forget()
                 #spieler_name_anzeigen_label1.grid(row=0, column=0)
             else:
-                spieler_name_anzeigen_label.text = "Spieler " + self.spieler2_eingabefeld.get() + " ist dran"
+                spieler_name_anzeigen_label['text'] = "Spieler " + self.spieler2_eingabefeld.get() + " ist dran"
                 #spieler_name_anzeigen_label1.grid_forget()
                 #spieler_name_anzeigen_label2.grid(row=0, column=0)
 
