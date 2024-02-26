@@ -109,8 +109,8 @@ class GUI(object):
                 self.spieler2_eingabefeld.grid_forget()
 
                 cpuLevel_Label.grid(row=5, column=1)
-                radio_leicht.grid(row=6, column=0)
-                radio_schwer.grid(row=6, column=2)
+                radio_leicht.grid(row=6, column=1)
+                radio_schwer.grid(row=7, column=1)
 
         spielmodus_label = Label(self.fenster, text=Constants.GAME_MODE_LABEL)
         willkommen_label = Label(self.fenster, text=Constants.GAME_WELCOME_LABEL)
