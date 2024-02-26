@@ -233,6 +233,8 @@ class GUI(object):
             spieler_name_anzeigen_label.grid(row=0, column=1)
             spiele_fenster.grid_rowconfigure(0, weight=1)
             spiele_fenster.grid_rowconfigure(2, weight=1)
+            spiele_fenster.grid_columnconfigure(0, weight=1)
+            spiele_fenster.grid_columnconfigure(2, weight=1)
 
         spiele_fenster = tkinter.Toplevel(self.fenster)
         spiele_fenster.title(Constants.WINDOW_TITLE_RUNNING_GAME)
