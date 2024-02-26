@@ -36,9 +36,8 @@ GAME_CURRENT_PLAYER_LABEL: Final = "Spieler {cplayer} ist dran"
 GAME_COLOR_BACKGROUND_PLAYER_1: Final = "red"
 GAME_COLOR_BACKGROUND_PLAYER_2: Final = "green"
 
-GAME_INFO_CONTENT = "\
-                ************************\n\
-                Autoren: OFR Sonnberger und OFRzS Blank\n\
-                Date: Schuljahr 2023/2024\n\
-                Version: 2.0\n\
-                ************************"
+GAME_INFO_CONTENT = ("************************\n"
+                     "Autoren: OFR Sonnberger und OFRzS Blank\n"
+                     "Date: Schuljahr 2023/2024\n"
+                     "Version: 2.0\n"
+                     "************************")
