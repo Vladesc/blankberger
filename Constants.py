@@ -28,6 +28,7 @@ GAME_INFO_BUTTON: Final = "Info"
 GAME_RULES_BUTTON: Final = "Spielregeln"
 GAME_START_BUTTON: Final = "Spiel Starten"
 GAME_SHUTDOWN_BUTTON: Final = "Shutdown System"
+GAME_MAIN_MENU_BUTTON: Final = "Hauptmenü"
 GAME_END_BUTTON: Final = "Beenden"
 
 GAME_PVE_MSG_MISSING_NAME: Final = "Spieler 1 hat keinen Namen."
