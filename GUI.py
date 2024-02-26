@@ -49,15 +49,6 @@ class GUI(object):
                 ************************"
             messagebox.showinfo(message=m_text, title="Infos")
 
-        def action_get_rules_dialog() -> None:
-            m_text = "\
-                ************************\n\
-                Spielregeln für 4 Gewinnt\n\
-                Text Text Text\n\
-                Viel Erfolg und Spaß!\n\
-                ************************"
-            messagebox.showinfo(message=m_text, title="Spielregeln")
-
         def build_grid() -> None:
             """
             Set position of gui elements inside the grid.
@@ -186,7 +177,7 @@ class GUI(object):
                                       variable=self.sound_state_container,
                                       value=1, command=ctrl_sound_state_change)
 
-        spielregeln_button = Button(self.fenster, text=Constants.GAME_RULES_BUTTON, command=action_get_rules_dialog)
+        spielregeln_button = Button(self.fenster, text=Constants.GAME_RULES_BUTTON, command=self.__rules_window)
         info_button = Button(self.fenster, text=Constants.GAME_INFO_BUTTON, command=action_get_info_dialog)
         end_application_button = Button(self.fenster, text=Constants.GAME_END_BUTTON, command=self.fenster.quit)
         shutdown_system_button = Button(self.fenster, text=Constants.GAME_SHUTDOWN_BUTTON,
