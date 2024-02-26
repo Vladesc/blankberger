@@ -39,6 +39,7 @@ class GUI(object):
         Generate initial main window.
         :return: None
         """
+
         def build_grid() -> None:
             """
             Set position of gui elements inside the grid.
@@ -245,6 +246,7 @@ class GUI(object):
         Generate and set the window content of the rules window.
         :return: None
         """
+
         def build_grid() -> None:
             """
             Set position of gui elements inside the grid.
@@ -261,7 +263,8 @@ class GUI(object):
         game_rules.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
         beenden_button1 = Button(game_rules, text=Constants.GAME_MAIN_MENU_BUTTON, command=game_rules.destroy)
         beenden_button1.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
-        spieler_name_anzeigen_label = Label(game_rules,text=Constants.GAME_RULES_CONTENT, font=("Arial", 12))
+        spieler_name_anzeigen_label = Label(game_rules, text=Constants.GAME_RULES_CONTENT, font=("Arial", 12),
+                                            anchor="w")
         game_rules.wm_overrideredirect(True)
         build_grid()
 
@@ -270,6 +273,7 @@ class GUI(object):
         Generate and set the window content of the info window.
         :return: None
         """
+
         def build_grid() -> None:
             """
             Set position of gui elements inside the grid.
@@ -286,7 +290,7 @@ class GUI(object):
         game_info.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
         beenden_button1 = Button(game_info, text=Constants.GAME_MAIN_MENU_BUTTON, command=game_info.destroy)
         beenden_button1.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
-        spieler_name_anzeigen_label = Label(game_info,text=Constants.GAME_INFO_CONTENT, font=("Arial", 20))
+        spieler_name_anzeigen_label = Label(game_info, text=Constants.GAME_INFO_CONTENT, font=("Arial", 20))
         game_info.wm_overrideredirect(True)
         build_grid()
 
