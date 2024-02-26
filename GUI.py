@@ -254,7 +254,7 @@ class GUI(object):
             """
             game_rules.grid_rowconfigure(0, weight=1)
             game_rules.grid_rowconfigure(1, weight=1)
-            game_rules.grid_columnconfigure(0, weight=1)
+            game_rules.grid_columnconfigure(0, weight=0)
             spieler_name_anzeigen_label.grid(row=0, column=0)
             beenden_button1.grid(row=1, column=0)
 
