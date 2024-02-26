@@ -229,8 +229,10 @@ class GUI(object):
             Set position of gui elements inside the grid.
             :return: None
             """
-            beenden_button1.grid(row=1, column=2)
-            spieler_name_anzeigen_label.grid(row=0, column=2)
+            beenden_button1.grid(row=1, column=1)
+            spieler_name_anzeigen_label.grid(row=0, column=1)
+            spiele_fenster.grid_rowconfigure(0, weight=1)
+            spiele_fenster.grid_rowconfigure(2, weight=1)
 
         spiele_fenster = tkinter.Toplevel(self.fenster)
         spiele_fenster.title(Constants.WINDOW_TITLE_RUNNING_GAME)
