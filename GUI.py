@@ -39,16 +39,6 @@ class GUI(object):
         Generate initial main window.
         :return: None
         """
-
-        def action_get_info_dialog() -> None:
-            m_text = "\
-                ************************\n\
-                Autoren: OFR Sonnberger und OFRzS Blank\n\
-                Date: Schuljahr 2023/2024\n\
-                Version: 2.0\n\
-                ************************"
-            messagebox.showinfo(message=m_text, title="Infos")
-
         def build_grid() -> None:
             """
             Set position of gui elements inside the grid.
@@ -178,7 +168,7 @@ class GUI(object):
                                       value=1, command=ctrl_sound_state_change)
 
         spielregeln_button = Button(self.fenster, text=Constants.GAME_RULES_BUTTON, command=self.__rules_window)
-        info_button = Button(self.fenster, text=Constants.GAME_INFO_BUTTON, command=action_get_info_dialog)
+        info_button = Button(self.fenster, text=Constants.GAME_INFO_BUTTON, command=self.__info_window)
         end_application_button = Button(self.fenster, text=Constants.GAME_END_BUTTON, command=self.fenster.quit)
         shutdown_system_button = Button(self.fenster, text=Constants.GAME_SHUTDOWN_BUTTON,
                                         command=self.__action_shutdown_system)
@@ -273,6 +263,30 @@ class GUI(object):
         beenden_button1 = Button(game_rules, text=Constants.GAME_END_BUTTON, command=game_rules.destroy)
         spieler_name_anzeigen_label = Label(game_rules,text="SPIELREGELN", font=("Arial", 25))
         game_rules.wm_overrideredirect(True)
+        build_grid()
+
+    def __info_window(self) -> None:
+        """
+        Generate and set the window content of the info window.
+        :return: None
+        """
+        def build_grid() -> None:
+            """
+            Set position of gui elements inside the grid.
+            :return: None
+            """
+            game_info.grid_rowconfigure(0, weight=1)
+            game_info.grid_rowconfigure(1, weight=1)
+            game_info.grid_columnconfigure(0, weight=1)
+            spieler_name_anzeigen_label.grid(row=0, column=0)
+            beenden_button1.grid(row=1, column=0)
+
+        game_info = tkinter.Toplevel(self.fenster)
+        game_info.title(Constants.WINDOW_TITLE_RUNNING_GAME)
+        game_info.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
+        beenden_button1 = Button(game_info, text=Constants.GAME_END_BUTTON, command=game_info.destroy)
+        spieler_name_anzeigen_label = Label(game_info,text=Constants.GAME_INFO_CONTENT, font=("Arial", 25))
+        game_info.wm_overrideredirect(True)
         build_grid()
 
     def __start_game_instance(self):
