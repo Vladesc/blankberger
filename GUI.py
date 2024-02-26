@@ -323,8 +323,8 @@ class GUI(object):
 ## todo [done] Spielregeln und Info Buttons aktivieren und weitere Ansichten hierfür implementieren (mit "Back" Button)
 ## todo [done] InfoPage formatieren
 ## todo [done] RadioButton für Schwierigkeitsstufe MITTEL kann gelöscht werden
+## todo [done] Spielregeln einbinden
 ## todo die drei Sounds implementieren
-## todo Spielregeln einbinden
 ## todo Add Computer Player Actions... in zwei Schwierigkeitsgraden
 ## todo Fix Durchlauftext bei Start des Spiels (oder schauen, wie er mit Musik wirkt)
 ## todo (optional) Check how to show Bildschirmtastatur
