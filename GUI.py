@@ -5,15 +5,17 @@ from tkinter import messagebox
 import pygame
 import threading
 import Constants
-from GLDummy import GLDummy ##todo entfernen, wenn debug beendet
-#from GameLogic import GameLogic ##todo einkommentieren, für real stuff
+from GLDummy import GLDummy  ##todo entfernen, wenn debug beendet
+
+
+# from GameLogic import GameLogic ##todo einkommentieren, für real stuff
 
 
 class GUI(object):
 
     def __init__(self):
-        #self.game_instance = GameLogic() #todo einkommentieren, für real stuff
-        self.game_instance = GLDummy() ##todo entfernen, wenn debug beendet
+        # self.game_instance = GameLogic() #todo einkommentieren, für real stuff
+        self.game_instance = GLDummy()  ##todo entfernen, wenn debug beendet
         self.active_game_thread = None
 
         self.fenster = Tk()
@@ -37,6 +39,7 @@ class GUI(object):
         Generate initial main window.
         :return: None
         """
+
         def action_get_info_dialog() -> None:
             m_text = "\
                 ************************\n\
@@ -176,9 +179,11 @@ class GUI(object):
         start_button = Button(self.fenster, text=Constants.GAME_START_BUTTON, command=self.__start_game_instance)
 
         sound_Label = Label(self.fenster, text=Constants.GAME_SOUND_LABEL)
-        radio_sound_on = Radiobutton(self.fenster, text=Constants.GAME_SOUND_LABEL_ON, padx=20, variable=self.sound_state_container,
+        radio_sound_on = Radiobutton(self.fenster, text=Constants.GAME_SOUND_LABEL_ON, padx=20,
+                                     variable=self.sound_state_container,
                                      value=0, command=ctrl_sound_state_change)
-        radio_sound_off = Radiobutton(self.fenster, text=Constants.GAME_SOUND_LABEL_OFF, padx=20, variable=self.sound_state_container,
+        radio_sound_off = Radiobutton(self.fenster, text=Constants.GAME_SOUND_LABEL_OFF, padx=20,
+                                      variable=self.sound_state_container,
                                       value=1, command=ctrl_sound_state_change)
 
         spielregeln_button = Button(self.fenster, text=Constants.GAME_RULES_BUTTON, command=action_get_rules_dialog)
@@ -213,11 +218,13 @@ class GUI(object):
             :return: None
             """
             if not current_player:
-                spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(cplayer=self.spieler1_eingabefeld.get())
+                spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
+                    cplayer=self.spieler1_eingabefeld.get())
                 spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
                 spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
             else:
-                spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(cplayer=self.spieler2_eingabefeld.get())
+                spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
+                    cplayer=self.spieler2_eingabefeld.get())
                 spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
                 spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
 
@@ -253,6 +260,30 @@ class GUI(object):
         self.game_instance.set_destroy_game_gui(close_top_window)
         self.active_game_thread.start()
 
+    def __rules_window(self) -> None:
+        """
+        Generate and set the window content of the rules window.
+        :return: None
+        """
+        def build_grid() -> None:
+            """
+            Set position of gui elements inside the grid.
+            :return: None
+            """
+            game_rules.grid_rowconfigure(0, weight=1)
+            game_rules.grid_rowconfigure(1, weight=1)
+            game_rules.grid_columnconfigure(0, weight=1)
+            spieler_name_anzeigen_label.grid(row=0, column=0)
+            beenden_button1.grid(row=1, column=0)
+
+        game_rules = tkinter.Toplevel(self.fenster)
+        game_rules.title(Constants.WINDOW_TITLE_RUNNING_GAME)
+        game_rules.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
+        beenden_button1 = Button(game_rules, text=Constants.GAME_END_BUTTON, command=game_rules.destroy)
+        spieler_name_anzeigen_label = Label(game_rules,text="SPIELREGELN", font=("Arial", 25))
+        game_rules.wm_overrideredirect(True)
+        build_grid()
+
     def __start_game_instance(self):
         spieler_namen = (self.spieler1_eingabefeld.get(), self.spieler2_eingabefeld.get())
         if self.game_mode_container.get() == 0:
@@ -278,7 +309,7 @@ class GUI(object):
 ## todo Die drei Sounds implementieren
 ## todo [done] GUI Schick machen... Schrift größer, Hintergrundfarbe f. Spieler setzen
 ## todo [done] In GUI und GameLogic alle Methoden, die nicht von außen gebraucht werden mit __ verstecken
-## todo Konstanten auslagern
+## todo [done] Konstanten auslagern
 ## todo [done] Methoden Doku und Kommentare weg
 ## todo Spielregeln und Info Buttons aktivieren und weitere Ansichten hierfür implementieren (mit "Back" Button)
 ## todo RadioButton für Schwierigkeitsstufe MITTEL kann gelöscht werden
