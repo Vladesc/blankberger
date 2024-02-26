@@ -214,8 +214,10 @@ class GUI(object):
             """
             if not current_player:
                 spieler_name_anzeigen_label['text'] = "Spieler " + self.spieler1_eingabefeld.get() + " ist dran"
+                spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
             else:
                 spieler_name_anzeigen_label['text'] = "Spieler " + self.spieler2_eingabefeld.get() + " ist dran"
+                spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
 
         def close_top_window() -> None:
             """
@@ -230,7 +232,7 @@ class GUI(object):
             :return: None
             """
             beenden_button1.grid(row=1, column=1)
-            spieler_name_anzeigen_label.grid(row=0, column=1)
+            spieler_name_anzeigen_label.grid(row=0, column=2)
             spiele_fenster.grid_rowconfigure(0, weight=1)
             spiele_fenster.grid_rowconfigure(2, weight=1)
             spiele_fenster.grid_columnconfigure(0, weight=1)
