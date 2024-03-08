@@ -15,7 +15,7 @@ from GameLogic import GameLogic
 class GUI(object):
 
     def __init__(self):
-        self.game_instance = GameLogic() #todo einkommentieren, für real stuff
+        self.game_instance = GameLogic()  # todo einkommentieren, für real stuff
         # self.game_instance = GLDummy()  ##todo entfernen, wenn debug beendet
         self.active_game_thread = None
 
@@ -28,7 +28,7 @@ class GUI(object):
         self.current_round_number = 0
         self.spieler1_eingabefeld = None
         self.spieler2_eingabefeld = None
-        self.game_mode_container = IntVar() # todo 0 = 1v1 1=PvE
+        self.game_mode_container = IntVar()  # todo 0 = 1v1 1=PvE
         self.game_difficulty_container = IntVar()
         self.sound_state_container = IntVar()
 
@@ -95,12 +95,12 @@ class GUI(object):
             Change the value of the game mode data container "game_mode_container".
             :return: None
             """
+            self.spieler2_eingabefeld.delete(0, END)
             if self.game_mode_container.get() == 0:
                 spieler1_label.grid(row=3, column=0)
                 self.spieler1_eingabefeld.grid(row=3, column=1)
                 spieler2_label.grid(row=4, column=0)
                 self.spieler2_eingabefeld.grid(row=4, column=1)
-                self.spieler2_eingabefeld.delete(0)
                 self.spieler2_eingabefeld.insert(0, Constants.GAME_PLAYER_2_PLACEHOLDER)
 
                 cpuLevel_Label.grid_forget()
@@ -111,7 +111,6 @@ class GUI(object):
                 self.spieler1_eingabefeld.grid(row=3, column=1)
                 spieler2_label.grid_forget()
                 self.spieler2_eingabefeld.grid_forget()
-                self.spieler2_eingabefeld.delete(0)
                 self.spieler2_eingabefeld.insert(0, Constants.GAME_ENVIRONMENT_PLACEHOLDER)
 
                 cpuLevel_Label.grid(row=5, column=1)
@@ -196,12 +195,39 @@ class GUI(object):
             self.game_instance.stop()
             spiele_fenster.quit()
 
-        def change_active_player(current_player: int) -> None:
+        def window_show_active_p0() -> None:
+            spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
+                cplayer=self.spieler1_eingabefeld.get())
+            spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
+            spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
+
+        def window_show_active_p1() -> None:
+            spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
+                cplayer=self.spieler2_eingabefeld.get())
+            spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
+            spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
+
+        def window_show_start() -> None:
+            spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL_START
+            spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
+            spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
+
+        window_show_options = {
+            0: window_show_active_p0,
+            1: window_show_active_p1,
+            2: window_show_start,
+        }
+
+        def show_window_content(show_option: int) -> None:
             """
             Change the display (window content) for current player.
-            :param current_player: player for the next turn.
+            :param show_option: Method, which will be called from window_show_options
             :return: None
             """
+            window_show_options[show_option]()
+
+            # todo:remove the following comment
+            """ 
             if not current_player:
                 spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
                     cplayer=self.spieler1_eingabefeld.get())
@@ -212,6 +238,7 @@ class GUI(object):
                     cplayer=self.spieler2_eingabefeld.get())
                 spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
                 spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
+            """
 
         def close_top_window() -> None:
             """
@@ -239,11 +266,11 @@ class GUI(object):
         spieler_name_anzeigen_label = Label(spiele_fenster, font=("Arial", 25))
         spiele_fenster.wm_overrideredirect(True)
         build_grid()
-        change_active_player(0)
+        show_window_content(2)
 
         self.active_game_thread = threading.Thread(target=self.game_instance.run_game)
         self.game_instance.set_mode_and_difficulty(self.game_mode_container.get(), self.game_difficulty_container.get())
-        self.game_instance.set_gui_update_method(change_active_player)
+        self.game_instance.set_gui_update_method(show_window_content)
         self.game_instance.set_destroy_game_gui(close_top_window)
         self.active_game_thread.start()
 

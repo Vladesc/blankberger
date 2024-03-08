@@ -739,7 +739,7 @@ class GameLogic(object):
         def __environment_hard() -> None:
             pass
 
-        time.sleep(1)
+        time.sleep(1) # todo fix sleep (aktuell werden zeilen ab 2 sonst nicht angezeigt)
         if self.pve_difficulty == 1:
             __environment_hard()
         else:
@@ -794,6 +794,7 @@ class GameLogic(object):
         self.reset_game = 1
         self.current_index_in_data = 0
         self.current_player_number = 0
+        self.gui_update_method(self.current_player_number)
         self.data_vector = self.__sample(0)
 
     def __init_game(self) -> None:
