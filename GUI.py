@@ -8,9 +8,6 @@ import Constants
 from GameLogic import GameLogic
 
 
-# from GameLogic import GameLogic ##todo einkommentieren, für real stuff
-
-
 class GUI(object):
 
     def __init__(self):

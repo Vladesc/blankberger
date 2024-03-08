@@ -743,7 +743,6 @@ class GameLogic(object):
         def __environment_hard() -> None:
             pass
 
-        time.sleep(1) # todo fix sleep (aktuell werden zeilen ab 2 sonst nicht angezeigt)
         if self.pve_difficulty == 1:
             __environment_hard()
         else:
