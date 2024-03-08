@@ -193,7 +193,7 @@ class GUI(object):
             :return: None
             """
             self.game_instance.stop()
-            spiele_fenster.quit()
+            spiele_fenster.destroy()
 
         def window_show_active_p0() -> None:
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
@@ -247,7 +247,7 @@ class GUI(object):
         spiele_fenster = tkinter.Toplevel(self.fenster)
         spiele_fenster.title(Constants.WINDOW_TITLE_RUNNING_GAME)
         spiele_fenster.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
-        beenden_button1 = Button(spiele_fenster, text=Constants.GAME_END_BUTTON, command=action_end_game)
+        beenden_button1 = Button(spiele_fenster, text=Constants.GAME_MAIN_MENU_BUTTON, command=action_end_game)
         beenden_button1.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
         spieler_name_anzeigen_label = Label(spiele_fenster, font=("Arial", 25))
         spiele_fenster.wm_overrideredirect(True)
