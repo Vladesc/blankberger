@@ -727,6 +727,10 @@ class GameLogic(object):
 
     # todo implement easy and hard pve actions
     def __environment_action(self) -> None:
+        """
+        Run environment actions if game mode is PvE
+        :return: None
+        """
         def __environment_easy() -> None:
             """
             The Easy Environment Actions. Just randomly press a button.

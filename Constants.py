@@ -37,7 +37,30 @@ GAME_BTN_SIZE_WIDTH: Final = 15
 GAME_PVE_MSG_MISSING_NAME: Final = "Spieler 1 hat keinen Namen."
 GAME_PVP_MSG_MISSING_NAME: Final = "Es sind nicht für alle Spieler Namen eingetragen."
 GAME_CURRENT_PLAYER_LABEL: Final = "Spieler {cplayer} ist dran"
-GAME_CURRENT_PLAYER_LABEL_START: Final = "Möge die Macht mit Dir sein. \n- Christopher Robin"
+GAME_CURRENT_PLAYER_LABEL_START: Final = [
+    "Möge die Macht mit Dir sein. \n- Christopher Robin",
+    "Wenns regnet wird man nass. \n- Albert Einstein",
+    "Ich denke, also bin ich. \n- Ein amerikanischer Präsident",
+    "Flieht, ihr Narren. \n- Ein Schüler der FSBwIT",
+    "How much is the fish. \n- Karl Marx",
+    "Segnen wir den Wald, bis wir meschugge sind. \n- Der Papst",
+    "Du bist nicht du, wenn du hungrig bist. \n- Der weiße Hai",
+    "Da hält der Geschmack, was der Duft verspricht. \n- Dixi-Klo",
+    "Sein oder Nicht Sein - Das ist hier die Frage \n- Schrödingers Katze",
+    "Halt mal kurz. \n- Zeus zu Atlas",
+    "Bei uns wird Gleichberechtigung groß geschrieben. \n- Der Duden",
+    "Und er sprach: Es werde Licht! Und es ward Licht. \n- Thomas Alva Edison",
+    "Orange is the new Black. \n- Donald Trump",
+    "Designed to make a difference. \n- Das Minuszeichen",
+    "Guten Freunden gibt man ein Küsschen. \n- Judas",
+    "Hurra, hurra die Hexe brennt! \n- Petunia Dursley",
+    "Der Bass muss ficken \n- Richard Wagner",
+    "Deine Mudda! \n- Siegmund Freud",
+    "Die Krone: eine Kopfbedeckung, die den Kopf überflüssig macht. \n- Ludwig XVI",
+    "Ihr Ziel befindet sich rechts. \n- Gandalf der Graue",
+    "Teile meiner Antwort könnten die Bevölkerung verunsichern. \n- Herodes",
+    "HALT STOP, JETZT REDE ICH! \n- Kim Jong-un",
+    "Zwei geh\'n rein, einer kommt raus. \n- Jack the Ripper"]
 GAME_COLOR_BACKGROUND_START: Final = "lightblue"
 GAME_COLOR_BACKGROUND_PLAYER_1: Final = "red"
 GAME_COLOR_BACKGROUND_PLAYER_2: Final = "green"

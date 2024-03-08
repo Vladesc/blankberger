@@ -1,4 +1,4 @@
-import time
+import random
 import tkinter
 from tkinter import *
 from tkinter import messagebox
@@ -208,7 +208,7 @@ class GUI(object):
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
 
         def window_show_start() -> None:
-            spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL_START
+            spieler_name_anzeigen_label['text'] = random.choice(Constants.GAME_CURRENT_PLAYER_LABEL_START)
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
 
@@ -225,20 +225,6 @@ class GUI(object):
             :return: None
             """
             window_show_options[show_option]()
-
-            # todo:remove the following comment
-            """ 
-            if not current_player:
-                spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
-                    cplayer=self.spieler1_eingabefeld.get())
-                spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
-                spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
-            else:
-                spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
-                    cplayer=self.spieler2_eingabefeld.get())
-                spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
-                spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
-            """
 
         def close_top_window() -> None:
             """
@@ -357,8 +343,9 @@ class GUI(object):
 ## todo [done] InfoPage formatieren
 ## todo [done] RadioButton für Schwierigkeitsstufe MITTEL kann gelöscht werden
 ## todo [done] Spielregeln einbinden
+## todo [done] Add Computer Player Actions... EASY
 ## todo die drei Sounds implementieren
-## todo Add Computer Player Actions... in zwei Schwierigkeitsgraden
+## todo Add Computer Player Actions... HEAVY
 ## todo Fix Durchlauftext bei Start des Spiels (oder schauen, wie er mit Musik wirkt)
 ## todo (optional) Check how to show Bildschirmtastatur
 ## todo (optional) Check how to fullscreen (ohne Titelleiste und ohne Icons)
