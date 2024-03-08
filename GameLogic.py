@@ -113,10 +113,10 @@ class GameLogic(object):
         while row_in_vector_data < self.rows:
             self.__clear_shift_register()
             self.__set_shift_register(self.row[
-                                    0 + row_in_vector_data * self.rows:self.rows + row_in_vector_data * self.rows])
+                                      0 + row_in_vector_data * self.rows:self.rows + row_in_vector_data * self.rows])
             self.__set_shift_register(self.rows_unused)
             self.__set_shift_register(data[
-                                    0 + row_in_vector_data * self.columns_total: self.columns_total + row_in_vector_data * self.columns_total])
+                                      0 + row_in_vector_data * self.columns_total: self.columns_total + row_in_vector_data * self.columns_total])
             self.__set_shift_register(self.columns_unused)
             self.__set_storage_register()
             row_in_vector_data = row_in_vector_data + 1
@@ -254,77 +254,107 @@ class GameLogic(object):
                                 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0,
                                 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
         elif sample_nr == 6:
-            self.data_vector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0,
+            self.data_vector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0,
+                                1, 0, 0,
                                 0, 1, 0,
-                                0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
                                 0, 0, 0,
                                 # Zeile1
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+                                1, 0, 0,
                                 0, 1, 0,
-                                0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
                                 0, 0, 0,
                                 # Zeile2
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0,
+                                1, 0, 0,
                                 0, 1, 0,
-                                0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
                                 0, 0, 0,
                                 # Zeile3
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+                                0, 0, 0,
                                 0, 1, 0,
-                                0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
                                 0, 0, 0,
                                 # Zeile4
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0,
+                                1, 0, 0,
                                 0, 0, 0,
-                                1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
                                 0, 0, 0,
                                 # Zeile5
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
                                 0, 0,
                                 0]  # Zeile6
         elif sample_nr == 7:
-            self.data_vector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,
+            self.data_vector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+                                1, 0, 1,
                                 0, 1, 0,
-                                0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+                                0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
+                                0, 0, 0,
                                 1, 0, 0,
-                                0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
                                 0, 0,
                                 # Zeile1
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0,
                                 0, 0, 0,
-                                0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
+                                0, 0, 0,
                                 1, 0, 0,
-                                0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
                                 0, 0,
                                 # Zeile2
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+                                0, 0, 1,
                                 0, 1, 0,
-                                0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0,
+                                0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1,
+                                0, 0, 0,
                                 1, 0, 0,
-                                0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
                                 0, 0,
                                 # Zeile3
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+                                0, 0, 0,
                                 0, 1, 0,
-                                0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0,
+                                0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
+                                0, 1, 0,
                                 1, 0, 0,
-                                0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
                                 0, 0,
                                 # Zeile4
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+                                1, 0, 1,
                                 0, 1, 0,
-                                0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+                                0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
+                                0, 0, 0,
                                 1, 0, 0,
-                                0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
                                 0, 0,
                                 # Zeile5
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
                                 0,
                                 0]  # Zeile6
         return self.data_vector
@@ -342,7 +372,8 @@ class GameLogic(object):
         """
         self.state = (self.data_vector[self.current_index_in_data] == level
                       or (self.current_player_number == 0 and self.data_vector[self.current_index_in_data + 1] == level)
-                      or (self.current_player_number == 1 and self.data_vector[self.current_index_in_data - 1] == level))
+                      or (self.current_player_number == 1 and self.data_vector[
+                    self.current_index_in_data - 1] == level))
         return (self.state)
 
     def __win_check(self, current_row: int) -> int:
@@ -388,7 +419,8 @@ class GameLogic(object):
         # Vertikal nach unten |0 x 0 0 0 0|
         while self.current_index_in_data + i * self.columns_total < self.rows * self.columns_total:  # |0 x 0 0 0 0|
             if self.data_vector[self.current_index_in_data + i * self.columns_total] == 1:  # |0 x 0 0 0 0|
-                self.win_check_container[led_in_a_row] = self.current_index_in_data + i * self.columns_total  # |0 x 0 0 0 0|
+                self.win_check_container[
+                    led_in_a_row] = self.current_index_in_data + i * self.columns_total  # |0 x 0 0 0 0|
                 led_in_a_row = led_in_a_row + 1
                 if led_in_a_row == 4:
                     return 1
@@ -400,7 +432,8 @@ class GameLogic(object):
         # Diagonal nach rechts steigend |0 0 0 0 x 0|
         while self.current_index_in_data - i * self.columns_total > 0 and self.current_index_in_data + i * 2 <= matrix_right_border:  # |0 0 0 x 0 0|
             if self.data_vector[self.current_index_in_data + i * 2 - i * self.columns_total] == 1:  # |0 0 x 0 0 0|
-                self.win_check_container[led_in_a_row] = self.current_index_in_data + i * 2 - i * self.columns_total  # |0 x 0 0 0 0|
+                self.win_check_container[
+                    led_in_a_row] = self.current_index_in_data + i * 2 - i * self.columns_total  # |0 x 0 0 0 0|
                 led_in_a_row = led_in_a_row + 1
                 if led_in_a_row == 4:
                     return 1
@@ -424,7 +457,8 @@ class GameLogic(object):
         # Diagonal nach rechts fallend |0 x 0 0 0 0|
         while self.current_index_in_data + i * self.columns_total < self.rows * self.columns_total and self.current_index_in_data + i * 2 <= matrix_right_border:  # |0 0 x 0 0 0|
             if self.data_vector[self.current_index_in_data + i * 2 + i * self.columns_total] == 1:  # |0 0 0 x 0 0|
-                self.win_check_container[led_in_a_row] = self.current_index_in_data + i * 2 + i * self.columns_total  # |0 0 0 0 x 0|
+                self.win_check_container[
+                    led_in_a_row] = self.current_index_in_data + i * 2 + i * self.columns_total  # |0 0 0 0 x 0|
                 led_in_a_row = led_in_a_row + 1
                 if led_in_a_row == 4:
                     return 1
@@ -491,7 +525,7 @@ class GameLogic(object):
                 self.__output_enable()
                 time_start_blink = time.time()
 
-    def __send_running_text(self, text:list[int]) -> None:
+    def __send_running_text(self, text: list[int]) -> None:
         """
         Funktion sendet eine Lauftext (Textsample, welches länger als die Breite des Displays ist) auf das Display.
         Dabei wird der Text von rechts nach links über die Anzeige geschoben, sodass ein bewegtes Bild entsteht.
@@ -519,8 +553,9 @@ class GameLogic(object):
         total_columns_length = int(len(text) / self.rows)
         while text_move_column <= total_columns_length - self.columns_total:
             while current_row < self.rows:
-                self.data_vector[current_row * self.columns_total:self.columns_total + current_row * self.columns_total] = text[
-                                                                              text_move_column + current_row * total_columns_length:text_move_column + total_columns_length + current_row * total_columns_length]  # Schreibe den mit i ausgewaehlten Ausschnitt des Lauftextes auf auf die entsprechende Zeile r in'data'
+                self.data_vector[
+                current_row * self.columns_total:self.columns_total + current_row * self.columns_total] = text[
+                                                                                                          text_move_column + current_row * total_columns_length:text_move_column + total_columns_length + current_row * total_columns_length]  # Schreibe den mit i ausgewaehlten Ausschnitt des Lauftextes auf auf die entsprechende Zeile r in'data'
                 current_row = current_row + 1
             current_row = 0
             self.__blink_screen(0.15, 0, self.data_vector)
@@ -745,6 +780,6 @@ class GameLogic(object):
             self.__reset_game_instance()
             while self.reset_game and self.thread_is_running:
                 self.__send_data(self.data_vector)
-                for btn_index in range(len(self.data_vector)):
+                for btn_index in range(len(self.input_button_from_left)):
                     if self.__button(self.input_button_from_left[btn_index]):
-                        self.reset_game = self.__handle_button_input(btn_index, self.current_index_in_data)
+                        self.reset_game = self.__handle_button_input(btn_index * 2, self.current_index_in_data)

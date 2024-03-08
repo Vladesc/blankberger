@@ -5,7 +5,8 @@ from tkinter import messagebox
 import pygame
 import threading
 import Constants
-from GLDummy import GLDummy  ##todo entfernen, wenn debug beendet
+# from GLDummy import GLDummy  ##todo entfernen, wenn debug beendet
+from GameLogic import GameLogic
 
 
 # from GameLogic import GameLogic ##todo einkommentieren, für real stuff
@@ -14,8 +15,8 @@ from GLDummy import GLDummy  ##todo entfernen, wenn debug beendet
 class GUI(object):
 
     def __init__(self):
-        # self.game_instance = GameLogic() #todo einkommentieren, für real stuff
-        self.game_instance = GLDummy()  ##todo entfernen, wenn debug beendet
+        self.game_instance = GameLogic() #todo einkommentieren, für real stuff
+        # self.game_instance = GLDummy()  ##todo entfernen, wenn debug beendet
         self.active_game_thread = None
 
         self.fenster = Tk()
