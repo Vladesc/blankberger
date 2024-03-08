@@ -182,12 +182,7 @@ class GUI(object):
             """
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
                 cplayer=self.spieler1_eingabefeld.get())
-            spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
-            spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
-            beenden_button1.grid(row=1, column=0)
-            if not self.sound_state_container.get():
-                pygame.mixer.music.stop()
-                pygame.mixer.music.load('sounds/FallenderStein.mp3')
+            window_show_active()
 
         def window_show_active_p1() -> None:
             """
@@ -196,6 +191,13 @@ class GUI(object):
             """
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
                 cplayer=self.spieler2_eingabefeld.get())
+            window_show_active()
+
+        def window_show_active()->None:
+            """
+            Duplicate content fix for window_show_active p0 and p1
+            :return: None
+            """
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
             beenden_button1.grid(row=1, column=0)
@@ -216,13 +218,29 @@ class GUI(object):
                 pygame.mixer.music.load('sounds/SpielStart.mp3')
                 pygame.mixer.music.play(loops=-1)
 
-        def window_show_end() -> None:
+        def window_show_end_p0() -> None:
+            """
+            Show the winner in the game window and play the end sound.
+            :return: None
+            """
+            spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL_END.format(
+                cplayer=self.spieler1_eingabefeld.get())
+            window_show_end()
+
+        def window_show_end_p1() -> None:
             """
             Show the winner in the game window and play the end sound.
             :return: None
             """
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL_END.format(
                 cplayer=self.spieler2_eingabefeld.get())
+            window_show_end()
+
+        def window_show_end() -> None:
+            """
+            Duplicate content fix for window_show_end p0 and p1
+            :return: None
+            """
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_END)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_END)
             beenden_button1.grid_forget()
@@ -234,16 +252,9 @@ class GUI(object):
             0: window_show_active_p0,
             1: window_show_active_p1,
             2: window_show_start,
-            3: window_show_end,
+            3: window_show_end_p0,
+            4: window_show_end_p1,
         }
-
-        def play_sound() -> None:
-            """
-            Plays the actual loaded soundFile (used by GameLogic Thread)
-            :return: None
-            """
-            if not self.sound_state_container.get():
-                pygame.mixer.music.play(loops=0, start=0.2)
 
         def show_window_content(show_option: int) -> None:
             """
@@ -252,6 +263,14 @@ class GUI(object):
             :return: None
             """
             window_show_options[show_option]()
+
+        def play_sound() -> None:
+            """
+            Plays the actual loaded soundFile (used by GameLogic Thread)
+            :return: None
+            """
+            if not self.sound_state_container.get():
+                pygame.mixer.music.play(loops=0, start=0.2)
 
         def close_top_window() -> None:
             """
@@ -362,25 +381,7 @@ class GUI(object):
         Shutdown the running operating system.
         :return: None
         """
-        print("Shutting down OS")  # todo implement os shutdown function
+        print("Shutting down OS")
 
-
-## todo [done] GUI Schick machen... Schrift größer, Hintergrundfarbe f. Spieler setzen
-## todo [done] In GUI und GameLogic alle Methoden, die nicht von außen gebraucht werden mit __ verstecken
-## todo [done] Konstanten auslagern
-## todo [done] Methoden Doku und Kommentare weg
-## todo [done] Spielregeln und Info Buttons aktivieren und weitere Ansichten hierfür implementieren (mit "Back" Button)
-## todo [done] InfoPage formatieren
-## todo [done] RadioButton für Schwierigkeitsstufe MITTEL kann gelöscht werden
-## todo [done] Spielregeln einbinden
-## todo [done] Add Computer Player Actions... EASY
-## todo die drei Sounds implementieren
-## todo change mainMenu to topWindow instance to get fullscreen
-## todo Add Computer Player Actions... HEAVY
-## todo Fix Durchlauftext bei Start des Spiels (oder schauen, wie er mit Musik wirkt)
-## todo (optional) Check how to show Bildschirmtastatur
-## todo (optional) Check how to fullscreen (ohne Titelleiste und ohne Icons)
-## todo (optional) Check how to hide mouse
-## todo Add EasterEgg...
 if __name__ == "__main__":
     gui = GUI()

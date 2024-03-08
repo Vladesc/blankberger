@@ -59,7 +59,7 @@ GAME_CURRENT_PLAYER_LABEL_START: Final = [
     "Deine Mudda! \n- Siegmund Freud",
     "Die Krone: eine Kopfbedeckung, \ndie den Kopf überflüssig macht. \n- Ludwig XVI",
     "Ihr Ziel befindet sich rechts. \n- Gandalf der Graue",
-    "Teile meiner Antwort könnten die Bevölkerung verunsichern. \n- Herodes",
+    "Teile meiner Antwort \nkönnten die Bevölkerung verunsichern. \n- Herodes",
     "HALT STOP, JETZT REDE ICH! \n- Kim Jong-un",
     "Zwei geh\'n rein, einer kommt raus. \n- Jack the Ripper"]
 GAME_COLOR_BACKGROUND_START: Final = "lightblue"

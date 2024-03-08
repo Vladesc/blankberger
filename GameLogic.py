@@ -1,15 +1,7 @@
-### Vier Gewinnt Spiel
-### Ansteuerung einer 6x7 LED-Matrix
 from __future__ import annotations
-
 from random import randrange
-
-# ------------------------------------------------------------------------#
-#                                 HEAD                                   #
-# ------------------------------------------------------------------------#
-### Bibliotheken
-import RPi.GPIO as GPIO  # Raspberry Pi Standart GPIO Bibliothek
-import time  # Bibliothek fuer time-Funktionen
+import RPi.GPIO as GPIO
+import time
 
 
 class GameLogic(object):
@@ -498,7 +490,7 @@ class GameLogic(object):
         Ebenfalls trigger der Anzeige, um den gewinner anzuzeigen.
         :return:
         """
-        self.gui_update_method(3)
+        self.gui_update_method(3 if self.current_player_number == 0 else 4)
         for x in range(0, 9):
             self.__blink_screen(0.25, 0, self.data_vector)
             for i in range(0, 4):
@@ -612,7 +604,6 @@ class GameLogic(object):
                 or pos_new != pos_old and (self.data_vector[btn_nr] == 1 or self.data_vector[btn_nr + 1] == 1)):
             return 1
         self.gui_play_sound_method()
-        #time.sleep(0.2) #todo fix lichter aus problem
         self.__change_active_position(pos_new, pos_old)
         return self.__check_game_over(self.__stone_set_and_fall(pos_new, pos_old))
 

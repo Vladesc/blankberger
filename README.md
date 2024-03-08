@@ -1,0 +1,19 @@
+# ToDo Liste
+- [done] GUI Schick machen... Schrift größer, Hintergrundfarbe f. Spieler setzen
+- [done] In GUI und GameLogic alle Methoden, die nicht von außen gebraucht werden mit __ verstecken
+- [done] Konstanten auslagern
+- [done] Methoden Doku und Kommentare weg
+- [done] Spielregeln und Info Buttons aktivieren und weitere Ansichten hierfür implementieren (mit "Back" Button)
+- [done] InfoPage formatieren
+- [done] RadioButton für Schwierigkeitsstufe MITTEL kann gelöscht werden
+- [done] Spielregeln einbinden
+- [done] Add Computer Player Actions... EASY
+- [done] die drei Sounds implementieren
+- implement shutdown function >>> *GUI.__action_shutdown_system()*
+- Add Computer Player Actions... HEAVY-Mode >>> *GameLogic__environment_action().__environment_hard()*
+- Fix Durchlauftext bei Start des Spiels (oder schauen, wie er mit Musik wirkt)
+- change mainMenu to topWindow instance to get fullscreen
+- (optional) Check how to show Bildschirmtastatur
+- (optional) Check how to fullscreen (ohne Titelleiste und ohne Icons)
+- (optional) Check how to hide mouse
+- Add EasterEgg...
