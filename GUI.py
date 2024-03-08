@@ -59,7 +59,7 @@ class GUI(object):
 
             start_button.grid(row=10, column=1)
 
-            sound_Label.grid(row=11, column=0)
+            sound_label.grid(row=11, column=0)
             radio_sound_on.grid(row=12, column=0)
             radio_sound_off.grid(row=13, column=0)
 
@@ -117,62 +117,63 @@ class GUI(object):
                 radio_leicht.grid(row=6, column=1)
                 radio_schwer.grid(row=7, column=1)
 
-        spielmodus_label = Label(self.fenster, text=Constants.GAME_MODE_LABEL)
-        willkommen_label = Label(self.fenster, text=Constants.GAME_WELCOME_LABEL)
+        spiele_fenster = tkinter.Toplevel(self.fenster)
+        spielmodus_label = Label(spiele_fenster, text=Constants.GAME_MODE_LABEL)
+        willkommen_label = Label(spiele_fenster, text=Constants.GAME_WELCOME_LABEL)
 
-        spieler1_label = Label(self.fenster, text=Constants.GAME_PLAYER_1_LABEL)
-        spieler2_label = Label(self.fenster, text=Constants.GAME_PLAYER_2_LABEL)
+        spieler1_label = Label(spiele_fenster, text=Constants.GAME_PLAYER_1_LABEL)
+        spieler2_label = Label(spiele_fenster, text=Constants.GAME_PLAYER_2_LABEL)
 
-        self.spieler1_eingabefeld = Entry(self.fenster, bd=5, width=40)
-        self.spieler2_eingabefeld = Entry(self.fenster, bd=5, width=40)
+        self.spieler1_eingabefeld = Entry(spiele_fenster, bd=5, width=40)
+        self.spieler2_eingabefeld = Entry(spiele_fenster, bd=5, width=40)
 
         self.spieler1_eingabefeld.insert(0, Constants.GAME_PLAYER_1_PLACEHOLDER)
         self.spieler2_eingabefeld.insert(0, Constants.GAME_PLAYER_2_PLACEHOLDER)
 
-        radio_oneOnOne = Radiobutton(self.fenster,
+        radio_oneOnOne = Radiobutton(spiele_fenster,
                                      text=Constants.GAME_MODE_PVP_LABEL,
                                      padx=20,
                                      variable=self.game_mode_container,
                                      command=ctrl_game_mode_change,
                                      value=0)
-        radio_oneOnCpu = Radiobutton(self.fenster,
+        radio_oneOnCpu = Radiobutton(spiele_fenster,
                                      text=Constants.GAME_MODE_PVE_LABEL,
                                      padx=20,
                                      variable=self.game_mode_container,
                                      command=ctrl_game_mode_change,
                                      value=1)
 
-        cpuLevel_Label = Label(self.fenster, text=Constants.GAME_MODE_PVP_DIFFICULTY_CHOOSE)
+        cpuLevel_Label = Label(spiele_fenster, text=Constants.GAME_MODE_PVP_DIFFICULTY_CHOOSE)
 
-        radio_leicht = Radiobutton(self.fenster,
+        radio_leicht = Radiobutton(spiele_fenster,
                                    text=Constants.GAME_MODE_PVP_DIFFICULTY_EASY,
                                    padx=20,
                                    variable=self.game_difficulty_container,
                                    value=0)
-        radio_schwer = Radiobutton(self.fenster,
+        radio_schwer = Radiobutton(spiele_fenster,
                                    text=Constants.GAME_MODE_PVP_DIFFICULTY_HARD,
                                    variable=self.game_difficulty_container,
                                    padx=20,
                                    value=2)
 
-        start_button = Button(self.fenster, text=Constants.GAME_START_BUTTON, command=self.__start_game_instance)
+        start_button = Button(spiele_fenster, text=Constants.GAME_START_BUTTON, command=self.__start_game_instance)
         start_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
 
-        sound_Label = Label(self.fenster, text=Constants.GAME_SOUND_LABEL)
-        radio_sound_on = Radiobutton(self.fenster, text=Constants.GAME_SOUND_LABEL_ON, padx=20,
+        sound_label = Label(spiele_fenster, text=Constants.GAME_SOUND_LABEL)
+        radio_sound_on = Radiobutton(spiele_fenster, text=Constants.GAME_SOUND_LABEL_ON, padx=20,
                                      variable=self.sound_state_container,
                                      value=0, command=ctrl_sound_state_change)
-        radio_sound_off = Radiobutton(self.fenster, text=Constants.GAME_SOUND_LABEL_OFF, padx=20,
+        radio_sound_off = Radiobutton(spiele_fenster, text=Constants.GAME_SOUND_LABEL_OFF, padx=20,
                                       variable=self.sound_state_container,
                                       value=1, command=ctrl_sound_state_change)
 
-        spielregeln_button = Button(self.fenster, text=Constants.GAME_RULES_BUTTON, command=self.__rules_window)
+        spielregeln_button = Button(spiele_fenster, text=Constants.GAME_RULES_BUTTON, command=self.__rules_window)
         spielregeln_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
-        info_button = Button(self.fenster, text=Constants.GAME_INFO_BUTTON, command=self.__info_window)
+        info_button = Button(spiele_fenster, text=Constants.GAME_INFO_BUTTON, command=self.__info_window)
         info_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
-        end_application_button = Button(self.fenster, text=Constants.GAME_END_BUTTON, command=self.fenster.quit)
+        end_application_button = Button(spiele_fenster, text=Constants.GAME_END_BUTTON, command=spiele_fenster.quit)
         end_application_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
-        shutdown_system_button = Button(self.fenster, text=Constants.GAME_SHUTDOWN_BUTTON,
+        shutdown_system_button = Button(spiele_fenster, text=Constants.GAME_SHUTDOWN_BUTTON,
                                         command=self.__action_shutdown_system)
         shutdown_system_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
 
