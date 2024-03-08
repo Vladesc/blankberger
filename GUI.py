@@ -95,12 +95,12 @@ class GUI(object):
             Change the value of the game mode data container "game_mode_container".
             :return: None
             """
-            self.spieler2_eingabefeld.delete()
             if self.game_mode_container.get() == 0:
                 spieler1_label.grid(row=3, column=0)
                 self.spieler1_eingabefeld.grid(row=3, column=1)
                 spieler2_label.grid(row=4, column=0)
                 self.spieler2_eingabefeld.grid(row=4, column=1)
+                self.spieler2_eingabefeld.delete(0)
                 self.spieler2_eingabefeld.insert(0, Constants.GAME_PLAYER_2_PLACEHOLDER)
 
                 cpuLevel_Label.grid_forget()
@@ -111,6 +111,7 @@ class GUI(object):
                 self.spieler1_eingabefeld.grid(row=3, column=1)
                 spieler2_label.grid_forget()
                 self.spieler2_eingabefeld.grid_forget()
+                self.spieler2_eingabefeld.delete(0)
                 self.spieler2_eingabefeld.insert(0, Constants.GAME_ENVIRONMENT_PLACEHOLDER)
 
                 cpuLevel_Label.grid(row=5, column=1)
