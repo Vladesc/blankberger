@@ -95,6 +95,7 @@ class GUI(object):
             Change the value of the game mode data container "game_mode_container".
             :return: None
             """
+            self.spieler2_eingabefeld.delete()
             if self.game_mode_container.get() == 0:
                 spieler1_label.grid(row=3, column=0)
                 self.spieler1_eingabefeld.grid(row=3, column=1)
