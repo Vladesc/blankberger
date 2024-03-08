@@ -61,15 +61,18 @@ class GameLogic(object):
         self.win_check_container = [0, 0, 0, 0]
 
     def __gpio_setup(self) -> None:
-        ### Setup GPIOs (Declare GPIOs as INPUT or OUTPUT)
-        # WICHTIG: Da mit PULL-UP-Widerstand gearbeitet wird, muss der Button den PIN auf LOW ziehen
-        #          -> Durch Buttondruck wird Pin auf GND gelegt! -> HIGH-Signal in Python
+        """
+        Setup GPIOs (Declare GPIOs as INPUT or OUTPUT)
+        WICHTIG: Da mit PULL-UP-Widerstand gearbeitet wird, muss der Button, den PIN auf LOW ziehen
+                 → Durch Buttondruck wird Pin auf GND gelegt! → HIGH-Signal in Python
+        BUTTON_n → IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
+        :return:
+        """
         GPIO.setup(self.output_enable_pin, GPIO.OUT)  # OUTPUT
         GPIO.setup(self.output_rck_storage_register_clock, GPIO.OUT)  # OUTPUT
         GPIO.setup(self.output_sck_shift_register_clock, GPIO.OUT)  # OUTPUT
         GPIO.setup(self.output_sclr_not_shift_register_clear, GPIO.OUT)  # OUTPUT
         GPIO.setup(self.output_si_serial_data, GPIO.OUT)  # OUTPUT
-        # BUTTON_n -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
         for x in range(len(self.input_button_from_left)):
             GPIO.setup(self.input_button_from_left[x], GPIO.IN, GPIO.PUD_UP)
 
@@ -608,7 +611,7 @@ class GameLogic(object):
                 or type(self.current_player_number) is not int
                 or pos_new != pos_old and (self.data_vector[btn_nr] == 1 or self.data_vector[btn_nr + 1] == 1)):
             return 1
-        self.gui_play_sound_method('sounds/FallenderStein.mp3') # todo test sound
+        self.gui_play_sound_method() # todo test sound
         self.__change_active_position(pos_new, pos_old)
         return self.__check_game_over(self.__stone_set_and_fall(pos_new, pos_old))
 

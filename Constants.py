@@ -69,8 +69,9 @@ GAME_COLOR_BACKGROUND_PLAYER_2: Final = "green"
 
 GAME_INFO_CONTENT = ("************************\n"
                      "Autoren: OFR Sonnberger und OFRzS Blank\n"
+                     "Code wizard: Vladesc\n"
                      "Date: Schuljahr 2023/2024\n"
-                     "Version: 2.0\n"
+                     "Version: 0.8.15\n"
                      "************************")
 
 GAME_RULES_CONTENT = ("> Ziel des Spiels <\n"

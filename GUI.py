@@ -11,7 +11,7 @@ from GameLogic import GameLogic
 class GUI(object):
 
     def __init__(self):
-        self.game_instance = GameLogic()  # todo einkommentieren, für real stuff
+        self.game_instance = GameLogic()
         self.active_game_thread = None
 
         self.fenster = Tk()
@@ -22,7 +22,7 @@ class GUI(object):
         self.current_round_number = 0
         self.spieler1_eingabefeld = None
         self.spieler2_eingabefeld = None
-        self.game_mode_container = IntVar()  # todo 0 = 1v1 1=PvE
+        self.game_mode_container = IntVar()
         self.game_difficulty_container = IntVar()
         self.sound_state_container = IntVar()
 
@@ -70,21 +70,6 @@ class GUI(object):
             self.game_mode_container.set(0)
             self.game_difficulty_container.set(0)
             self.sound_state_container.set(0)
-
-## todo remove this shit
-        def ctrl_sound_state_change() -> None:
-            """
-            Change the value of the sound state data container "sound_state_container".
-            :return: None
-            """
-            if self.sound_state_container.get() == 0:
-                print("Es sollte Musik laufen!")  # todo rm debug msg
-                # pygame.mixer.music.play(-1) #todo SOUND STUFF
-                # pygame.mixer.music.set_volume(.5) #todo SOUND STUFF
-            else:
-                print("Jetzt läuft keine Musik!")  # todo rm debug msg
-                pygame.mixer.music.stop()
-## todo until here
 
         def ctrl_game_mode_change() -> None:
             """
@@ -157,10 +142,10 @@ class GUI(object):
         sound_Label = Label(self.fenster, text=Constants.GAME_SOUND_LABEL)
         radio_sound_on = Radiobutton(self.fenster, text=Constants.GAME_SOUND_LABEL_ON, padx=20,
                                      variable=self.sound_state_container,
-                                     value=0, command=ctrl_sound_state_change)
+                                     value=0, command=pygame.mixer.music.stop)
         radio_sound_off = Radiobutton(self.fenster, text=Constants.GAME_SOUND_LABEL_OFF, padx=20,
                                       variable=self.sound_state_container,
-                                      value=1, command=ctrl_sound_state_change)
+                                      value=1, command=pygame.mixer.music.stop)
 
         spielregeln_button = Button(self.fenster, text=Constants.GAME_RULES_BUTTON, command=self.__rules_window)
         spielregeln_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
@@ -173,7 +158,6 @@ class GUI(object):
         shutdown_system_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
 
         build_grid()
-        ctrl_sound_state_change()
         reset_game_container_values()
 
     def __game_window(self) -> None:
@@ -189,7 +173,7 @@ class GUI(object):
             :return: None
             """
             self.game_instance.stop()
-            stop_sound() #todo test sound
+            pygame.mixer.music.stop() #todo test sound
             close_top_window()
 
         def window_show_active_p0() -> None:
@@ -197,22 +181,24 @@ class GUI(object):
             Show the active Player 0 in the game window
             :return: None
             """
-            stop_sound() #todo test sound
+            pygame.mixer.music.stop() #todo test sound
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
                 cplayer=self.spieler1_eingabefeld.get())
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
+            pygame.mixer.music.load('sounds/FallenderStein.mp3')
 
         def window_show_active_p1() -> None:
             """
             Show the active Player 1 in the game window
             :return: None
             """
-            stop_sound() #todo test sound
+            pygame.mixer.music.stop() #todo test sound
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
                 cplayer=self.spieler2_eingabefeld.get())
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
+            pygame.mixer.music.load('sounds/FallenderStein.mp3')
 
         def window_show_start() -> None:
             """
@@ -222,7 +208,8 @@ class GUI(object):
             spieler_name_anzeigen_label['text'] = random.choice(Constants.GAME_CURRENT_PLAYER_LABEL_START)
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
-            play_sound('sounds/SpielStart.mp3')
+            pygame.mixer.music.load('sounds/SpielStart.mp3')
+            play_sound()
 
         def window_show_end() -> None:
             """
@@ -233,7 +220,8 @@ class GUI(object):
                 cplayer=self.spieler2_eingabefeld.get())
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_END)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_END)
-            play_sound('sounds/SpielStart.mp3')
+            pygame.mixer.music.load('sounds/SpielEnde.mp3')
+            play_sound()
 
         window_show_options = {
             0: window_show_active_p0,
@@ -242,23 +230,14 @@ class GUI(object):
             3: window_show_end,
         }
 
-        def play_sound(soundfile: str) -> None:
+        def play_sound() -> None:
             """
-            Plays a sound.
-            :param soundfile: relative path to the sound file
+            Plays the actual loaded soundFile
             :return: None
             """
             if self.sound_state_container:
-                pygame.mixer.music.load(soundfile)
                 pygame.mixer.music.set_volume(.5)
                 pygame.mixer.music.play(-1)
-
-        def stop_sound() -> None:
-            """
-            Stops the playing sound
-            :return:
-            """
-            pygame.mixer.music.stop()
 
         def show_window_content(show_option: int) -> None:
             """
@@ -302,7 +281,6 @@ class GUI(object):
         self.game_instance.set_gui_play_sound_method(play_sound)
         self.game_instance.set_destroy_game_gui(close_top_window)
         self.active_game_thread.start()
-        print("start game...")#todo rm
 
     def __rules_window(self) -> None:
         """
