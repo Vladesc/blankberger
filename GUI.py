@@ -189,10 +189,14 @@ class GUI(object):
             :return: None
             """
             self.game_instance.stop()
-            spiele_fenster.destroy()
             stop_sound() #todo test sound
+            close_top_window()
 
         def window_show_active_p0() -> None:
+            """
+            Show the active Player 0 in the game window
+            :return: None
+            """
             stop_sound() #todo test sound
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
                 cplayer=self.spieler1_eingabefeld.get())
@@ -200,6 +204,10 @@ class GUI(object):
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
 
         def window_show_active_p1() -> None:
+            """
+            Show the active Player 1 in the game window
+            :return: None
+            """
             stop_sound() #todo test sound
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
                 cplayer=self.spieler2_eingabefeld.get())
@@ -207,12 +215,20 @@ class GUI(object):
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
 
         def window_show_start() -> None:
+            """
+            Show start/load screen in the game window and play the start sound.
+            :return: None
+            """
             spieler_name_anzeigen_label['text'] = random.choice(Constants.GAME_CURRENT_PLAYER_LABEL_START)
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
             play_sound('sounds/SpielStart.mp3')
 
         def window_show_end() -> None:
+            """
+            Show the winner in the game window and play the end sound.
+            :return: None
+            """
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL_END.format(
                 cplayer=self.spieler2_eingabefeld.get())
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_END)
@@ -227,12 +243,21 @@ class GUI(object):
         }
 
         def play_sound(soundfile: str) -> None:
+            """
+            Plays a sound.
+            :param soundfile: relative path to the sound file
+            :return: None
+            """
             if self.sound_state_container:
                 pygame.mixer.music.load(soundfile)
                 pygame.mixer.music.set_volume(.5)
                 pygame.mixer.music.play(-1)
 
         def stop_sound() -> None:
+            """
+            Stops the playing sound
+            :return:
+            """
             pygame.mixer.music.stop()
 
         def show_window_content(show_option: int) -> None:
@@ -277,6 +302,7 @@ class GUI(object):
         self.game_instance.set_gui_play_sound_method(play_sound)
         self.game_instance.set_destroy_game_gui(close_top_window)
         self.active_game_thread.start()
+        print("start game...")#todo rm
 
     def __rules_window(self) -> None:
         """

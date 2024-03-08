@@ -495,6 +495,7 @@ class GameLogic(object):
         Ebenfalls trigger der Anzeige, um den gewinner anzuzeigen.
         :return:
         """
+        self.gui_update_method(3)
         for x in range(0, 9):
             self.__blink_screen(0.25, 0, self.data_vector)
             for i in range(0, 4):
@@ -502,7 +503,6 @@ class GameLogic(object):
 
         self.__blink_screen(4, 0.5,
                             self.__sample(3 + self.current_player_number))
-        self.gui_update_method(3)
 
     def __draw_screen(self) -> None:
         """
@@ -608,8 +608,8 @@ class GameLogic(object):
                 or type(self.current_player_number) is not int
                 or pos_new != pos_old and (self.data_vector[btn_nr] == 1 or self.data_vector[btn_nr + 1] == 1)):
             return 1
-        self.__change_active_position(pos_new, pos_old)
         self.gui_play_sound_method('sounds/FallenderStein.mp3') # todo test sound
+        self.__change_active_position(pos_new, pos_old)
         return self.__check_game_over(self.__stone_set_and_fall(pos_new, pos_old))
 
     def __change_active_position(self, pos_new: int, pos_old: int):
@@ -635,8 +635,7 @@ class GameLogic(object):
         """
         last_empty_field = 0
         self.data_vector[pos_new] = 0
-        self.current_index_in_data = pos_new + (
-                self.rows - 1) * self.columns_total  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
+        self.current_index_in_data = pos_new + (self.rows - 1) * self.columns_total
 
         while last_empty_field < self.rows:
             if self.__position_check(1):
@@ -726,7 +725,7 @@ class GameLogic(object):
     #                      PvE Environment Actions                            #
     # ------------------------------------------------------------------------#
 
-    # todo implement easy and hard pve actions
+    # todo implement hard pve actions
     def __environment_action(self) -> None:
         """
         Run environment actions if game mode is PvE
@@ -743,6 +742,10 @@ class GameLogic(object):
                                                              self.current_index_in_data)
 
         def __environment_hard() -> None:
+            """
+            The Hard Environment Actions. Some kind of intelligence.
+            :return: None
+            """
             pass
 
         if self.pve_difficulty == 1:
