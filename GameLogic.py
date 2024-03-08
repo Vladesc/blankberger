@@ -578,7 +578,6 @@ class GameLogic(object):
         :param current_row:
         :return:
         """
-        self.gui_play_sound_method('sounds/FallenderStein.mp3')
         row_start = self.rows - current_row - 1
         fall_pos_old = self.current_index_in_data - row_start * self.columns_total
         current_row = 1
@@ -588,11 +587,9 @@ class GameLogic(object):
             self.data_vector[fall_pos] = 1
             self.data_vector[fall_pos_old] = 0
             self.__blink_screen(0.05, 0, self.data_vector)
-
             fall_pos_old = fall_pos
             current_row = current_row + 1
-        self.data_vector[
-            fall_pos_old] = 0
+        self.data_vector[fall_pos_old] = 0
 
     # ------------------------------------------------------------------------#
     #                          BtnHandling (new)                              #
@@ -612,6 +609,7 @@ class GameLogic(object):
                 or pos_new != pos_old and (self.data_vector[btn_nr] == 1 or self.data_vector[btn_nr + 1] == 1)):
             return 1
         self.__change_active_position(pos_new, pos_old)
+        self.gui_play_sound_method('sounds/FallenderStein.mp3') # todo test sound
         return self.__check_game_over(self.__stone_set_and_fall(pos_new, pos_old))
 
     def __change_active_position(self, pos_new: int, pos_old: int):
@@ -629,6 +627,8 @@ class GameLogic(object):
     def __stone_set_and_fall(self, pos_new: int, pos_old: int) -> int:
         """
         Senden der Informationen des Buttons, ausführen der FallAnimation (leeres Feld = 0).
+        Fallanimation wird nur ausgeführt, wenn die Spalte noch nicht gefüllt ist.
+        Ansonsten kann der Spieler noch einmal setzen, bis das einsetzen eines Steins möglich ist.
         :param pos_new: Neue Position des Steins
         :param pos_old: Alte Position des Steins
         :return: unterstes, leeres Feld
@@ -638,20 +638,16 @@ class GameLogic(object):
         self.current_index_in_data = pos_new + (
                 self.rows - 1) * self.columns_total  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
 
-        while last_empty_field < self.rows:  # Solange die obere Zeile nicht ueberschritten wird:
-            if self.__position_check(1):  # Wenn 'data' an der aktuellen Position 1 ist:
-                last_empty_field = last_empty_field + 1  # -> Erhoehe Zaehlvariable um 1
-                self.current_index_in_data = self.current_index_in_data - self.columns_total  # → Erhoehe die aktuelle Position um eine Zeile nach oben
-            else:  # Sonst:
-                # Diese If-Anweisung prueft, ob die aktuell erreichte Position der urspruenglichen Position (oberste Zeile) entspricht
-                # Diese Abfage ist wichtig, da sonst die Matrix an der aktuellen Position auf 1 und danach gleich wieder auf 0 gesetzt wird
-                # dadurch koennte man niemals die obere Zeile beschreiben
-                if self.current_index_in_data != pos_old:  # Wenn die aktuelle Position nicht der urspruenglichen Position entspricht (heisst: aktuelle Position hat noch nicht wieder die obere Zeile erreicht):
-                    self.data_vector[
-                        pos_old] = 0  # -> Setze 'data' der alten Position auf 0 (LED in der oberen Zeile ausschalten, ausser diese ist das letzte freie Feld in der Spalte)
-                    self.__fall_animation(last_empty_field)  # -> Funktionsaufruf, Fallanimation
-                self.data_vector[self.current_index_in_data] = 1  # -> Setze 'data' der aktuellen Position auf 1
-                break  # -> Beende Schleife
+        while last_empty_field < self.rows:
+            if self.__position_check(1):
+                last_empty_field = last_empty_field + 1
+                self.current_index_in_data = self.current_index_in_data - self.columns_total
+            else:
+                if self.current_index_in_data != pos_old:
+                    self.data_vector[pos_old] = 0
+                    self.__fall_animation(last_empty_field)
+                self.data_vector[self.current_index_in_data] = 1
+                break
         return last_empty_field
 
     def __check_game_over(self, last_empty_field: int) -> int:
@@ -736,6 +732,7 @@ class GameLogic(object):
         Run environment actions if game mode is PvE
         :return: None
         """
+
         def __environment_easy() -> None:
             """
             The Easy Environment Actions. Just randomly press a button.

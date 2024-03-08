@@ -189,8 +189,8 @@ class GUI(object):
             :return: None
             """
             self.game_instance.stop()
-            stop_sound() #todo test sound
             spiele_fenster.destroy()
+            stop_sound() #todo test sound
 
         def window_show_active_p0() -> None:
             stop_sound() #todo test sound
