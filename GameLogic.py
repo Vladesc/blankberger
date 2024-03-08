@@ -611,7 +611,8 @@ class GameLogic(object):
                 or type(self.current_player_number) is not int
                 or pos_new != pos_old and (self.data_vector[btn_nr] == 1 or self.data_vector[btn_nr + 1] == 1)):
             return 1
-        self.gui_play_sound_method() # todo test sound
+        self.gui_play_sound_method()
+        #time.sleep(0.2) #todo fix lichter aus problem
         self.__change_active_position(pos_new, pos_old)
         return self.__check_game_over(self.__stone_set_and_fall(pos_new, pos_old))
 
