@@ -184,7 +184,8 @@ class GUI(object):
                 cplayer=self.spieler1_eingabefeld.get())
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
-            if self.sound_state_container:
+            beenden_button1.grid(row=1, column=0)
+            if self.sound_state_container.get():
                 pygame.mixer.music.stop()  # todo test sound
                 pygame.mixer.music.load('sounds/FallenderStein.mp3')
 
@@ -197,7 +198,8 @@ class GUI(object):
                 cplayer=self.spieler2_eingabefeld.get())
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
-            if self.sound_state_container:
+            beenden_button1.grid(row=1, column=0)
+            if self.sound_state_container.get():
                 pygame.mixer.music.stop()  # todo test sound
                 pygame.mixer.music.load('sounds/FallenderStein.mp3')
 
@@ -209,7 +211,8 @@ class GUI(object):
             spieler_name_anzeigen_label['text'] = random.choice(Constants.GAME_CURRENT_PLAYER_LABEL_START)
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
-            if self.sound_state_container:
+            beenden_button1.grid_forget()
+            if self.sound_state_container.get():
                 pygame.mixer.music.load('sounds/SpielStart.mp3')
                 pygame.mixer.music.play(loops=-1)
 
@@ -222,7 +225,8 @@ class GUI(object):
                 cplayer=self.spieler2_eingabefeld.get())
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_END)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_END)
-            if self.sound_state_container:
+            beenden_button1.grid_forget()
+            if self.sound_state_container.get():
                 pygame.mixer.music.load('sounds/SpielEnde.mp3')
                 pygame.mixer.music.play(loops=0)
 
@@ -259,7 +263,7 @@ class GUI(object):
 
         def build_grid() -> None:
             """
-            Set position of gui elements inside the grid.
+            Set initial position of gui elements inside the grid.
             :return: None
             """
             spiele_fenster.grid_rowconfigure(0, weight=1)
