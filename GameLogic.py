@@ -1,5 +1,6 @@
 ### Vier Gewinnt Spiel
 ### Ansteuerung einer 6x7 LED-Matrix
+from __future__ import annotations
 
 # ------------------------------------------------------------------------#
 #                                 HEAD                                   #
@@ -8,539 +9,586 @@
 import RPi.GPIO as GPIO  # Raspberry Pi Standart GPIO Bibliothek
 import time  # Bibliothek fuer time-Funktionen
 
+
 class GameLogic(object):
     def __init__(self):
-        ### ThreadHandling Methods
+        ### Init Thread handling variables
         self.close_game_gui_method = None
         self.gui_update_method = None
         self.thread_is_running = 1
 
-        ### Initialisierung
-        GPIO.setmode(GPIO.BCM)  # Verwendung der , wie sie auf dem Board heissen
-        GPIO.setwarnings(False)  # Deaktiviere GPIO-Warnungen
-        GPIO.cleanup()  # Zuruecksetzen aller GPIO-Pins
+        ### Initialisierung GPIO
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setwarnings(False)
+        GPIO.cleanup()
 
-        self.G_NOT = 14  # Output Enable   Pinnamen      OUTPUT
-        self.RCK = 15  # Storage Register Clock        OUTPUT
-        self.SCK = 18  # Shift RegisterClock           OUTPUT
-        self.SCLR_NOT = 23  # Shift Register Clear          OUTPUT
-        self.SI = 24  # Serial Data                   OUTPUT
-        self.BUTTON_0 = 2  # Button 1 von Links                 INPUT
-        self.BUTTON_1 = 3  # Button 2 von Links                 INPUT
-        self.BUTTON_2 = 4  # Button 3 von Links                 INPUT
-        self.BUTTON_3 = 17  # Button 4 von Links                 INPUT
-        self.BUTTON_4 = 27  # Button 5 von Links                 INPUT
-        self.BUTTON_5 = 22  # Button 6 von Links                 INPUT
-        self.BUTTON_6 = 10  # Button 7 von Links                 INPUT
+        self.output_enable_pin = 14
+        self.output_rck_storage_register_clock = 15
+        self.output_sck_shift_register_clock = 18
+        self.output_sclr_not_shift_register_clear = 23
+        self.output_si_serial_data = 24
+        self.input_button_from_left = [2, 3, 4, 17, 27, 22, 10]
 
-        ### Setup GPIOs (Declare GPIOs as INPUT or OUTPUT)
-        # WICHTIG: Da mit PULL-UP-Widerstand gearbeitet wird, muss der Button den PIN auf LOW ziehen
-        #          -> Durch Buttondruck wird Pin auf GND gelegt! -> HIGH-Signal in Python
-        GPIO.setup(self.G_NOT, GPIO.OUT)  # OUTPUT
-        GPIO.setup(self.RCK, GPIO.OUT)  # OUTPUT
-        GPIO.setup(self.SCK, GPIO.OUT)  # OUTPUT
-        GPIO.setup(self.SCLR_NOT, GPIO.OUT)  # OUTPUT
-        GPIO.setup(self.SI, GPIO.OUT)  # OUTPUT
-        GPIO.setup(self.BUTTON_0, GPIO.IN,
-                   GPIO.PUD_UP)  # BUTTON_1 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
-        GPIO.setup(self.BUTTON_1, GPIO.IN,
-                   GPIO.PUD_UP)  # BUTTON_2 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
-        GPIO.setup(self.BUTTON_2, GPIO.IN,
-                   GPIO.PUD_UP)  # BUTTON_3 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
-        GPIO.setup(self.BUTTON_3, GPIO.IN,
-                   GPIO.PUD_UP)  # BUTTON_4 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
-        GPIO.setup(self.BUTTON_4, GPIO.IN,
-                   GPIO.PUD_UP)  # BUTTON_5 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
-        GPIO.setup(self.BUTTON_5, GPIO.IN,
-                   GPIO.PUD_UP)  # BUTTON_6 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
-        GPIO.setup(self.BUTTON_6, GPIO.IN,
-                   GPIO.PUD_UP)  # BUTTON_7 -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
+        self.__gpio_setup()
 
-        ### Globale Variablen
-        # Innerhalb einer Funktion koennen globale Variablen lesend aufgerufen werden
-        # Will man eine globale Variable innerhalb einer Funktion veraendern,
-        # muss man diese mit "global ..." in der Funktion definieren!
-        # Eine innerhalb einer Funktion definierte Variable ist immer lokal
-        self.reset = 0
-        self.button_state = 0  # Variable fuer Button-Funktion (siehe 'def Button(button_nr)')
-        self.button_old = 0  # Variable fuer Button-Funktion (siehe 'def Button(button_nr)')
-        self.columns = 14  # 7 Spalten mit jeweils zwei Farben -> 14 (eigentlich 16, da Scheiberegister 16 Bits braucht, letzten 2 Bits sind beliebig und werden in der Funktion send_data() seperat mitgesendet)
-        self.columns_unused = [0,
-                               0]  # Anzahl der unbenutzten Spalten (=Anzahl der im Schieberegisterbaustein NICHT benutzten Ausgaenge, HIGH-SIDE)
-        self.rows = 6  # 6 Zeilen (eigentlich 8, da Schieberegister 8 Bit braucht, letzten 2 Bits sind beliebig und werden in der Funktion send_data() seperat mitgesendet)
-        self.rows_unused = [0,
-                            0]  # Anzahl der unbenutzten Zeilen (=Anzahl der im Schieberegisterbaustein nicht benutzten Ausgaenge, LOW-SIDE)
+        self.reset_game = 0
+        self.button_is_pressed = 0
+        self.last_button_pressed = 0
+        # 7 Spalten mit jeweils zwei Farben -> 14 (eigentlich 16, da Scheiberegister 16 Bits braucht, letzten 2 Bits sind beliebig und werden in der Funktion send_data() seperat mitgesendet)
+        self.columns_total = 14
+        # Anzahl der unbenutzten Spalten (=Anzahl der im Schieberegisterbaustein NICHT benutzten Ausgaenge, HIGH-SIDE)
+        self.columns_unused = [0, 0]
+        # 6 Zeilen (eigentlich 8, da Schieberegister 8 Bit braucht, letzten 2 Bits sind beliebig und werden in der Funktion send_data() seperat mitgesendet)
+        self.rows = 6
+        # Anzahl der unbenutzten Zeilen (=Anzahl der im Schieberegisterbaustein nicht benutzten Ausgaenge, LOW-SIDE)
+        self.rows_unused = [0, 0]
         self.clk_delay = 0.00000001  # Delay zur sicheren Erkennung der Signalflanken (siehe Datenblatt Schieberegister 74HC595), mind. 6ns
-        self.data = [0]  # Datenvektor mit den aktuellen Daten des Spielfeldes, Initialwert
+        self.data_vector = [0]
         self.row = [1, 0, 0, 0, 0, 0,  # Zeile1
                     0, 1, 0, 0, 0, 0,  # Zeile2
                     0, 0, 1, 0, 0, 0,  # Zeile3
                     0, 0, 0, 1, 0, 0,  # Zeile4
                     0, 0, 0, 0, 1, 0,  # Zeile5
                     0, 0, 0, 0, 0, 1]  # Zeile6
-        self.pos = 0  # aktuelle Position in der Matrix (im Datenverktor -> pos = Index des Datenvektors data)
-        self.pos_max = 12  # maximale Position in einer Zeile (fuer gruen, rot gilt pos_max+1)
-        self.player_nr: int = 0  # Player Number (0...Player 1, 1...Player 2)
-        self.win_row = [0, 0, 0,
-                        0]  # Initialwert des Gewinnvekors -> Vektor, der die Positionen der zum Sieg fuehrenden Daten speichert, also Positionen der '4 in einer Reihe'
+        self.current_index_in_data = 0
+        self.max_index_in_data_row = 12
+        self.current_player_number: int = 0
+        self.win_check_container = [0, 0, 0, 0]
+
+    def __gpio_setup(self) -> None:
+        ### Setup GPIOs (Declare GPIOs as INPUT or OUTPUT)
+        # WICHTIG: Da mit PULL-UP-Widerstand gearbeitet wird, muss der Button den PIN auf LOW ziehen
+        #          -> Durch Buttondruck wird Pin auf GND gelegt! -> HIGH-Signal in Python
+        GPIO.setup(self.output_enable_pin, GPIO.OUT)  # OUTPUT
+        GPIO.setup(self.output_rck_storage_register_clock, GPIO.OUT)  # OUTPUT
+        GPIO.setup(self.output_sck_shift_register_clock, GPIO.OUT)  # OUTPUT
+        GPIO.setup(self.output_sclr_not_shift_register_clear, GPIO.OUT)  # OUTPUT
+        GPIO.setup(self.output_si_serial_data, GPIO.OUT)  # OUTPUT
+        # BUTTON_n -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
+        for x in range(len(self.input_button_from_left)):
+            GPIO.setup(self.input_button_from_left[x], GPIO.IN, GPIO.PUD_UP)
 
     # ------------------------------------------------------------------------#
     #                                 Functions                              #
     # ------------------------------------------------------------------------#
-    def button(self, button_nr):
-        # Funktion gibt ein Signal button_state aus, wenn der geforderte Taster gedrueckt wird"
-        # Dieses Signal kann nur ausgegeben werden, wenn button_state zuvor 0 war"
-        # -> dadurch werden wiederholte Aufrufe der Funktion bei laenger betaetigtem Taster vermieden"
+    def __button(self, button_nr) -> int | None:
+        """
+        Funktion gibt das Signal button_is_pressed aus, wenn der geforderte Taster gedrueckt wird.
+        Dieses Signal kann nur ausgegeben werden, wenn button_state zuvor 0 war.
+        Dadurch werden wiederholte Aufrufe der Funktion bei laenger betaetigtem Taster vermieden.
+        → Setze button_state auf 1, wenn BUTTON gedrueckt (GPIO.input == 0 wegen Pull-Up) und button_state == 0
+        → Setze button_state auf 0, sobald zuvor betaetigte BUTTON (button_old) losgelassen wird
+        :param button_nr:
+        :return: button_is_pressed or None
+        """
+        if not GPIO.input(button_nr) and not self.button_is_pressed:
+            self.last_button_pressed = button_nr
+            self.button_is_pressed = 1
+            time.sleep(0.01)
+            return self.button_is_pressed
+        elif GPIO.input(button_nr) and self.button_is_pressed and self.last_button_pressed == button_nr:
+            self.button_is_pressed = 0
+            time.sleep(0.01)
+            return None
 
-        # Setze button_state auf 1, wenn BUTTON gedrueckt (GPIO.input == 0 wegen Pull-Up) und button_state == 0
-        if GPIO.input(button_nr) == 0 and self.button_state == 0:
-            self.button_old = button_nr  # Merke aktuelle button_nr
-            self.button_state = 1  # Setze button_state auf 1
-            time.sleep(0.01)  # Zeitverzoegerung, um Tasterprellen zu umgehen
-            return self.button_state  # Gib den Wert button_state zurueck
+    def __send_data(self, data) -> None:
+        """
+        Funktion sendet 'data' an Shift-Register und aktiviert Ausgabe an das Storage-Register
+        → Ausgabe der Daten im Storgage-Register auf die LED-Matrix
+        Dabei wird jede Zeile seperat angesteuert
+        → Immer nur eine Zeile der LED-Matrix wird beschrieben, danach wird diese gelöscht
+        und die naechste Zeile beschrieben.
 
-        # Setze button_state auf 0, sobald zuvor betaetigte BUTTON (button_old) losgelassen wird
-        elif GPIO.input(button_nr) == 1 and self.button_state == 1 and self.button_old == button_nr:
-            self.button_state = 0  # Diese elif-Anweisung verhindert, dass der Taster bei durchgehendem Druecken neu ausgeloest wird
-            time.sleep(0.01)  # Zeitverzoegerung, um Tasterprellen zu umgehen
-            # Erfolgt kein Return-Befehlt, liefert die Funktion den Wert 'none'
+        Die Schleife sendet (6+2)-Bit-Vektor 'row' mit Information, welche Zeile angesteuert werden soll
+        und (14+2)-Bit-Vektor 'data' mit Information, was in der entsprechenden Zeile angezeigt werden soll
+        (welche LEDs in der entsprechenden Zeile leuchten sollen).
 
-    def send_data(self, data):
-        # Funktion sendet 'data' an Shift-Register und aktiviert Ausgabe an das Storage-Register
-        # ->Ausgabe der Daten im Storgage-Register auf die LED-Matrix
-        # Dabei wird jede Zeile seperat angesteuert
-        # -> Immer nur eine Zeile der LED-Matrix wird beschrieben, danach wird diese geloescht und die naechste Zeile beschrieben
-        r = 0  # Zaehlvariable zum Auswaehlen der einzelnen Zeilen im Vektor 'data' und 'row'
+        Funktionsaufruf "set_shift_register" with data, sende 14-Bit-Vektor 'data' mit Information,
+        was in der entsprechenden Zeile angezeigt werden soll
+        :param data: Data Vector
+        :return: None
+        """
 
-        # Schleife sendet (6+2)-Bit-Vektor 'row' mit Information, welche Zeile angesteuert werden soll
-        # und (14+2)-Bit-Vektor 'data' mit Information, was in der entsprechenden Zeile angezeigt werden soll
-        # (welche LEDs in der entsprechenden Zeile leuchten sollen)
-        while r < self.rows:
-            self.clear_shift_register()  # Funktionsaufruf, loesche alle Werte im Shift-Register
-            self.set_shift_register(self.row[
-                                    0 + r * self.rows:self.rows + r * self.rows])  # Funktionsaufruf, sende 6-Bit-Vektor 'row' mit Information, welche Zeile angesteuert werden soll
-            self.set_shift_register(
-                self.rows_unused)  # Vektor [0,0] fuer die NICHT benutzten Ausgaenge der Schieberegister HIGH-Side
-            self.set_shift_register(data[
-                                    0 + r * self.columns:self.columns + r * self.columns])  # Funktionsaufruf, sende 14-Bit-Vektor 'data' mit Information, was in der entsprechenden Zeile angezeigt werden soll
-            self.set_shift_register(
-                self.columns_unused)  # Vektor [0,0] fuer die NICHT benutzten Ausgaenge der Schieberegister LOW-Side
-            self.set_storage_register()  # Funktionsaufruf, Ausgabe der Daten im Shift-Register an LED-Matrix
-            r = r + 1
+        row_in_vector_data = 0
+        while row_in_vector_data < self.rows:
+            self.__clear_shift_register()
+            self.__set_shift_register(self.row[
+                                      0 + row_in_vector_data * self.rows:self.rows + row_in_vector_data * self.rows])
+            self.__set_shift_register(self.rows_unused)
+            self.__set_shift_register(data[
+                                      0 + row_in_vector_data * self.columns_total: self.columns_total + row_in_vector_data * self.columns_total])
+            self.__set_shift_register(self.columns_unused)
+            self.__set_storage_register()
+            row_in_vector_data = row_in_vector_data + 1
 
-    def output_enable(self):
-        # Funktion aktiviert Ausgaenge der Scheiberegisterbausteine
-        GPIO.output(self.G_NOT, GPIO.LOW)  # Qa bis Qh aktivieren
-        time.sleep(self.clk_delay)  # Delay zur sicheren Erkennung der Signalpegel
-
-    def output_disable(self):
-        # Funktion deaktiviert Ausgaenge der Scheiberegisterbausteine
-        GPIO.output(self.G_NOT, GPIO.HIGH)  # Qa bis Qh deaktivieren
-        time.sleep(self.clk_delay)  # Delay zur sicheren Erkennung der Signalpegel
-
-    def clear_shift_register(self):
-        # Funktion loescht Daten im Shift-Register
-        GPIO.output(self.SCLR_NOT, GPIO.LOW)  # Shift-Register loeschen (solange SCLR_NOT LOW ist)
+    def __output_enable(self) -> None:
+        """
+        Activate output of shift register blocks.
+        Activate Qa to Qh and set delay for secure registration of signal level.
+        :return: None
+        """
+        GPIO.output(self.output_enable_pin, GPIO.LOW)
         time.sleep(self.clk_delay)
-        GPIO.output(self.SCLR_NOT, GPIO.HIGH)  # Shift-Register wird nichtmehr geloescht
+
+    def __output_disable(self) -> None:
+        """
+        Deactivate output of shift register blocks.
+        Deactivate Qa to Qh and set delay for secure registration of signal level.
+        :return: None
+        """
+        GPIO.output(self.output_enable_pin, GPIO.HIGH)
         time.sleep(self.clk_delay)
 
-    def set_shift_register(self, data):
-        # Funktion senden 'data' an Shift-Register
-        i = 0  # Zaehlvariable, Index -> data[i]
-        data_length = len(data)  # Laenge des Datenvektors bestimmen
+    def __clear_shift_register(self) -> None:
+        """
+        Clear data in shift register until SCLR_NOT_LOW.
+        :return: None
+        """
+        GPIO.output(self.output_sclr_not_shift_register_clear, GPIO.LOW)
+        time.sleep(self.clk_delay)
+        GPIO.output(self.output_sclr_not_shift_register_clear, GPIO.HIGH)
+        time.sleep(self.clk_delay)
 
-        while i < data_length:
-            # Hier wird geschaut ob das aktuell zu uebergebende Bit 1 oder 0 ist
-            if data[i] == 1:
-                GPIO.output(self.SI, GPIO.HIGH)  # Wenn data[i] == 1 -> SERIAL DATA OUTPUT 'SI'auf HIGH
+    def __set_shift_register(self, data) -> None:
+        """
+        Send data vector to shift register.
+        → If data is 1 set SERIAL DATA OUTPUT (SI) to high.
+        → If data is 0 set SERIAL DATA OUTPUT (SI) to low.
+
+        Send serial data value in first stage of shift register and send actual data in next stage when Low-High-Flank.
+        Set delay for secure registration of signal level.
+        :param data:
+        :return: None
+        """
+        data_index = 0
+        data_length = len(data)
+
+        while data_index < data_length:
+            if data[data_index] == 1:
+                GPIO.output(self.output_si_serial_data, GPIO.HIGH)
                 time.sleep(self.clk_delay)
-            elif data[i] == 0:
-                GPIO.output(self.SI, GPIO.LOW)  # Wenn data[i] == 0 -> SERIAL DATA OUTPUT 'SI' auf LOW
+            elif data[data_index] == 0:
+                GPIO.output(self.output_si_serial_data, GPIO.LOW)
                 time.sleep(self.clk_delay)
 
-            GPIO.output(self.SCK, GPIO.HIGH)  # Uebergabe des Serial Data Wertes in erste Stufe des Shift-Registers
-            time.sleep(self.clk_delay)  # und Weitergabe der aktuellen Werte des Shiftregisters einer Stufe
-            GPIO.output(self.SCK, GPIO.LOW)  # auf die Naechste bei LOW-HIGH-Flanke
+            GPIO.output(self.output_sck_shift_register_clock, GPIO.HIGH)
             time.sleep(self.clk_delay)
-            i = i + 1
+            GPIO.output(self.output_sck_shift_register_clock, GPIO.LOW)
+            time.sleep(self.clk_delay)
+            data_index = data_index + 1
 
-    def set_storage_register(self):
-        # Funktion gibt aktuellen Daten im Shift-Register an Storage-Register weiter bei LOW-HIGH-Flanke an RCK
-        # (Das Storage-Register (=Ausgang) gibt Daten direkt auf die LED-Matrix bzw. die Treiberstufen vor der Matrix,
-        # sofern die Ausgaenge Qa bis Qh der Schieberegisterbausteine aktiviert wurden (siehe 'def Output_Enable()')
-        GPIO.output(self.RCK, GPIO.HIGH)
+    def __set_storage_register(self) -> None:
+        """
+        Funktion gibt aktuellen Daten im Shift-Register an Storage-Register weiter bei LOW-HIGH-Flanke an RCK
+        (Das Storage-Register (=Ausgang) gibt Daten direkt auf die LED-Matrix bzw. die Treiberstufen vor der Matrix,
+        sofern die Ausgaenge Qa bis Qh der Schieberegisterbausteine aktiviert wurden (siehe 'def Output_Enable()')
+        :return: None
+        """
+        GPIO.output(self.output_rck_storage_register_clock, GPIO.HIGH)
         time.sleep(self.clk_delay)
-        GPIO.output(self.RCK, GPIO.LOW)
+        GPIO.output(self.output_rck_storage_register_clock, GPIO.LOW)
         time.sleep(self.clk_delay)
 
-    def sample(self, sample_nr):
-        # Funktion enthaelt verschiedene Samples, welche mithilfe der Funktion Send_Data() auf der LED-Matrix
-        # angezeigt werden koennen, z.B.: Send_Data(Sample(2))
-        # WICHTIG: Die LED-Matrix besitzt nur 7 LED-Spalten mit je 2 Farben (gruen(g), rot(r)) -> 14 Spalten
-        #          Da die Schieberegisterbausteine zur Ansteuerung der Spalten aber 2*8=16 Ausgaenge besitzen,
-        #          muessen die 2 ungenutzten Ausgaenge (Spalte 15 und 16) mitgesendet werden
-        #          Diese werden in der Funktion send_data() seperat mitgesendet und muessen hier nit extra eingetragen werden
+    def __sample(self, sample_nr) -> list[int]:
+        """
+        Funktion enthaelt verschiedene Samples, welche mithilfe der Funktion Send_Data() auf der LED-Matrix
+        angezeigt werden koennen, z.B.: Send_Data(Sample(2)).
+        Struktur:
+                 #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
+                 #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
+        WICHTIG: Die LED-Matrix besitzt nur 7 LED-Spalten mit je 2 Farben (gruen(g), rot(r)) -> 14 Spalten
+                 Da die Schieberegisterbausteine zur Ansteuerung der Spalten aber 2*8=16 Ausgaenge besitzen,
+                 muessen die 2 ungenutzten Ausgaenge (Spalte 15 und 16) mitgesendet werden.
+                 Diese werden in der Funktion send_data() seperat mitgesendet und muessen hier nit extra eingetragen werden
+        Sample 0: Startbildschirm
+        Sample 1: HI
+        Sample 2: DU
+        Sample 3: Spieler 1 gewinnt
+        Sample 4: Spieler 2 gewinnt
+        Sample 5: Unentschieden
+        Sample 6: Lauftext Player 2 win
+        Sample 7: 4 Gewinnt
+        :param sample_nr:
+        :return:
+        """
+        if sample_nr == 0:
+            self.data_vector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        elif sample_nr == 1:
+            self.data_vector = [0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,
+                                0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,
+                                0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0,
+                                0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,
+                                0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,
+                                0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0]
+        elif sample_nr == 2:
+            self.data_vector = [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,
+                                1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,
+                                1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,
+                                1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,
+                                1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,
+                                1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1]
+        elif sample_nr == 3:
+            self.data_vector = [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                                1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0,
+                                1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0,
+                                1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                                1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        elif sample_nr == 4:
+            self.data_vector = [0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,
+                                0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+                                0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,
+                                0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                                0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        elif sample_nr == 5:
+            self.data_vector = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
+                                1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0,
+                                1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0,
+                                1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0,
+                                1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0,
+                                1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
+        elif sample_nr == 6:
+            self.data_vector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0,
+                                1, 0, 0,
+                                0, 1, 0,
+                                0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 0,
+                                # Zeile1
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+                                1, 0, 0,
+                                0, 1, 0,
+                                0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 0,
+                                # Zeile2
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0,
+                                1, 0, 0,
+                                0, 1, 0,
+                                0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 0,
+                                # Zeile3
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+                                0, 0, 0,
+                                0, 1, 0,
+                                0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 0,
+                                # Zeile4
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0,
+                                1, 0, 0,
+                                0, 0, 0,
+                                1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 0,
+                                # Zeile5
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0,
+                                0]  # Zeile6
+        elif sample_nr == 7:
+            self.data_vector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+                                1, 0, 1,
+                                0, 1, 0,
+                                0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
+                                0, 0, 0,
+                                1, 0, 0,
+                                0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0,
+                                # Zeile1
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+                                0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
+                                0, 0, 0,
+                                1, 0, 0,
+                                0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0,
+                                # Zeile2
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+                                0, 0, 1,
+                                0, 1, 0,
+                                0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1,
+                                0, 0, 0,
+                                1, 0, 0,
+                                0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0,
+                                # Zeile3
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+                                0, 0, 0,
+                                0, 1, 0,
+                                0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
+                                0, 1, 0,
+                                1, 0, 0,
+                                0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0,
+                                # Zeile4
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+                                1, 0, 1,
+                                0, 1, 0,
+                                0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
+                                0, 0, 0,
+                                1, 0, 0,
+                                0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0,
+                                # Zeile5
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0,
+                                0,
+                                0]  # Zeile6
+        return self.data_vector
 
-        if sample_nr == 0:  # Startbildschirm
-            #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
-            #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
-            self.data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         # Zeile1 erste 0 zu 1 um Initial Playerstein anzuzeigen
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile2
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile3
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile4
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile5
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Zeile6
+    def __position_check(self, level: int) -> int:
+        """
+        Funktion zur Ueberpruefung, ob auf der aktuellen Position in der Matrix eine 1 oder eine 0 ist.
+        Je nach player_nr wird auch geprueft, ob die rechte oder linke Position der aktuellen 1 oder 0 ist.
+        Dies ist wichtig, da sonst in einer LED beide Farben leuchten koennen
+        |LD1|
+        |g,r|
+        |1,1|
+        :param level:
+        :return: Funktion gibt bei Aufruf 'state' (1 oder 0) zuruek
+        """
+        self.state = (self.data_vector[self.current_index_in_data] == level
+                      or (self.current_player_number == 0 and self.data_vector[self.current_index_in_data + 1] == level)
+                      or (self.current_player_number == 1 and self.data_vector[
+                    self.current_index_in_data - 1] == level))
+        return (self.state)
 
-        if sample_nr == 1:  # "HI"
-            #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
-            #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
-            self.data = [0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,  # Zeile1
-                         0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,  # Zeile2
-                         0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0,  # Zeile3
-                         0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,  # Zeile4
-                         0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0,  # Zeile5
-                         0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0]  # Zeile6
+    def __win_check(self, current_row: int) -> int:
+        """
+        Funktion ueberprueft, ob sich horizontal, vertikal oder diagonal "4 in einer Reihe" befinden.
+        Dazu wird ausgehend von der aktuellen Position in allen Richtungen gesucht und die Variable 'led_in_a_row' hochgezaehlt.
+        Sobald diese den Wert 4 erreicht, endet die Funktion und gibt den Wert '1' zurueck.
+        Sollten keine 4 in einer Reihe gefunden werden, endet die Funktion ohne Rueckgabewert "4 in einer Reihe"
+        entspricht 4 LEDs der gleichen Farbe in einer Reihe (horizontal, vertikal oder diagonal) auf der LED-Anzeige
+        :param current_row:
+        :return:
+        """
+        i = 1
+        led_in_a_row = 1
+        current_row = self.rows - current_row - 1
+        matrix_right_border = current_row * self.columns_total + self.max_index_in_data_row + self.current_player_number
+        matrix_left_border = current_row * self.columns_total + self.current_player_number
+        self.win_check_container = [self.current_index_in_data, 0, 0, 0]
 
-        if sample_nr == 2:  # "DU"
-            #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
-            #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
-            self.data = [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,  # Zeile1
-                         1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,  # Zeile2
-                         1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,  # Zeile3
-                         1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,  # Zeile4
-                         1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1,  # Zeile5
-                         1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1]  # Zeile6
-
-        if sample_nr == 3:  # Spieler 1 gewinnt
-            #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
-            #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
-            self.data = [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,  # Zeile1
-                         1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0,  # Zeile2
-                         1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0,  # Zeile3
-                         1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,  # Zeile4
-                         1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,  # Zeile5
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Zeile6
-
-        if sample_nr == 4:  # Spieler 2 gewinnt
-            #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
-            #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
-            self.data = [0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,  # Zeile1
-                         0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,  # Zeile2
-                         0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,  # Zeile3
-                         0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,  # Zeile4
-                         0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,  # Zeile5
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Zeile6
-
-        if sample_nr == 5:  # Unentschieden
-            #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
-            #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
-            self.data = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,  # Zeile1
-                         1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0,  # Zeile2
-                         1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0,  # Zeile3
-                         1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0,  # Zeile4
-                         1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0,  # Zeile5
-                         1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]  # Zeile6
-
-        if sample_nr == 6:  # Lauftext, Player 2 Win
-            #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|  -->                                                                              |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
-            #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|  -->                                                                              |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
-            self.data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0,
-                         0, 1, 0,
-                         0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0, 0,
-                         # Zeile1
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-                         0, 1, 0,
-                         0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0, 0,
-                         # Zeile2
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0,
-                         0, 1, 0,
-                         0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0, 0,
-                         # Zeile3
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-                         0, 1, 0,
-                         0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0, 0,
-                         # Zeile4
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0,
-                         0, 0, 0,
-                         1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0, 0,
-                         # Zeile5
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0, 0,
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0,
-                         0]  # Zeile6
-
-        if sample_nr == 7:  # Lauftext, Start-Screen '4 GEWINNT'
-            #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|  -->     																                                          								   |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
-            #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|  -->                                                                                                                         	                   |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
-            self.data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,
-                         0, 1, 0,
-                         0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-                         1, 0, 0,
-                         0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0,
-                         # Zeile1
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-                         0, 0, 0,
-                         0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-                         1, 0, 0,
-                         0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0,
-                         # Zeile2
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,
-                         0, 1, 0,
-                         0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0,
-                         1, 0, 0,
-                         0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0,
-                         # Zeile3
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-                         0, 1, 0,
-                         0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0,
-                         1, 0, 0,
-                         0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0,
-                         # Zeile4
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,
-                         0, 1, 0,
-                         0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-                         1, 0, 0,
-                         0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0,
-                         # Zeile5
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0, 0,
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0, 0,
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0,
-                         0]  # Zeile6
-
-        return (self.data)  # Funktion gibt bei Aufruf als Wert den Vektor 'data' zuruek
-
-    def position_check(self, level):
-        # Funktion zur Ueberpruefung, ob auf der aktuellen Position in der Matrix eine 1 oder eine 0 ist
-        # Je nach player_nr wird auch geprueft, ob die rechte oder linke Position der aktuellen 1 oder 0 ist
-        # Dies ist wichtig, da sonst in einer LED beide Farben leuchten koennen
-        # ->|LD1|
-        #   |g,r|
-        #   |1,1|
-        self.state = (self.data[self.pos] == level
-                      or (self.player_nr == 0 and self.data[self.pos + 1] == level)
-                      or (self.player_nr == 1 and self.data[self.pos - 1] == level))
-        return (self.state)  # Funktion gibt bei Aufruf 'state' (1 oder 0) zuruek
-
-    def win_check(self, r):
-        # Funktion ueberprueft, ob sich horizontal, vertikal oder diagonal "4 in einer Reihe" befinden
-        # Dazu wird ausgehend von der aktuellen Position in allen Richtungen gesucht
-        # und die Variable 'coins_in_a_row' hochgezaehlt
-        # Sobald diese den Wert 4 erreicht, endet die Funktion und gibt den Wert '1' zurueck
-        # Sollten keine 4 in einer Reihe gefunden werden, endet die Funktion ohne Rueckgabewert
-        # "4 in einer Reihe" entspricht 4 LEDs der gleichen Farbe in einer Reihe (horizontal, vertikal oder diagonal) auf der LED-Anzeige
-
-        i = 1  # Zaehlvariable zum aendern der Position horizontal, vertikal oder diagonal
-        coins_in_a_row = 1  # Zaehler fuer Anzahl der LEDs in einer Reihe (horizontal, vertikal oder diagonal)
-        r = self.rows - r - 1  # r ...in welcher Zeile befinde ich mich aktuell
-        x_max = r * self.columns + self.pos_max + self.player_nr  # Abfragegrenze (rechter Rand der Matrix) in x-Richtung
-        x_min = r * self.columns + self.player_nr  # Abfragegrenze (linkter Rand der Matrix) in x-Richtung
-        self.win_row = [self.pos, 0, 0,
-                        0]  # Speichert die Positionen der LEDs in der Gewinn-Reihe (fuer Blinkende Hervorhebung der Gewinnreihe aud Anzeige)
-
-        # Horizontal nach rechts					  			# |0 0 0 0 0 0|
-        while self.pos + i * 2 <= x_max:  # |0 0 0 0 0 0|
-            if self.data[self.pos + i * 2] == 1:  # |0 0 0 0 0 0|
-                self.win_row[coins_in_a_row] = self.pos + i * 2  # |0 x x x x 0|
-                coins_in_a_row = coins_in_a_row + 1
-                if coins_in_a_row == 4:
-                    return (1)
+        # Horizontal nach rechts |0 0 0 0 0 0|
+        while self.current_index_in_data + i * 2 <= matrix_right_border:  # |0 0 0 0 0 0|
+            if self.data_vector[self.current_index_in_data + i * 2] == 1:  # |0 0 0 0 0 0|
+                self.win_check_container[led_in_a_row] = self.current_index_in_data + i * 2  # |0 x x x x 0|
+                led_in_a_row = led_in_a_row + 1
+                if led_in_a_row == 4:
+                    return 1
                 i = i + 1
             else:
                 break
         i = 1
         # Horizontal nach links
-        while self.pos - i * 2 >= x_min:
-            if self.data[self.pos - i * 2] == 1:
-                self.win_row[coins_in_a_row] = self.pos - i * 2
-                coins_in_a_row = coins_in_a_row + 1
-                if coins_in_a_row == 4:
-                    return (1)
+        while self.current_index_in_data - i * 2 >= matrix_left_border:
+            if self.data_vector[self.current_index_in_data - i * 2] == 1:
+                self.win_check_container[led_in_a_row] = self.current_index_in_data - i * 2
+                led_in_a_row = led_in_a_row + 1
+                if led_in_a_row == 4:
+                    return 1
                 i = i + 1
             else:
                 break
-
         i = 1
-        coins_in_a_row = 1
-        # Vertikal nach unten								# |0 x 0 0 0 0|
-        while self.pos + i * self.columns < self.rows * self.columns:  # |0 x 0 0 0 0|
-            if self.data[self.pos + i * self.columns] == 1:  # |0 x 0 0 0 0|
-                self.win_row[coins_in_a_row] = self.pos + i * self.columns  # |0 x 0 0 0 0|
-                coins_in_a_row = coins_in_a_row + 1
-                if coins_in_a_row == 4:
-                    return (1)
+        led_in_a_row = 1
+        # Vertikal nach unten |0 x 0 0 0 0|
+        while self.current_index_in_data + i * self.columns_total < self.rows * self.columns_total:  # |0 x 0 0 0 0|
+            if self.data_vector[self.current_index_in_data + i * self.columns_total] == 1:  # |0 x 0 0 0 0|
+                self.win_check_container[
+                    led_in_a_row] = self.current_index_in_data + i * self.columns_total  # |0 x 0 0 0 0|
+                led_in_a_row = led_in_a_row + 1
+                if led_in_a_row == 4:
+                    return 1
                 i = i + 1
             else:
                 break
-
         i = 1
-        coins_in_a_row = 1
-        # Diagonal nach rechts steigend   			      	# |0 0 0 0 x 0|
-        while self.pos - i * self.columns > 0 and self.pos + i * 2 <= x_max:  # |0 0 0 x 0 0|
-            if self.data[self.pos + i * 2 - i * self.columns] == 1:  # |0 0 x 0 0 0|
-                self.win_row[coins_in_a_row] = self.pos + i * 2 - i * self.columns  # |0 x 0 0 0 0|
-                coins_in_a_row = coins_in_a_row + 1
-                if coins_in_a_row == 4:
-                    return (1)
+        led_in_a_row = 1
+        # Diagonal nach rechts steigend |0 0 0 0 x 0|
+        while self.current_index_in_data - i * self.columns_total > 0 and self.current_index_in_data + i * 2 <= matrix_right_border:  # |0 0 0 x 0 0|
+            if self.data_vector[self.current_index_in_data + i * 2 - i * self.columns_total] == 1:  # |0 0 x 0 0 0|
+                self.win_check_container[
+                    led_in_a_row] = self.current_index_in_data + i * 2 - i * self.columns_total  # |0 x 0 0 0 0|
+                led_in_a_row = led_in_a_row + 1
+                if led_in_a_row == 4:
+                    return 1
                 i = i + 1
             else:
                 break
         i = 1
         # Diagonal nach links fallend
-        while self.pos + i * self.columns < self.rows * self.columns and self.pos - i * 2 >= x_min:
-            if self.data[self.pos - i * 2 + i * self.columns] == 1:
-                self.win_row[coins_in_a_row] = self.pos - i * 2 + i * self.columns
-                coins_in_a_row = coins_in_a_row + 1
-                if coins_in_a_row == 4:
-                    return (1)
+        while self.current_index_in_data + i * self.columns_total < self.rows * self.columns_total and self.current_index_in_data - i * 2 >= matrix_left_border:
+            if self.data_vector[self.current_index_in_data - i * 2 + i * self.columns_total] == 1:
+                self.win_check_container[led_in_a_row] = self.current_index_in_data - i * 2 + i * self.columns_total
+                led_in_a_row = led_in_a_row + 1
+                if led_in_a_row == 4:
+                    return 1
                 i = i + 1
             else:
                 break
 
         i = 1
-        coins_in_a_row = 1
-        # Diagonal nach rechts fallend 										# |0 x 0 0 0 0|
-        while self.pos + i * self.columns < self.rows * self.columns and self.pos + i * 2 <= x_max:  # |0 0 x 0 0 0|
-            if self.data[self.pos + i * 2 + i * self.columns] == 1:  # |0 0 0 x 0 0|
-                self.win_row[coins_in_a_row] = self.pos + i * 2 + i * self.columns  # |0 0 0 0 x 0|
-                coins_in_a_row = coins_in_a_row + 1
-                if coins_in_a_row == 4:
-                    return (1)
+        led_in_a_row = 1
+        # Diagonal nach rechts fallend |0 x 0 0 0 0|
+        while self.current_index_in_data + i * self.columns_total < self.rows * self.columns_total and self.current_index_in_data + i * 2 <= matrix_right_border:  # |0 0 x 0 0 0|
+            if self.data_vector[self.current_index_in_data + i * 2 + i * self.columns_total] == 1:  # |0 0 0 x 0 0|
+                self.win_check_container[
+                    led_in_a_row] = self.current_index_in_data + i * 2 + i * self.columns_total  # |0 0 0 0 x 0|
+                led_in_a_row = led_in_a_row + 1
+                if led_in_a_row == 4:
+                    return 1
                 i = i + 1
             else:
                 break
         i = 1
         # Diagonal nach links steigend
-        while self.pos - i * self.columns > 0 and self.pos - i * 2 >= x_min:
-            if self.data[self.pos - i * 2 - i * self.columns] == 1:
-                self.win_row[coins_in_a_row] = self.pos - i * 2 - i * self.columns
-                coins_in_a_row = coins_in_a_row + 1
-                if coins_in_a_row == 4:
-                    return (1)
+        while self.current_index_in_data - i * self.columns_total > 0 and self.current_index_in_data - i * 2 >= matrix_left_border:
+            if self.data_vector[self.current_index_in_data - i * 2 - i * self.columns_total] == 1:
+                self.win_check_container[led_in_a_row] = self.current_index_in_data - i * 2 - i * self.columns_total
+                led_in_a_row = led_in_a_row + 1
+                if led_in_a_row == 4:
+                    return 1
                 i = i + 1
             else:
                 break
 
-    def win_screen(self):
-        # Funktion zeigt die "4 in einer Reihe" des Gewinners 10s im Blinkinterval von 0.25s an
-        # und ruft danach fuer 4s eine blinkende Gewinnanzeige (Sample(3+player_nr)) mit der Spielernummer des Gewinner
-        # im 0.5s Blinkintervall auf
+    def __win_screen(self) -> None:
+        """
+        Funktion zeigt die "4 in einer Reihe" des Gewinners 10s im Blinkinterval von 0.25s an und ruft danach für
+        4s eine blinkende Gewinnanzeige (Sample(3+player_nr)) mit der Spielernummer des Gewinner
+        im 0.5s Blinkintervall auf
 
-        # For-Schleife zur blinkenden Hervorhebung der Gewinnreihe
-        # Dabei wird fuer 10*0.25s = 2,5s das Spielfeld angezeigt
-        # und alle 0.25s die Gewinnreihe ein- und ausgeschaltet
-        for x in range(0, 9):  # Von x=0 bis 9
-            self.blink_screen(0.25, 0, self.data)  # Gib aktuelles Spielfeld aus
-            for i in range(0, 4):  # Von i=0 bis 4
-                self.data[self.win_row[i]] = not self.data[
-                    self.win_row[i]]  # Toogle Data der Gewinnreihe => Gewinnreihe auf 1 bzw. 0 setzen
+        For-Schleife zur blinkenden Hervorhebung der Gewinnreihe
+        Dabei wird fuer 10*0.25s = 2,5s das Spielfeld angezeigt
+        und alle 0.25s die Gewinnreihe ein- und ausgeschaltet
+        :return:
+        """
+        for x in range(0, 9):
+            self.__blink_screen(0.25, 0, self.data_vector)
+            for i in range(0, 4):
+                self.data_vector[self.win_check_container[i]] = not self.data_vector[self.win_check_container[i]]
 
-        self.blink_screen(4, 0.5,
-                          self.sample(
-                              3 + self.player_nr))  # Ausgabe der Spielernummer des Gewinners fuer 4s im 0.5s Blinkintervall
+        self.__blink_screen(4, 0.5,
+                            self.__sample(3 + self.current_player_number))
 
-    def draw_screen(self):
-        # Funktion ruft fuer 4sec eine blinkende Unentschiedenanzeige (Sample(5))
-        # mit 0.5sec Blinkintervall auf
-        self.blink_screen(4, 0.5, self.sample(5))
+    def __draw_screen(self) -> None:
+        """
+        Funktion ruft fuer 4sec eine blinkende Unentschiedenanzeige (Sample(5)) mit 0.5sec Blinkintervall auf
+        :return: None
+        """
+        self.__blink_screen(4, 0.5, self.__sample(5))
 
-    def blink_screen(self, time_length, interval, data):
-        # Funktion schreibt "data" auf die Matrix und laesst diese fuer die angegebene Dauer 'time_length'
-        # im entsprechenden Intervall 'interval' blinken
-        # Dabei werden die Ausgaenge der Schieberegister im entsprechenden Takt aktiviert und deaktiviert
-        # Angaben der Zeitwerte in sec
-        # time.time(): Return the time in seconds since the epoch as a floating point number from the system clock.
+    def __blink_screen(self, time_length: float | int, interval: float | int, data: list[int]) -> None:
+        """
+        Funktion schreibt "data" auf die Matrix und lässt diese für die angegebene Dauer 'time_length'
+        im entsprechenden Intervall 'interval' blinken.
+        Dabei werden die Ausgänge der Schieberegister im entsprechenden Takt aktiviert und deaktiviert.
+        Angaben der Zeitwerte in sec.
+        time.time(): Return the time in seconds since the epoch as a floating point number from the system clock.
+        :param time_length: The length of the full blink interval in seconds
+        :param interval: interval in seconds between two consecutive blinks
+        :param data: Array with data to blink (generated from self.sample(int) method or self.data)
+        :return: None
+        """
+        time_start = time.time()
+        time_start_blink = time.time()
+        while time.time() < time_start + time_length:
+            self.__send_data(data)
+            if time.time() > time_start_blink + interval:
+                self.__output_disable()
+                time.sleep(interval)
+                self.__output_enable()
+                time_start_blink = time.time()
 
-        time_start = time.time()  # Schreibe die aktuelle Systemzeit auf die Variable 'time_start'
-        time_start_blink = time.time()  # Schreibe die aktuelle Systemzeit auf die Variable 'time_start_blink'
+    def __send_running_text(self, text: list[int]) -> None:
+        """
+        Funktion sendet eine Lauftext (Textsample, welches länger als die Breite des Displays ist) auf das Display.
+        Dabei wird der Text von rechts nach links über die Anzeige geschoben, sodass ein bewegtes Bild entsteht.
+        Um den Lauftext zu erzeugen, wird nur ein Ausschnitt des gesamten Datenvektors 'text' genommen.
+        Dieser wird an den Vektor 'data' übergeben und für 0.15s durch die Funktion Blink_Screen() dargestellt.
+        Danach wird der aktuelle Ausschnitt des Datenvektors 'text' um eine Spalte nach rechts verschoben.
+        Nun wird auch dieser an den Vektor 'data' übergeben und für 0.15s durch die Funktion Blink_Screen() dargestellt.
+        → solange, bis der Ausschnitt des Datenvektors 'text' die letzte Spalte erreicht
 
-        while time.time() < time_start + time_length:  # Solange aktuelle Systemzeit die Startsystemzeit + die geforderte Zeit, die die Matrix blinken soll, nicht ueberschritten hat:
-            self.send_data(data)  # Sende Daten
-            # Durch die If-Schleife wird der Ausgang der Schieberegister in geforderten Intervall Ein- und Ausgeschaltet
-            if time.time() > time_start_blink + interval:  # Sobald aktuelle Systemzeit die Start-Blink-Zeit + die Blink-Intervall-Zeit ueberschritten hat:
-                self.output_disable()  # Deaktiviere Ausgang der Schieberegister
-                time.sleep(interval)  # Schlafe fuer die Dauer des Blink-Intervalls
-                self.output_enable()  # Aktiviere Ausgang der Schieberegister
-                time_start_blink = time.time()  # Setze time_start_blink erneut auf die aktuelle Systemzeit
+        |LD1|LD2|LD3|LD4|LD5|LD6|LD7|     -->       |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
+        |g,r|g,r|g,r|g,r|g,r|g,r|g,r|     -->       |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
+        -----------------------------               ----------------------------
+        |0,1,0,0,0,1,0,0,0,0,0,1,0,1|0,1,...     0,1|0,0,0,1,0,0,0,0,0,1,0,1,0,0|...  # Zeile1
+        |0,1,0,0,0,1,0,0,0,0,0,1,0,0|0,0,...     0,1|0,0,0,1,0,0,0,0,0,1,0,0,0,0|...  # Zeile2
+        |0,1,0,1,0,1,0,0,0,0,0,1,0,0|0,1,...     0,1|0,1,0,1,0,0,0,0,0,1,0,0,0,1|...  # Zeile3
+        |0,0,0,0,0,1,0,0,0,0,0,1,0,0|0,0,...     0,0|0,0,0,1,0,0,0,0,0,1,0,0,0,0|...  # Zeile4
+        |0,0,0,0,0,1,0,0,0,0,0,1,0,1|0,1,...     0,0|0,0,0,1,0,0,0,0,0,1,0,1,0,1|...  # Zeile5
+        |0,0,0,0,0,0,0,0,0,0,0,0,0,0|0,0,...     0,0|0,0,0,0,0,0,0,0,0,0,0,0,0,0|...  # Zeile6
+        -----------------------------               -----------------------------
+        :param text:
+        :return:
+        """
+        text_move_column = 0
+        current_row = 0
+        total_columns_length = int(len(text) / self.rows)
+        while text_move_column <= total_columns_length - self.columns_total:
+            while current_row < self.rows:
+                self.data_vector[
+                current_row * self.columns_total:self.columns_total + current_row * self.columns_total] = text[
+                                                                                                          text_move_column + current_row * total_columns_length:text_move_column + total_columns_length + current_row * total_columns_length]  # Schreibe den mit i ausgewaehlten Ausschnitt des Lauftextes auf auf die entsprechende Zeile r in'data'
+                current_row = current_row + 1
+            current_row = 0
+            self.__blink_screen(0.15, 0, self.data_vector)
+            text_move_column = text_move_column + 2
 
-    def send_running_text(self, text):
-        # Funktion sendet eine Lauftext (Textsample, welches laenger als die breite des Displays ist) auf das Display
-        # Dabei wird der Text von rechts nach links ueber die Anzeige geschoben, sodass ein bewegtes Bild entsteht
-        # Um den Lauftext zu erzeugen, wird nur ein Ausschnitt des gesammten Datenvektors 'text' genommen
-        # Dieser wird an den Vektor 'data' uebergeben und fuer 0.15s durch die Funktion Blink_Screen() dargestellt
-        # Danach wird der aktuelle Ausschnitt des Datenvektors 'text' um eine Spalte nach rechts verschoben
-        # Nun wird auch dieser an den Vektor 'data' uebergeben und fuer 0.15s durch die Funktion Blink_Screen() dargestellt
-        # -> solange, bis der Ausschnitt des Datenvektors 'text' die letze Spalte erreicht
+    def __fall_animation(self, current_row) -> None:
+        """
+        Funktion zur Animation einer Fallenden LED auf der LED-Matrix bei betaetigen des Enter-Buttons.
+        Dazu wird eine 1 (LED AN) innerhalb der aktuellen Spalte einmal durch alle Zeilen geschoben und fuer jeweils 0,05s pro Zeile ausgegeben.
+        Dabei ist die aktuelle Position 'pos' bereits an der Zielposition, also an der Position, wo die LED "hinfaellt".
+        Diese Zielposition ist abhaengig davon, wieweit die ausgewaehlte Spalte bereits beim Spielen "aufgefuellt" wurde.
+        :param current_row:
+        :return:
+        """
+        row_start = self.rows - current_row - 1
+        fall_pos_old = self.current_index_in_data - row_start * self.columns_total
+        current_row = 1
 
-        #  |LD1|LD2|LD3|LD4|LD5|LD6|LD7|     -->       |LD1|LD2|LD3|LD4|LD5|LD6|LD7|
-        #  |g,r|g,r|g,r|g,r|g,r|g,r|g,r|     -->       |g,r|g,r|g,r|g,r|g,r|g,r|g,r|
-        #  -----------------------------               ----------------------------
-        #  |0,1,0,0,0,1,0,0,0,0,0,1,0,1|0,1,...     0,1|0,0,0,1,0,0,0,0,0,1,0,1,0,0|...  # Zeile1
-        #  |0,1,0,0,0,1,0,0,0,0,0,1,0,0|0,0,...     0,1|0,0,0,1,0,0,0,0,0,1,0,0,0,0|...  # Zeile2
-        #  |0,1,0,1,0,1,0,0,0,0,0,1,0,0|0,1,...     0,1|0,1,0,1,0,0,0,0,0,1,0,0,0,1|...  # Zeile3
-        #  |0,0,0,0,0,1,0,0,0,0,0,1,0,0|0,0,...     0,0|0,0,0,1,0,0,0,0,0,1,0,0,0,0|...  # Zeile4
-        #  |0,0,0,0,0,1,0,0,0,0,0,1,0,1|0,1,...     0,0|0,0,0,1,0,0,0,0,0,1,0,1,0,1|...  # Zeile5
-        #  |0,0,0,0,0,0,0,0,0,0,0,0,0,0|0,0,...     0,0|0,0,0,0,0,0,0,0,0,0,0,0,0,0|...  # Zeile6
-        #  -----------------------------               -----------------------------
+        while current_row * self.columns_total < self.current_index_in_data:
+            fall_pos = self.current_index_in_data - row_start * self.columns_total + current_row * self.columns_total
+            self.data_vector[fall_pos] = 1
+            self.data_vector[fall_pos_old] = 0
+            self.__blink_screen(0.05, 0, self.data_vector)
 
-        i = 0  # Zaehlvariable zum Verschieben des Ausschnittes im Vektor 'text' um eine Spalte nach rechts
-        r = 0  # Zaehlvariable fuer die aktuelle Zeile im Datenvektor
-        columns_length = int(len(text) / self.rows)  # Anzahl der Spalten des gesammten Lauftextes
-        # int(), weil bei Bruchrechnung x,0 rauskommt ...muss aber ohne Kommastelle sein, da dieser Wert Spaeter als Index genutzt wird
-
-        while i <= columns_length - self.columns:  # Solange rechter Rand des Lauftextes noch nicht erreicht wurde und:
-            while r < self.rows:  # solange die letzte Zeile nicht ueberschritten wurde
-                self.data[r * self.columns:self.columns + r * self.columns] = text[
-                                                                         i + r * columns_length:i + columns_length + r * columns_length]  # Schreibe den mit i ausgewaehlten Ausschnitt des Lauftextes auf auf die entsprechende Zeile r in'data'
-                r = r + 1  # erhoehe Zeile um 1
-
-            r = 0  # Zuruecksetzen der Zaehlvariable fuer die aktuelle Zeile
-            self.blink_screen(0.15, 0, self.data)  # Ausgabe des aktuellen Ausschnittes
-            i = i + 2  # Verschiebe den Ausschnitt im Vektor 'text' um eine LED-Spalte (=2 Spalten im Lauftext) nach rechts
-
-    def fall_animation(self, r):
-        # Funktion zur Animation einer Fallenden LED auf der LED-Matrix bei betaetigen des Enter-Buttons
-        # Dazu wird eine 1 (LED AN) innerhalb der aktuellen Spalte einmal durch alle Zeilen geschoben und fuer jeweils 0,05s pro Zeile ausgegeben
-        # Dabei ist die aktuelle Position 'pos' bereits an der Zielposition, also an der Position, wo die LED "hinfaellt"
-        # Diese Zielposition ist abhaengig davon, wieweit die ausgewaehlte Spalte bereits beim Spielen "aufgefuellt" wurde
-
-        r_start = self.rows - r - 1  # Berechnung der Startreihe aus der akteullen Zeile
-        fall_pos_old = self.pos - r_start * self.columns  # Initialwert der zuletzt akteullen Position in der Spalte
-        r = 1  # Variable fuer aktuelle Zeile
-
-        while r * self.columns < self.pos:  # Solange die Zielposition beim "Fallen" noch nicht erreicht wurde:
-            fall_pos = self.pos - r_start * self.columns + r * self.columns  # erhoehe die Fallposition um eine Zeile
-            self.data[fall_pos] = 1  # Setze data der aktuellen Fallposition auf 1
-            self.data[fall_pos_old] = 0  # Setze data der alten Fallposition (Position, von der man beim "Fallen" kommt)
-            self.blink_screen(0.05, 0, self.data)  # Ausgabe
-
-            fall_pos_old = fall_pos  # Setze die alte Fallposition auf die aktuelle
-            r = r + 1  # Erhoehe die Zeile um 1
-        self.data[
-            fall_pos_old] = 0  # Zueletzt muss data der letzten Fallposition wieder auf 0 gesetzt werden, danach wird die Animation beendet
-
-    ### Interrupt Events
-    # GPIO.add_event_detect(BUTTON_ENTER, GPIO.FALLING, callback = Reset, bouncetime = 200)
+            fall_pos_old = fall_pos
+            current_row = current_row + 1
+        self.data_vector[
+            fall_pos_old] = 0
 
     # ------------------------------------------------------------------------#
     #                          BtnHandling (new)                              #
     # ------------------------------------------------------------------------#
-    def handle_button_input(self, btn_nr: int, pos_old: int) -> int:
+    def __handle_button_input(self, btn_nr: int, pos_old: int) -> int:
         """
         Verarbeiten der Eingabe eines Buttons. Dabei wird kombiniert die Position der aktiven LED auf die Position des Buttons gesetzt
         sowie die Anzeige der Fallanimation gestartet.
@@ -548,56 +596,56 @@ class GameLogic(object):
         :param pos_old: Alte, aktive Position, die resettet werden muss.
         :return: None
         """
-        pos_new = btn_nr + self.player_nr
+        pos_new = btn_nr + self.current_player_number
         if (type(pos_new) is not int
                 or type(pos_old) is not int
-                or type(self.player_nr) is not int
-                or pos_new != pos_old and (self.data[btn_nr] == 1 or self.data[btn_nr + 1] == 1)):
+                or type(self.current_player_number) is not int
+                or pos_new != pos_old and (self.data_vector[btn_nr] == 1 or self.data_vector[btn_nr + 1] == 1)):
             return 1
-        self.change_active_position(pos_new, pos_old)
-        return self.check_game_over(self.stone_set_and_fall(pos_new, pos_old))
+        self.__change_active_position(pos_new, pos_old)
+        return self.__check_game_over(self.__stone_set_and_fall(pos_new, pos_old))
 
-    def change_active_position(self, pos_new: int, pos_old: int):
+    def __change_active_position(self, pos_new: int, pos_old: int):
         """
         Setzen der aktiven Position auf den Wert des Buttons+Playernummer sowie reset der alten Position
         :param pos_new: Nummer des gedrückten Buttons
         :param pos_old: Alte, aktive Position, die resettet werden muss.
         :return: None
         """
-        self.data[pos_new] = 1
+        self.data_vector[pos_new] = 1
         if pos_new != pos_old:
-            self.data[pos_old] = 0
-        self.send_data(self.data)
+            self.data_vector[pos_old] = 0
+        self.__send_data(self.data_vector)
 
-    def stone_set_and_fall(self, pos_new: int, pos_old: int) -> int:
+    def __stone_set_and_fall(self, pos_new: int, pos_old: int) -> int:
         """
         Senden der Informationen des Buttons, ausführen der FallAnimation (leeres Feld = 0).
         :param pos_new: Neue Position des Steins
         :param pos_old: Alte Position des Steins
         :return: unterstes, leeres Feld
         """
-        last_empty_field = 0  # Zaehlvariable zum Durchsuchen der Zeilen einer Spalte nach dem untersten leeren Feld
-        self.data[pos_new] = 0
-        self.pos = pos_new + (
-                    self.rows - 1) * self.columns  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
+        last_empty_field = 0
+        self.data_vector[pos_new] = 0
+        self.current_index_in_data = pos_new + (
+                self.rows - 1) * self.columns_total  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
 
         while last_empty_field < self.rows:  # Solange die obere Zeile nicht ueberschritten wird:
-            if self.position_check(1):  # Wenn 'data' an der aktuellen Position 1 ist:
+            if self.__position_check(1):  # Wenn 'data' an der aktuellen Position 1 ist:
                 last_empty_field = last_empty_field + 1  # -> Erhoehe Zaehlvariable um 1
-                self.pos = self.pos - self.columns  # → Erhoehe die aktuelle Position um eine Zeile nach oben
+                self.current_index_in_data = self.current_index_in_data - self.columns_total  # → Erhoehe die aktuelle Position um eine Zeile nach oben
             else:  # Sonst:
                 # Diese If-Anweisung prueft, ob die aktuell erreichte Position der urspruenglichen Position (oberste Zeile) entspricht
                 # Diese Abfage ist wichtig, da sonst die Matrix an der aktuellen Position auf 1 und danach gleich wieder auf 0 gesetzt wird
                 # dadurch koennte man niemals die obere Zeile beschreiben
-                if self.pos != pos_old:  # Wenn die aktuelle Position nicht der urspruenglichen Position entspricht (heisst: aktuelle Position hat noch nicht wieder die obere Zeile erreicht):
-                    self.data[
+                if self.current_index_in_data != pos_old:  # Wenn die aktuelle Position nicht der urspruenglichen Position entspricht (heisst: aktuelle Position hat noch nicht wieder die obere Zeile erreicht):
+                    self.data_vector[
                         pos_old] = 0  # -> Setze 'data' der alten Position auf 0 (LED in der oberen Zeile ausschalten, ausser diese ist das letzte freie Feld in der Spalte)
-                    self.fall_animation(last_empty_field)  # -> Funktionsaufruf, Fallanimation
-                self.data[self.pos] = 1  # -> Setze 'data' der aktuellen Position auf 1
+                    self.__fall_animation(last_empty_field)  # -> Funktionsaufruf, Fallanimation
+                self.data_vector[self.current_index_in_data] = 1  # -> Setze 'data' der aktuellen Position auf 1
                 break  # -> Beende Schleife
         return last_empty_field
 
-    def check_game_over(self, last_empty_field: int) -> int:
+    def __check_game_over(self, last_empty_field: int) -> int:
         """
         Prüfen ob der Spieler gewonnen hat.
         Switch des aktiven Spielers.
@@ -606,14 +654,14 @@ class GameLogic(object):
         :param last_empty_field:
         :return: 1 = true 0 = false
         """
-        if not self.is_win(last_empty_field):
+        if not self.__is_win(last_empty_field):
             return 0
-        self.switch_player_set_start()
-        if not self.is_patt():
+        self.__switch_player_set_start()
+        if not self.__is_patt():
             return 0
         return 1
 
-    def is_win(self, last_empty_field: int) -> int:
+    def __is_win(self, last_empty_field: int) -> int:
         """
         Ueberpruefe, ob 4 in einer Reihe (horizontal, vertikal, diagonal)
         Funktionsaufruf, Starte Gewinner-Bildschirm
@@ -621,91 +669,117 @@ class GameLogic(object):
         :param last_empty_field:
         :return: 1 = true 0 = false
         """
-        if self.win_check(last_empty_field) == 1:
-            self.win_screen()
-            self.end_game()
+        if self.__win_check(last_empty_field) == 1:
+            self.__win_screen()
+            self.__end_game()
             return 0
         return 1
 
-    def is_patt(self) -> int:
+    def __is_patt(self) -> int:
         """
         Pruefe, ob die Matrix bereits komplett ausgefuellt wurde (ohne dass bereits ein Sieg errungen wurde).
         Sollte die Position beim 'Ueberpruefen der aktuellen Position auf eine 1' den rechten Rand der Matrix
         ueberschritten haben, starte den Unentschieden-Bildschirm.
         Setze reset als Return Value und Starte das Spiel neu.
-        :param pos_new:
         :return: 1 = true 0 = false
         """
-        if self.pos > self.pos_max + self.player_nr:
-            self.draw_screen()
-            self.end_game()
+        if self.current_index_in_data > self.max_index_in_data_row + self.current_player_number:
+            self.__draw_screen()
+            self.__end_game()
             return 0
         return 1
 
-    def end_game(self):
-            self.stop()
-            self.close_game_gui_method()
+    def __end_game(self) -> None:
+        """
+        Stop the game instance and close the game gui window
+        :return: None
+        """
+        self.stop()
+        self.close_game_gui_method()
 
-    def switch_player_set_start(self):
+    def __switch_player_set_start(self) -> None:
         """
         Toogle Player Number ( 0...Player 1, 1...Player 2) and reset aktuelle Position zurueck auf Startposition (oben links).
         Beachten des Sonderfalls, dass das obere linke Feld bereits belegt ist.
-        → In diesem Fall verschieben des Steins nach rechts, bis Feld frei
+        → In diesem Fall verschieben des Steins nach rechts, bis Feld frei.
         Ebenfalls setzen der Spielernummer in der GUI
         :return: 1 = true 0 = false
         """
-        self.player_nr = (0 if self.player_nr == 1 else 1)
-        self.gui_update_method(self.player_nr)
-        self.pos = 0 + self.player_nr
+        self.current_player_number = (0 if self.current_player_number == 1 else 1)
+        self.gui_update_method(self.current_player_number)
+        self.current_index_in_data = 0 + self.current_player_number
 
-        while self.pos <= self.pos_max + self.player_nr:
-            if self.position_check(1):
-                self.pos = self.pos + 2
+        while self.current_index_in_data <= self.max_index_in_data_row + self.current_player_number:
+            if self.__position_check(1):
+                self.current_index_in_data = self.current_index_in_data + 2
                 pass
             else:
-                self.data[self.pos] = 0  ## hier auf 1 setzen, playerstein zu beleuchten.
+                self.data_vector[self.current_index_in_data] = 0  ## hier auf 1 setzen, playerstein zu beleuchten.
                 break
 
     # ------------------------------------------------------------------------#
     #                                 Main                                   #
     # ------------------------------------------------------------------------#
 
-    def stop(self):
+    def stop(self) -> None:
+        """
+        Stop running game -> stop game instance
+        :return: None
+        """
         self.thread_is_running = not self.thread_is_running
 
-    def set_destroy_game_gui(self, close_game_gui_method):
+    def set_destroy_game_gui(self, close_game_gui_method) -> None:
+        """
+        Set the Method to close the running game window and show the main menu window.
+        :param close_game_gui_method: Method to close the running game window and show the main menu window
+        :return: None
+        """
         self.close_game_gui_method = close_game_gui_method
 
-    def set_gui_update_method(self, gui_update_method):
+    def set_gui_update_method(self, gui_update_method) -> None:
+        """
+        Set the Method to update the game window with active player number.
+        :param gui_update_method: Method to update the game window with current player information
+        :return: None
+        """
         self.gui_update_method = gui_update_method
 
-    def run_game(self):
+    def __reset_game_instance(self) -> None:
+        """
+        nachdem Reset ausgeloest wurde:
+        → reset zuruecksetzen
+        → position zuruecksetzen
+        → player_nr zuruecksetzen
+        → Funktionsaufruf, schreibe Startbildschirm (Sample(0)) auf 'data'
+        :return: None
+        """
+        self.reset_game = 1
+        self.current_index_in_data = 0
+        self.current_player_number = 0
+        self.data_vector = self.__sample(0)
+
+    def __init_game(self) -> None:
+        """
+        Activate output of shift register blocks, clear actual content of shift register,
+        clean output of shift register and send sample(7) to output.
+        :return: None
+        """
         self.thread_is_running = 1
-        self.output_enable()  # Funktionsaufruf, aktiviere Ausgaenge der Schieberegisterbausteine
-        self.clear_shift_register()  # Funktionsaufruf, loesche aktuellen Inhalt der Shift-Register
-        self.set_storage_register()  # Funktionsaufruf, Ausgabe des leeren Shift-Registers
-        self.send_running_text(self.sample(7))  # Funktionsaufruf, Ausgabe des Startbildschirms ('4 Gewinnt')
+        self.__output_enable()
+        self.__clear_shift_register()
+        self.__set_storage_register()
+        self.__send_running_text(self.__sample(7))
 
+    def run_game(self) -> None:
+        """
+        Run the game from outside.
+        :return: None
+        """
+        self.__init_game()
         while self.thread_is_running:
-            self.reset = 1  # reset zuruecksetzen (nachdem Reset ausgeloest wurde)
-            self.pos = 0  # position zuruecksetzen (nachdem Reset ausgeloest wurde)
-            self.player_nr = 0  # player_nr zuruecksetzen (nachdem Reset ausgeloest wurde)
-            self.data = self.sample(0)  # Funktionsaufruf, schreibe Startbildschirm (Sample(0)) auf 'data'
-
-            while self.reset and self.thread_is_running:  # Spiel läuft bis abgeschlossen (reset wird durch Reset-Funktion, Spielgewinn oder Unentschieden ausgeloest)
-                self.send_data(self.data)  # Funktionsaufruf, Sende 'data' an LED-Matrix
-                ## Verarbeiten der Eingabe des Nutzers
-                if self.button(self.BUTTON_0):
-                    self.reset = self.handle_button_input(0, self.pos)
-                elif self.button(self.BUTTON_1):
-                    self.reset = self.handle_button_input(2, self.pos)
-                elif self.button(self.BUTTON_2):
-                    self.reset = self.handle_button_input(4, self.pos)
-                elif self.button(self.BUTTON_3):
-                    self.reset = self.handle_button_input(6, self.pos)
-                elif self.button(self.BUTTON_4):
-                    self.reset = self.handle_button_input(8, self.pos)
-                elif self.button(self.BUTTON_5):
-                    self.reset = self.handle_button_input(10, self.pos)
-                elif self.button(self.BUTTON_6):
-                    self.reset = self.handle_button_input(12, self.pos)
+            self.__reset_game_instance()
+            while self.reset_game and self.thread_is_running:
+                self.__send_data(self.data_vector)
+                for btn_index in range(len(self.input_button_from_left)):
+                    if self.__button(self.input_button_from_left[btn_index]):
+                        self.reset_game = self.__handle_button_input(btn_index * 2, self.current_index_in_data)
