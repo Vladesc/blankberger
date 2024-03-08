@@ -1,22 +1,17 @@
-import time
+import random
 import tkinter
 from tkinter import *
 from tkinter import messagebox
 import pygame
 import threading
 import Constants
-# from GLDummy import GLDummy  ##todo entfernen, wenn debug beendet
 from GameLogic import GameLogic
-
-
-# from GameLogic import GameLogic ##todo einkommentieren, für real stuff
 
 
 class GUI(object):
 
     def __init__(self):
-        self.game_instance = GameLogic() #todo einkommentieren, für real stuff
-        # self.game_instance = GLDummy()  ##todo entfernen, wenn debug beendet
+        self.game_instance = GameLogic()  # todo einkommentieren, für real stuff
         self.active_game_thread = None
 
         self.fenster = Tk()
@@ -28,7 +23,7 @@ class GUI(object):
         self.current_round_number = 0
         self.spieler1_eingabefeld = None
         self.spieler2_eingabefeld = None
-        self.game_mode_container = IntVar()
+        self.game_mode_container = IntVar()  # todo 0 = 1v1 1=PvE
         self.game_difficulty_container = IntVar()
         self.sound_state_container = IntVar()
 
@@ -95,11 +90,13 @@ class GUI(object):
             Change the value of the game mode data container "game_mode_container".
             :return: None
             """
+            self.spieler2_eingabefeld.delete(0, END)
             if self.game_mode_container.get() == 0:
                 spieler1_label.grid(row=3, column=0)
                 self.spieler1_eingabefeld.grid(row=3, column=1)
                 spieler2_label.grid(row=4, column=0)
                 self.spieler2_eingabefeld.grid(row=4, column=1)
+                self.spieler2_eingabefeld.insert(0, Constants.GAME_PLAYER_2_PLACEHOLDER)
 
                 cpuLevel_Label.grid_forget()
                 radio_leicht.grid_forget()
@@ -109,6 +106,7 @@ class GUI(object):
                 self.spieler1_eingabefeld.grid(row=3, column=1)
                 spieler2_label.grid_forget()
                 self.spieler2_eingabefeld.grid_forget()
+                self.spieler2_eingabefeld.insert(0, Constants.GAME_ENVIRONMENT_PLACEHOLDER)
 
                 cpuLevel_Label.grid(row=5, column=1)
                 radio_leicht.grid(row=6, column=1)
@@ -190,24 +188,38 @@ class GUI(object):
             :return: None
             """
             self.game_instance.stop()
-            spiele_fenster.quit()
+            spiele_fenster.destroy()
 
-        def change_active_player(current_player: int) -> None:
+        def window_show_active_p0() -> None:
+            spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
+                cplayer=self.spieler1_eingabefeld.get())
+            spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
+            spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
+
+        def window_show_active_p1() -> None:
+            spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
+                cplayer=self.spieler2_eingabefeld.get())
+            spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
+            spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
+
+        def window_show_start() -> None:
+            spieler_name_anzeigen_label['text'] = random.choice(Constants.GAME_CURRENT_PLAYER_LABEL_START)
+            spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
+            spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
+
+        window_show_options = {
+            0: window_show_active_p0,
+            1: window_show_active_p1,
+            2: window_show_start,
+        }
+
+        def show_window_content(show_option: int) -> None:
             """
             Change the display (window content) for current player.
-            :param current_player: player for the next turn.
+            :param show_option: Method, which will be called from window_show_options
             :return: None
             """
-            if not current_player:
-                spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
-                    cplayer=self.spieler1_eingabefeld.get())
-                spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
-                spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
-            else:
-                spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
-                    cplayer=self.spieler2_eingabefeld.get())
-                spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
-                spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
+            window_show_options[show_option]()
 
         def close_top_window() -> None:
             """
@@ -230,15 +242,16 @@ class GUI(object):
         spiele_fenster = tkinter.Toplevel(self.fenster)
         spiele_fenster.title(Constants.WINDOW_TITLE_RUNNING_GAME)
         spiele_fenster.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
-        beenden_button1 = Button(spiele_fenster, text=Constants.GAME_END_BUTTON, command=action_end_game)
+        beenden_button1 = Button(spiele_fenster, text=Constants.GAME_MAIN_MENU_BUTTON, command=action_end_game)
         beenden_button1.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
         spieler_name_anzeigen_label = Label(spiele_fenster, font=("Arial", 25))
         spiele_fenster.wm_overrideredirect(True)
         build_grid()
-        change_active_player(0)
+        show_window_content(2)
 
         self.active_game_thread = threading.Thread(target=self.game_instance.run_game)
-        self.game_instance.set_gui_update_method(change_active_player)
+        self.game_instance.set_mode_and_difficulty(self.game_mode_container.get(), self.game_difficulty_container.get())
+        self.game_instance.set_gui_update_method(show_window_content)
         self.game_instance.set_destroy_game_gui(close_top_window)
         self.active_game_thread.start()
 
@@ -325,8 +338,9 @@ class GUI(object):
 ## todo [done] InfoPage formatieren
 ## todo [done] RadioButton für Schwierigkeitsstufe MITTEL kann gelöscht werden
 ## todo [done] Spielregeln einbinden
+## todo [done] Add Computer Player Actions... EASY
 ## todo die drei Sounds implementieren
-## todo Add Computer Player Actions... in zwei Schwierigkeitsgraden
+## todo Add Computer Player Actions... HEAVY
 ## todo Fix Durchlauftext bei Start des Spiels (oder schauen, wie er mit Musik wirkt)
 ## todo (optional) Check how to show Bildschirmtastatur
 ## todo (optional) Check how to fullscreen (ohne Titelleiste und ohne Icons)

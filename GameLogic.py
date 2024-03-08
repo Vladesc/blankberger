@@ -2,6 +2,8 @@
 ### Ansteuerung einer 6x7 LED-Matrix
 from __future__ import annotations
 
+from random import randrange
+
 # ------------------------------------------------------------------------#
 #                                 HEAD                                   #
 # ------------------------------------------------------------------------#
@@ -52,6 +54,8 @@ class GameLogic(object):
                     0, 0, 0, 0, 0, 1]  # Zeile6
         self.current_index_in_data = 0
         self.max_index_in_data_row = 12
+        self.game_mode = 0
+        self.pve_difficulty = 0
         self.current_player_number: int = 0
         self.win_check_container = [0, 0, 0, 0]
 
@@ -372,9 +376,9 @@ class GameLogic(object):
         """
         self.state = (self.data_vector[self.current_index_in_data] == level
                       or (self.current_player_number == 0 and self.data_vector[self.current_index_in_data + 1] == level)
-                      or (self.current_player_number == 1 and self.data_vector[
-                    self.current_index_in_data - 1] == level))
-        return (self.state)
+                      or (self.current_player_number == 1 and self.data_vector[self.current_index_in_data - 1] == level)
+                      )
+        return self.state
 
     def __win_check(self, current_row: int) -> int:
         """
@@ -718,7 +722,34 @@ class GameLogic(object):
                 break
 
     # ------------------------------------------------------------------------#
-    #                                 Main                                   #
+    #                      PvE Environment Actions                            #
+    # ------------------------------------------------------------------------#
+
+    # todo implement easy and hard pve actions
+    def __environment_action(self) -> None:
+        """
+        Run environment actions if game mode is PvE
+        :return: None
+        """
+        def __environment_easy() -> None:
+            """
+            The Easy Environment Actions. Just randomly press a button.
+            :return: None
+            """
+            while self.current_player_number == 1:
+                self.reset_game = self.__handle_button_input(randrange(len(self.input_button_from_left)) * 2,
+                                                             self.current_index_in_data)
+
+        def __environment_hard() -> None:
+            pass
+
+        if self.pve_difficulty == 1:
+            __environment_hard()
+        else:
+            __environment_easy()
+
+    # ------------------------------------------------------------------------#
+    #                                 Main                                    #
     # ------------------------------------------------------------------------#
 
     def stop(self) -> None:
@@ -727,6 +758,16 @@ class GameLogic(object):
         :return: None
         """
         self.thread_is_running = not self.thread_is_running
+
+    def set_mode_and_difficulty(self, mode: int, difficulty: int = None) -> None:
+        """
+        Set game mode
+        :param mode: GameMode 0=PvP 1=PvE
+        :param difficulty: Schwierigkeit des Computergegners 0=easy 1=hard
+        :return: None
+        """
+        self.game_mode = mode
+        self.pve_difficulty = difficulty
 
     def set_destroy_game_gui(self, close_game_gui_method) -> None:
         """
@@ -756,6 +797,7 @@ class GameLogic(object):
         self.reset_game = 1
         self.current_index_in_data = 0
         self.current_player_number = 0
+        self.gui_update_method(self.current_player_number)
         self.data_vector = self.__sample(0)
 
     def __init_game(self) -> None:
@@ -781,5 +823,8 @@ class GameLogic(object):
             while self.reset_game and self.thread_is_running:
                 self.__send_data(self.data_vector)
                 for btn_index in range(len(self.input_button_from_left)):
-                    if self.__button(self.input_button_from_left[btn_index]):
-                        self.reset_game = self.__handle_button_input(btn_index * 2, self.current_index_in_data)
+                    if self.game_mode == 1 and self.current_player_number == 1:
+                        self.__environment_action()
+                    else:
+                        if self.__button(self.input_button_from_left[btn_index]):
+                            self.reset_game = self.__handle_button_input(btn_index * 2, self.current_index_in_data)
