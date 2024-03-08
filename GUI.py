@@ -28,7 +28,7 @@ class GUI(object):
         self.current_round_number = 0
         self.spieler1_eingabefeld = None
         self.spieler2_eingabefeld = None
-        self.game_mode_container = IntVar()
+        self.game_mode_container = IntVar() # todo 0 = 1v1 1=PvE
         self.game_difficulty_container = IntVar()
         self.sound_state_container = IntVar()
 
@@ -238,6 +238,7 @@ class GUI(object):
         change_active_player(0)
 
         self.active_game_thread = threading.Thread(target=self.game_instance.run_game)
+        self.game_instance.set_mode_and_difficulty(self.game_mode_container.get(), self.game_difficulty_container.get())
         self.game_instance.set_gui_update_method(change_active_player)
         self.game_instance.set_destroy_game_gui(close_top_window)
         self.active_game_thread.start()
