@@ -765,6 +765,7 @@ class GameLogic(object):
         Stop running game -> stop game instance
         :return: None
         """
+        self.__reset_game_instance()
         self.thread_is_running = not self.thread_is_running
 
     def set_mode_and_difficulty(self, mode: int, difficulty: int = None) -> None:
