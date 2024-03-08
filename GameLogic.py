@@ -17,6 +17,7 @@ class GameLogic(object):
         ### Init Thread handling variables
         self.close_game_gui_method = None
         self.gui_update_method = None
+        self.gui_play_sound_method = None
         self.thread_is_running = 1
 
         ### Initialisierung GPIO
@@ -490,6 +491,8 @@ class GameLogic(object):
         For-Schleife zur blinkenden Hervorhebung der Gewinnreihe
         Dabei wird fuer 10*0.25s = 2,5s das Spielfeld angezeigt
         und alle 0.25s die Gewinnreihe ein- und ausgeschaltet
+
+        Ebenfalls trigger der Anzeige, um den gewinner anzuzeigen.
         :return:
         """
         for x in range(0, 9):
@@ -499,6 +502,7 @@ class GameLogic(object):
 
         self.__blink_screen(4, 0.5,
                             self.__sample(3 + self.current_player_number))
+        self.gui_update_method(3)
 
     def __draw_screen(self) -> None:
         """
@@ -574,6 +578,7 @@ class GameLogic(object):
         :param current_row:
         :return:
         """
+        self.gui_play_sound_method('sounds/FallenderStein.mp3')
         row_start = self.rows - current_row - 1
         fall_pos_old = self.current_index_in_data - row_start * self.columns_total
         current_row = 1
@@ -784,6 +789,14 @@ class GameLogic(object):
         :return: None
         """
         self.gui_update_method = gui_update_method
+
+    def set_gui_play_sound_method(self, gui_play_sound_method) -> None:
+        """
+        Set the Method to play game sound
+        :param gui_play_sound_method: Method to play game sound
+        :return: None
+        """
+        self.gui_play_sound_method = gui_play_sound_method
 
     def __reset_game_instance(self) -> None:
         """

@@ -18,7 +18,6 @@ class GUI(object):
         self.fenster.title(Constants.WINDOW_TITLE)
         self.fenster.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
         pygame.init()
-        # pygame.mixer.music.load('sounds/FallenderStein.mp3') #todo SOUND STUFF
 
         self.current_round_number = 0
         self.spieler1_eingabefeld = None
@@ -72,6 +71,7 @@ class GUI(object):
             self.game_difficulty_container.set(0)
             self.sound_state_container.set(0)
 
+## todo remove this shit
         def ctrl_sound_state_change() -> None:
             """
             Change the value of the sound state data container "sound_state_container".
@@ -84,6 +84,7 @@ class GUI(object):
             else:
                 print("Jetzt läuft keine Musik!")  # todo rm debug msg
                 pygame.mixer.music.stop()
+## todo until here
 
         def ctrl_game_mode_change() -> None:
             """
@@ -188,15 +189,18 @@ class GUI(object):
             :return: None
             """
             self.game_instance.stop()
+            stop_sound() #todo test sound
             spiele_fenster.destroy()
 
         def window_show_active_p0() -> None:
+            stop_sound() #todo test sound
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
                 cplayer=self.spieler1_eingabefeld.get())
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
 
         def window_show_active_p1() -> None:
+            stop_sound() #todo test sound
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
                 cplayer=self.spieler2_eingabefeld.get())
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
@@ -206,12 +210,30 @@ class GUI(object):
             spieler_name_anzeigen_label['text'] = random.choice(Constants.GAME_CURRENT_PLAYER_LABEL_START)
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
+            play_sound('sounds/SpielStart.mp3')
+
+        def window_show_end() -> None:
+            spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL_END.format(
+                cplayer=self.spieler2_eingabefeld.get())
+            spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_END)
+            spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_END)
+            play_sound('sounds/SpielStart.mp3')
 
         window_show_options = {
             0: window_show_active_p0,
             1: window_show_active_p1,
             2: window_show_start,
+            3: window_show_end,
         }
+
+        def play_sound(soundfile: str) -> None:
+            if self.sound_state_container:
+                pygame.mixer.music.load(soundfile)
+                pygame.mixer.music.set_volume(.5)
+                pygame.mixer.music.play(-1)
+
+        def stop_sound() -> None:
+            pygame.mixer.music.stop()
 
         def show_window_content(show_option: int) -> None:
             """
@@ -252,6 +274,7 @@ class GUI(object):
         self.active_game_thread = threading.Thread(target=self.game_instance.run_game)
         self.game_instance.set_mode_and_difficulty(self.game_mode_container.get(), self.game_difficulty_container.get())
         self.game_instance.set_gui_update_method(show_window_content)
+        self.game_instance.set_gui_play_sound_method(play_sound)
         self.game_instance.set_destroy_game_gui(close_top_window)
         self.active_game_thread.start()
 
@@ -340,6 +363,7 @@ class GUI(object):
 ## todo [done] Spielregeln einbinden
 ## todo [done] Add Computer Player Actions... EASY
 ## todo die drei Sounds implementieren
+## todo change mainMenu to topWindow instance to get fullscreen
 ## todo Add Computer Player Actions... HEAVY
 ## todo Fix Durchlauftext bei Start des Spiels (oder schauen, wie er mit Musik wirkt)
 ## todo (optional) Check how to show Bildschirmtastatur
