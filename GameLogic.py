@@ -739,6 +739,7 @@ class GameLogic(object):
         def __environment_hard() -> None:
             pass
 
+        time.sleep(1)
         if self.pve_difficulty == 1:
             __environment_hard()
         else:

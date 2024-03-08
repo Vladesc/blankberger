@@ -12,6 +12,7 @@ GAME_PLAYER_2_LABEL: Final = "Spieler 2: "
 
 GAME_PLAYER_1_PLACEHOLDER: Final = "Spieler 1"
 GAME_PLAYER_2_PLACEHOLDER: Final = "Spieler 2"
+GAME_ENVIRONMENT_PLACEHOLDER: Final = "Deep Blue 1996"
 
 GAME_MODE_PVE_LABEL: Final = "Spieler gegen Computer"
 GAME_MODE_PVP_LABEL: Final = "Spieler gegen Spieler"
@@ -36,6 +37,7 @@ GAME_BTN_SIZE_WIDTH: Final = 15
 GAME_PVE_MSG_MISSING_NAME: Final = "Spieler 1 hat keinen Namen."
 GAME_PVP_MSG_MISSING_NAME: Final = "Es sind nicht für alle Spieler Namen eingetragen."
 GAME_CURRENT_PLAYER_LABEL: Final = "Spieler {cplayer} ist dran"
+GAME_COLOR_BACKGROUND_START: Final = "lightblue"
 GAME_COLOR_BACKGROUND_PLAYER_1: Final = "red"
 GAME_COLOR_BACKGROUND_PLAYER_2: Final = "green"
 
