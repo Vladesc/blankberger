@@ -60,9 +60,8 @@ class MockEnvWinCheck:
         # --------------------- von Position aus prüfen
         i = 1
         led_in_a_row = 1
-        current_row = check_row  # todo das geht auch schöner
-        matrix_right_border = current_row * self.columns_total + self.max_index_in_data_row + player_check
-        matrix_left_border = current_row * self.columns_total + player_check
+        matrix_right_border = check_row * self.columns_total + self.max_index_in_data_row + player_check
+        matrix_left_border = check_row * self.columns_total + player_check
         env_win_check_container = [current_index_in_vector, 0, 0, 0]
         # Horizontal nach rechts |0 0 0 0 0 0|
         while current_index_in_vector + i * 2 <= matrix_right_border:  # |0 0 0 0 0 0|
@@ -164,11 +163,8 @@ class MockEnvWinCheck:
 
         # check_player_number = 0
         def win_check_for_player(check_player_number: int):
-            print("checking player", check_player_number)
-            # check Player win in two turns
             for check_column in range(int(self.columns_total / 2)):
                 if self.environment_win_check(check_vector.copy(), check_column, check_player_number) == 1:
-                    print("1 turn ", check_player_number, " win ", check_column)
                     return check_column
             for manipulate_row in range(int(self.columns_total / 2)):
                 manipulated_vector = self.environment_manipulate_vector(check_vector.copy(), manipulate_row,
@@ -177,30 +173,9 @@ class MockEnvWinCheck:
                     continue
                 for check_column in range(int(self.columns_total / 2)):
                     if self.environment_win_check(manipulated_vector.copy(), check_column, check_player_number) == 1:
-                        print("2 turn ", check_player_number, " win ", manipulate_row)
                         return manipulate_row
             return -1
-        """
-        # check Computer win in one turn
-        check_player_number = 1
-        for check_column in range(int(self.columns_total / 2)):
-            if self.environment_win_check(check_vector.copy(), check_column, check_player_number) == 1:
-                print("1 turn e win ", check_column)
-                return check_column
-        # check Computer win in two turns
-        for manipulate_row in range(int(self.columns_total / 2)):
-            manipulated_vector = self.environment_manipulate_vector(check_vector.copy(), manipulate_row,
-                                                                    check_player_number)
-            if manipulated_vector is None:
-                continue
-            for check_column in range(int(self.columns_total / 2)):
-                if self.environment_win_check(manipulated_vector.copy(), check_column, check_player_number) == 1:
-                    print("2 turn e win ", manipulate_row)
-                    return manipulate_row
-        # Random set stone
-        return randrange(int(self.columns_total / 2))
-        """
-        # Random set stone
+
         press_btn = win_check_for_player(0)
         press_btn = win_check_for_player(1) if press_btn == -1 else press_btn
         return randrange(int(self.columns_total / 2)) if press_btn == -1 else press_btn
@@ -216,11 +191,11 @@ if __name__ == '__main__':
                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     """
     data_vector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                   0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0,
-                   0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0,
-                   0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1,
-                   0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-                   0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0]
+                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     mock = MockEnvWinCheck()
 
     print("press button: ", mock.env_check(data_vector))

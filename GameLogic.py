@@ -321,7 +321,6 @@ class GameLogic(object):
                       )
         return self.state
 
-    # todo so umbauen, das ich die Methode auch auf ein fiktiven data_vektor ausführen kann. (für PvE hard mode)
     def __win_check(self, current_row: int) -> int:
         """
         Funktion ueberprueft, ob sich horizontal, vertikal oder diagonal "4 in einer Reihe" befinden.
@@ -699,46 +698,28 @@ class GameLogic(object):
                 self.current_index_in_data = self.current_index_in_data + 2
                 pass
             else:
-                self.data_vector[self.current_index_in_data] = 0  ## hier auf 1 setzen, playerstein zu beleuchten.
+                self.data_vector[self.current_index_in_data] = 0
                 break
 
     # ------------------------------------------------------------------------#
     #                      PvE Environment Actions                            #
     # ------------------------------------------------------------------------#
-    # todo implement win check for environment
-    def __environment_win_check(self) -> int:
-        pass
-
-    # todo implement hard pve actions
     def __environment_action(self) -> None:
         """
         Run environment actions if game mode is PvE
         :return: None
         """
+        while self.current_player_number == 1:
+            if self.pve_difficulty == 1:
+                self.reset_game = self.__handle_button_input(
+                    self.__environment_select_button(self.data_vector.copy(), 0) * 2,
+                    self.current_index_in_data)
+            else:
+                self.reset_game = self.__handle_button_input(
+                    self.__environment_select_button(self.data_vector.copy(), 30) * 2,
+                    self.current_index_in_data)
 
-        def __environment_easy() -> None:
-            """
-            The Easy Environment Actions. Just randomly press a button.
-            :return: None
-            """
-            while self.current_player_number == 1:
-                self.reset_game = self.__handle_button_input(randrange(len(self.input_button_from_left)) * 2,
-                                                             self.current_index_in_data)
-
-        def __environment_hard() -> None:
-            """
-            The Hard Environment Actions. Some kind of intelligence.
-            :return: None
-            """
-            self.reset_game = self.__handle_button_input(self.__environment_select_button(self.data_vector),
-                                                         self.current_index_in_data)
-
-        if self.pve_difficulty == 1:
-            __environment_hard()
-        else:
-            __environment_easy()
-
-    def __environment_select_button(self, check_vector: list[int]):
+    def __environment_select_button(self, check_vector: list[int], easy_percentage: int) -> int:
         """
         1. Prüfen, ob der Spieler in der nächsten Runde gewinnen könnte
             → Ja: Stein setzen und abbruch der Prüfung
@@ -749,12 +730,12 @@ class GameLogic(object):
         4. Prüfen, ob der Computer in den nächsten zwei Runden gewinnen könnte
             → Ja: Stein setzen und abbruch der Prüfung
         5. Stein random setzen.
-        :param check_vector:
+        :param check_vector: Aktueller DataVektor, der geprüft werden soll.
+        :param easy_percentage: Prozentwert (0-100), um wie viel Wahrscheinlichkeit ein Zufallswert zurückgegeben wird.
         :return: Nummer des Buttons, der ausgelöst werden soll
         """
 
         def win_check_for_player(check_player_number: int):
-            # check Player win in two turns
             for check_column in range(int(self.columns_total / 2)):
                 if self.environment_win_check(check_vector.copy(), check_column, check_player_number) == 1:
                     return check_column
@@ -770,7 +751,10 @@ class GameLogic(object):
 
         press_btn = win_check_for_player(0)
         press_btn = win_check_for_player(1) if press_btn == -1 else press_btn
-        return randrange(int(self.columns_total / 2)) if press_btn == -1 else press_btn
+        if randrange(100) > easy_percentage:
+            return randrange(int(self.columns_total / 2)) if press_btn == -1 else press_btn
+        else:
+            return randrange(int(self.columns_total / 2))
 
     def environment_manipulate_vector(self, check_vector: list[int], set_x: int, player_check: int) -> None | list[int]:
         """
@@ -822,9 +806,8 @@ class GameLogic(object):
         # --------------------- von Position aus prüfen
         i = 1
         led_in_a_row = 1
-        current_row = check_row  # todo das geht auch schöner
-        matrix_right_border = current_row * self.columns_total + self.max_index_in_data_row + player_check
-        matrix_left_border = current_row * self.columns_total + player_check
+        matrix_right_border = check_row * self.columns_total + self.max_index_in_data_row + player_check
+        matrix_left_border = check_row * self.columns_total + player_check
         env_win_check_container = [current_index_in_vector, 0, 0, 0]
         # Horizontal nach rechts |0 0 0 0 0 0|
         while current_index_in_vector + i * 2 <= matrix_right_border:  # |0 0 0 0 0 0|

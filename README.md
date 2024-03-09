@@ -11,7 +11,7 @@
 - [done] die drei Sounds implementieren
 - [done] Add EasterEgg...
 - [done] Fix Durchlauftext bei Start des Spiels (oder schauen, wie er mit Musik wirkt)
-- Add Computer Player Actions... HEAVY-Mode >>> *GameLogic__environment_action().__environment_hard()*
+- [done] Add Computer Player Actions... HEAVY-Mode >>> *GameLogic__environment_action().__environment_hard()*
 - implement shutdown function >>> *GUI.__action_shutdown_system()*
 - (optional) Check how to show Bildschirmtastatur
 - (optional) Check how to fullscreen (ohne Titelleiste und ohne Icons)
