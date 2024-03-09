@@ -716,26 +716,32 @@ class GameLogic(object):
                     self.current_index_in_data)
             else:
                 self.reset_game = self.__handle_button_input(
-                    self.__environment_select_button(self.data_vector.copy(), 30) * 2,
+                    self.__environment_select_button(self.data_vector.copy(), 50) * 2,
                     self.current_index_in_data)
 
     def __environment_select_button(self, check_vector: list[int], easy_percentage: int) -> int:
         """
         1. Prüfen, ob der Spieler in der nächsten Runde gewinnen könnte
-            → Ja: Stein setzen und abbruch der Prüfung
+            → Ja: Nummer des Buttons zurückgeben und abbruch der Prüfung
         2. Prüfen, ob der Spieler in den nächsten zwei Runden gewinnen könnte
-            → Ja: Stein setzen und abbruch der Prüfung
+            → Ja: Nummer des Buttons zurückgeben und abbruch der Prüfung
         3. Prüfen, ob der Computer in der nächsten Runde gewinnen könnte
-            → Ja: Stein setzen und abbruch der Prüfung
+            → Ja: Nummer des Buttons zurückgeben und abbruch der Prüfung
         4. Prüfen, ob der Computer in den nächsten zwei Runden gewinnen könnte
-            → Ja: Stein setzen und abbruch der Prüfung
-        5. Stein random setzen.
+            → Ja: Nummer des Buttons zurückgeben und abbruch der Prüfung
+        5. Rückgabe des ermittelten Wertes oder Random Wert. Hier kommt der Prozentwert zum Einsatz.
         :param check_vector: Aktueller DataVektor, der geprüft werden soll.
         :param easy_percentage: Prozentwert (0-100), um wie viel Wahrscheinlichkeit ein Zufallswert zurückgegeben wird.
         :return: Nummer des Buttons, der ausgelöst werden soll
         """
 
         def win_check_for_player(check_player_number: int):
+            """
+            1. Prüfen, ob der übergebene Player in der nächsten Runde gewinnen könnte
+            2. Prüfen, ob der übergebene Player in der übernächsten Runde gewinnen könnte
+            :param check_player_number:
+            :return:
+            """
             for check_column in range(int(self.columns_total / 2)):
                 if self.environment_win_check(check_vector.copy(), check_column, check_player_number) == 1:
                     return check_column
@@ -749,9 +755,9 @@ class GameLogic(object):
                         return manipulate_row
             return -1
 
-        press_btn = win_check_for_player(0)
-        press_btn = win_check_for_player(1) if press_btn == -1 else press_btn
-        if randrange(100) > easy_percentage:
+        if randrange(1, 100) > easy_percentage:
+            press_btn = win_check_for_player(0)
+            press_btn = win_check_for_player(1) if press_btn == -1 else press_btn
             return randrange(int(self.columns_total / 2)) if press_btn == -1 else press_btn
         else:
             return randrange(int(self.columns_total / 2))
