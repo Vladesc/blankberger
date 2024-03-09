@@ -56,6 +56,7 @@ class GUI(object):
 
             sound_Label.grid(row=11, column=0)
             radio_sound_on.grid(row=12, column=0)
+            demo_button.grid(row=12, column=1)
             radio_sound_off.grid(row=13, column=0)
 
             spielregeln_button.grid(row=13, column=1)
@@ -140,6 +141,9 @@ class GUI(object):
         start_button = Button(self.fenster, text=Constants.GAME_START_BUTTON, command=self.__start_game_instance)
         start_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
 
+        demo_button = Button(self.fenster, text=Constants.GAME_START_BUTTON, command=self.__start_demo_instance)
+        demo_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
+
         sound_Label = Label(self.fenster, text=Constants.GAME_SOUND_LABEL)
         radio_sound_on = Radiobutton(self.fenster, text=Constants.GAME_SOUND_LABEL_ON, padx=20,
                                      variable=self.sound_state_container,
@@ -173,6 +177,10 @@ class GUI(object):
             Stop the running game instance thread and close the window
             :return: None
             """
+            self.spieler1_eingabefeld.delete(0, END)
+            self.spieler2_eingabefeld.delete(0, END)
+            self.spieler1_eingabefeld.insert(0, Constants.GAME_PLAYER_1_PLACEHOLDER)
+            self.spieler2_eingabefeld.insert(0, Constants.GAME_PLAYER_2_PLACEHOLDER)
             self.game_instance.stop()
             close_top_window()
 
@@ -395,6 +403,14 @@ class GUI(object):
         spieler_name_anzeigen_label = Label(game_info, text=Constants.GAME_INFO_CONTENT, font=("Arial", 20))
         game_info.wm_overrideredirect(True)
         build_grid()
+
+    def __start_demo_instance(self):
+        self.spieler1_eingabefeld.delete(0, END)
+        self.spieler2_eingabefeld.delete(0, END)
+        self.spieler1_eingabefeld.set(Constants.GAME_ENVIRONMENT2_PLACEHOLDER)
+        self.spieler2_eingabefeld.set(Constants.GAME_ENVIRONMENT_PLACEHOLDER)
+        self.game_mode_container.set(2)
+        self.__start_game_instance()
 
     def __start_game_instance(self):
         spieler_namen = (self.spieler1_eingabefeld.get(), self.spieler2_eingabefeld.get())

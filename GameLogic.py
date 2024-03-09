@@ -716,7 +716,7 @@ class GameLogic(object):
                     self.current_index_in_data)
             else:
                 self.reset_game = self.__handle_button_input(
-                    self.__environment_select_button(self.data_vector.copy(), 50) * 2,
+                    self.__environment_select_button(self.data_vector.copy(), 40) * 2,
                     self.current_index_in_data)
 
     def __environment_select_button(self, check_vector: list[int], easy_percentage: int) -> int:
@@ -756,8 +756,8 @@ class GameLogic(object):
             return -1
 
         if randrange(1, 100) > easy_percentage:
-            press_btn = win_check_for_player(0)
-            press_btn = win_check_for_player(1) if press_btn == -1 else press_btn
+            press_btn = win_check_for_player(not self.current_player_number)
+            press_btn = win_check_for_player(self.current_player_number) if press_btn == -1 else press_btn
             return randrange(int(self.columns_total / 2)) if press_btn == -1 else press_btn
         else:
             return randrange(int(self.columns_total / 2))
@@ -985,6 +985,8 @@ class GameLogic(object):
                 self.__send_data(self.data_vector)
                 for btn_index in range(len(self.input_button_from_left)):
                     if self.game_mode == 1 and self.current_player_number == 1:
+                        self.__environment_action()
+                    elif self.game_mode == 2:
                         self.__environment_action()
                     else:
                         if self.__button(self.input_button_from_left[btn_index]):

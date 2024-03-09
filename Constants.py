@@ -13,6 +13,7 @@ GAME_PLAYER_2_LABEL: Final = "Spieler 2: "
 GAME_PLAYER_1_PLACEHOLDER: Final = "Spieler 1"
 GAME_PLAYER_2_PLACEHOLDER: Final = "Spieler 2"
 GAME_ENVIRONMENT_PLACEHOLDER: Final = "Deep Blue 1996"
+GAME_ENVIRONMENT2_PLACEHOLDER: Final = "Joshua 1983"
 
 GAME_MODE_PVE_LABEL: Final = "Spieler gegen Computer"
 GAME_MODE_PVP_LABEL: Final = "Spieler gegen Spieler"
