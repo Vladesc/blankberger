@@ -467,7 +467,6 @@ class GameLogic(object):
         :param text:
         :return:
         """
-        #todo fix running text
         text_move_column = 0
         current_row = 0
         total_row_length = int(len(text) / self.rows)
