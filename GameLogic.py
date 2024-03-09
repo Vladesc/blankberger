@@ -51,9 +51,9 @@ class GameLogic(object):
         self.pve_difficulty = 0
         self.current_player_number: int = 0
         self.win_check_container = [0, 0, 0, 0]
-        self.vladesc_ref = '00661212'
-        self.vladesc_p0 = None
-        self.vladesc_p1 = None
+        self.vladesc_ref = '0612'
+        self.vladesc_p0 = ""
+        self.vladesc_p1 = ""
 
     def __gpio_setup(self) -> None:
         """
@@ -601,13 +601,14 @@ class GameLogic(object):
         self.__blink_screen(4, 0.5, self.__sample(3 + self.current_player_number))
 
     def __vladesc_add(self, btn_nr: int) -> None:
-        print(btn_nr, "___", self.current_player_number)  # todo remove this log
         if self.game_mode == 1:
             return
         if self.current_player_number == 0:
-            self.vladesc_p0 = self.vladesc_p0 + btn_nr if len(self.vladesc_p0) != len(self.vladesc_ref) else None
+            self.vladesc_p0 = self.vladesc_p0 + str(int(btn_nr / 2)) if len(self.vladesc_p0) != len(
+                self.vladesc_ref) else ""
         else:
-            self.vladesc_p1 = self.vladesc_p1 + btn_nr if len(self.vladesc_p1) != len(self.vladesc_ref) else None
+            self.vladesc_p1 = self.vladesc_p1 + str(int(btn_nr / 2)) if len(self.vladesc_p1) != len(
+                self.vladesc_ref) else ""
 
     def __vladesc_check(self) -> bool:
         if self.game_mode == 1:
@@ -705,6 +706,7 @@ class GameLogic(object):
         """
         if self.__vladesc_check():
             self.__vladesc_win_screen()
+            time.sleep(5)
             self.__end_game()
             return 0
         if self.__win_check(last_empty_field) == 1:

@@ -38,7 +38,12 @@ GAME_PVE_MSG_MISSING_NAME: Final = "Spieler 1 hat keinen Namen."
 GAME_PVP_MSG_MISSING_NAME: Final = "Es sind nicht für alle Spieler Namen eingetragen."
 GAME_CURRENT_PLAYER_LABEL: Final = "Spieler {cplayer} ist dran"
 GAME_CURRENT_PLAYER_LABEL_END: Final = "Spieler {cplayer} hat gewonnen"
-GAME_CURRENT_PLAYER_LABEL_VLADESC: Final = "Ich werde das Gebet in Neulatein sprechen: \nOh Herrum, schenkenum unsum deinum Segenum. Aaameeenum. \n{cplayer} Gewinnt. \n- Vladesc"
+GAME_CURRENT_PLAYER_LABEL_VLADESC: Final = ("So preiset den Herrn in Neulatein: "
+                                            "\nOh Herrum, schenkenum unsum deinum Segenum. "
+                                            "\nAaameeenum. "
+                                            "\n\nDir, {cplayer}, sei die Kraft des Gottimperators gewährt."
+                                            "\nSpieler {cplayer} hat gewonnen."
+                                            "\n- Vladesc")
 GAME_CURRENT_PLAYER_LABEL_START: Final = [
     "Möge die Macht mit Dir sein. \n- Christopher Robin",
     "Wenns regnet wird man nass. \n- Albert Einstein",
