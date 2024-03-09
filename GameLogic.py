@@ -709,14 +709,15 @@ class GameLogic(object):
         Run environment actions if game mode is PvE
         :return: None
         """
-        while self.current_player_number == 1:
-            if self.pve_difficulty == 1:
+        actual_player = [self.current_player_number].copy()
+        while self.current_player_number == actual_player[0]:
+            if self.pve_difficulty == 0:
                 self.reset_game = self.__handle_button_input(
-                    self.__environment_select_button(self.data_vector.copy(), 0) * 2,
+                    self.__environment_select_button(self.data_vector.copy(), 40) * 2,
                     self.current_index_in_data)
             else:
                 self.reset_game = self.__handle_button_input(
-                    self.__environment_select_button(self.data_vector.copy(), 40) * 2,
+                    self.__environment_select_button(self.data_vector.copy(), 0) * 2,
                     self.current_index_in_data)
 
     def __environment_select_button(self, check_vector: list[int], easy_percentage: int) -> int:
