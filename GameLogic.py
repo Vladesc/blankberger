@@ -730,7 +730,8 @@ class GameLogic(object):
             The Hard Environment Actions. Some kind of intelligence.
             :return: None
             """
-            self.reset_game = self.__handle_button_input(self.__environment_select_button(self.data_vector))
+            self.reset_game = self.__handle_button_input(self.__environment_select_button(self.data_vector),
+                                                             self.current_index_in_data)
 
         if self.pve_difficulty == 1:
             __environment_hard()
@@ -739,42 +740,37 @@ class GameLogic(object):
 
     def __environment_select_button(self, check_vector: list[int]):
         """
-        1. Prüfen, ob der Spieler in den nächsten zwei Runden gewinnen könnte
+        1. Prüfen, ob der Spieler in der nächsten Runde gewinnen könnte
             → Ja: Stein setzen und abbruch der Prüfung
-        2. Prüfen, ob der Computer in der nächsten Runde gewinnen könnte
+        2. Prüfen, ob der Spieler in den nächsten zwei Runden gewinnen könnte
             → Ja: Stein setzen und abbruch der Prüfung
-        3. Prüfen, ob der Computer in den nächsten zwei Runden gewinnen könnte
+        3. Prüfen, ob der Computer in der nächsten Runde gewinnen könnte
             → Ja: Stein setzen und abbruch der Prüfung
-        4. Stein random setzen.
+        4. Prüfen, ob der Computer in den nächsten zwei Runden gewinnen könnte
+            → Ja: Stein setzen und abbruch der Prüfung
+        5. Stein random setzen.
         :param check_vector:
         :return: Nummer des Buttons, der ausgelöst werden soll
         """
-        # check Player win in two turns
-        check_player_number = 0
-        for manipulate_row in range(int(self.columns_total / 2)):
-            manipulated_vector = self.environment_manipulate_vector(check_vector.copy(), manipulate_row,
-                                                                    check_player_number)
-            if manipulated_vector is None:
-                continue
+        def win_check_for_player(check_player_number:int):
+            # check win in one turn
             for check_column in range(int(self.columns_total / 2)):
-                if self.environment_win_check(manipulated_vector.copy(), check_column, check_player_number) == 1:
-                    return manipulate_row
-        # check Computer win in one turn
-        check_player_number = 1
-        for check_column in range(int(self.columns_total / 2)):
-            if self.environment_win_check(check_vector.copy(), check_column, check_player_number) == 1:
-                return check_column
-        # check Computer win in two turns
-        for manipulate_row in range(int(self.columns_total / 2)):
-            manipulated_vector = self.environment_manipulate_vector(check_vector.copy(), manipulate_row,
-                                                                    check_player_number)
-            if manipulated_vector is None:
-                continue
-            for check_column in range(int(self.columns_total / 2)):
-                if self.environment_win_check(manipulated_vector.copy(), check_column, check_player_number) == 1:
-                    return manipulate_row
+                if self.environment_win_check(check_vector.copy(), check_column, check_player_number) == 1:
+                    return check_column
+            # check win in two turns
+            for manipulate_row in range(int(self.columns_total / 2)):
+                manipulated_vector = self.environment_manipulate_vector(check_vector.copy(), manipulate_row,
+                                                                        check_player_number)
+                if manipulated_vector is None:
+                    continue
+                for check_column in range(int(self.columns_total / 2)):
+                    if self.environment_win_check(manipulated_vector.copy(), check_column, check_player_number) == 1:
+                        return manipulate_row
+            return -1
+        press_button = win_check_for_player(0)
+        press_button = win_check_for_player(1) if press_button == -1 else press_button
         # Random set stone
-        return randrange(int(self.columns_total / 2))
+        return randrange(int(self.columns_total / 2)) if press_button == -1 else press_button
 
     def environment_manipulate_vector(self, check_vector: list[int], set_x: int, player_check: int) -> None | list[int]:
         """
