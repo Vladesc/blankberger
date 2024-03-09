@@ -38,6 +38,7 @@ GAME_PVE_MSG_MISSING_NAME: Final = "Spieler 1 hat keinen Namen."
 GAME_PVP_MSG_MISSING_NAME: Final = "Es sind nicht für alle Spieler Namen eingetragen."
 GAME_CURRENT_PLAYER_LABEL: Final = "Spieler {cplayer} ist dran"
 GAME_CURRENT_PLAYER_LABEL_END: Final = "Spieler {cplayer} hat gewonnen"
+GAME_CURRENT_PLAYER_LABEL_VLADESC: Final = "Ich werde das Gebet in Neulatein sprechen: \nOh Herrum, schenkenum unsum deinum Segenum. Aaameeenum. \n{cplayer} Gewinnt. \n- Vladesc"
 GAME_CURRENT_PLAYER_LABEL_START: Final = [
     "Möge die Macht mit Dir sein. \n- Christopher Robin",
     "Wenns regnet wird man nass. \n- Albert Einstein",
@@ -66,6 +67,7 @@ GAME_COLOR_BACKGROUND_START: Final = "lightblue"
 GAME_COLOR_BACKGROUND_END: Final = "lightblue"
 GAME_COLOR_BACKGROUND_PLAYER_1: Final = "red"
 GAME_COLOR_BACKGROUND_PLAYER_2: Final = "green"
+GAME_COLOR_BACKGROUND_VLADESC: Final = "spring green"
 
 GAME_INFO_CONTENT = ("************************\n"
                      "Autoren: OFR Sonnberger und OFRzS Blank\n"

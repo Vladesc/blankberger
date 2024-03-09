@@ -250,12 +250,44 @@ class GUI(object):
                 pygame.mixer.music.load('sounds/SpielEnde.mp3')
                 pygame.mixer.music.play(loops=0)
 
+        def window_show_vladesc_p0() -> None:
+            """
+            Show the winner in the game window and play the end sound.
+            :return: None
+            """
+            spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL_VLADESC.format(
+                cplayer=self.spieler1_eingabefeld.get())
+            window_show_vladesc()
+
+        def window_show_vladesc_p1() -> None:
+            """
+            Show the winner in the game window and play the end sound.
+            :return: None
+            """
+            spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL_VLADESC.format(
+                cplayer=self.spieler2_eingabefeld.get())
+            window_show_vladesc()
+
+        def window_show_vladesc() -> None:
+            """
+            Duplicate content fix for window_show_end p0 and p1
+            :return: None
+            """
+            spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_VLADESC)
+            spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_VLADESC)
+            beenden_button1.grid_forget()
+            if not self.sound_state_container.get():
+                pygame.mixer.music.load('sounds/Vladesc.mp3')
+                pygame.mixer.music.play(loops=0)
+
         window_show_options = {
             0: window_show_active_p0,
             1: window_show_active_p1,
             2: window_show_start,
             3: window_show_end_p0,
             4: window_show_end_p1,
+            5: window_show_vladesc_p0,
+            6: window_show_vladesc_p1,
         }
 
         def show_window_content(show_option: int) -> None:
