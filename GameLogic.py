@@ -1,15 +1,7 @@
-### Vier Gewinnt Spiel
-### Ansteuerung einer 6x7 LED-Matrix
 from __future__ import annotations
-
 from random import randrange
-
-# ------------------------------------------------------------------------#
-#                                 HEAD                                   #
-# ------------------------------------------------------------------------#
-### Bibliotheken
-import RPi.GPIO as GPIO  # Raspberry Pi Standart GPIO Bibliothek
-import time  # Bibliothek fuer time-Funktionen
+import RPi.GPIO as GPIO
+import time
 
 
 class GameLogic(object):
@@ -17,6 +9,7 @@ class GameLogic(object):
         ### Init Thread handling variables
         self.close_game_gui_method = None
         self.gui_update_method = None
+        self.gui_play_sound_method = None
         self.thread_is_running = 1
 
         ### Initialisierung GPIO
@@ -60,15 +53,18 @@ class GameLogic(object):
         self.win_check_container = [0, 0, 0, 0]
 
     def __gpio_setup(self) -> None:
-        ### Setup GPIOs (Declare GPIOs as INPUT or OUTPUT)
-        # WICHTIG: Da mit PULL-UP-Widerstand gearbeitet wird, muss der Button den PIN auf LOW ziehen
-        #          -> Durch Buttondruck wird Pin auf GND gelegt! -> HIGH-Signal in Python
+        """
+        Setup GPIOs (Declare GPIOs as INPUT or OUTPUT)
+        WICHTIG: Da mit PULL-UP-Widerstand gearbeitet wird, muss der Button, den PIN auf LOW ziehen
+                 → Durch Buttondruck wird Pin auf GND gelegt! → HIGH-Signal in Python
+        BUTTON_n → IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
+        :return:
+        """
         GPIO.setup(self.output_enable_pin, GPIO.OUT)  # OUTPUT
         GPIO.setup(self.output_rck_storage_register_clock, GPIO.OUT)  # OUTPUT
         GPIO.setup(self.output_sck_shift_register_clock, GPIO.OUT)  # OUTPUT
         GPIO.setup(self.output_sclr_not_shift_register_clear, GPIO.OUT)  # OUTPUT
         GPIO.setup(self.output_si_serial_data, GPIO.OUT)  # OUTPUT
-        # BUTTON_n -> IN (mit Pull-Up Wiederstand, standartmaessig auf HIGH)
         for x in range(len(self.input_button_from_left)):
             GPIO.setup(self.input_button_from_left[x], GPIO.IN, GPIO.PUD_UP)
 
@@ -490,8 +486,11 @@ class GameLogic(object):
         For-Schleife zur blinkenden Hervorhebung der Gewinnreihe
         Dabei wird fuer 10*0.25s = 2,5s das Spielfeld angezeigt
         und alle 0.25s die Gewinnreihe ein- und ausgeschaltet
+
+        Ebenfalls trigger der Anzeige, um den gewinner anzuzeigen.
         :return:
         """
+        self.gui_update_method(3 if self.current_player_number == 0 else 4)
         for x in range(0, 9):
             self.__blink_screen(0.25, 0, self.data_vector)
             for i in range(0, 4):
@@ -583,11 +582,9 @@ class GameLogic(object):
             self.data_vector[fall_pos] = 1
             self.data_vector[fall_pos_old] = 0
             self.__blink_screen(0.05, 0, self.data_vector)
-
             fall_pos_old = fall_pos
             current_row = current_row + 1
-        self.data_vector[
-            fall_pos_old] = 0
+        self.data_vector[fall_pos_old] = 0
 
     # ------------------------------------------------------------------------#
     #                          BtnHandling (new)                              #
@@ -596,6 +593,7 @@ class GameLogic(object):
         """
         Verarbeiten der Eingabe eines Buttons. Dabei wird kombiniert die Position der aktiven LED auf die Position des Buttons gesetzt
         sowie die Anzeige der Fallanimation gestartet.
+        Hinweis: Zwei Sleeps mit 0.05, damit der Sound besser abgespielt wird/passt.
         :param btn_nr: Nummer des gedrückten Buttons
         :param pos_old: Alte, aktive Position, die resettet werden muss.
         :return: None
@@ -606,7 +604,10 @@ class GameLogic(object):
                 or type(self.current_player_number) is not int
                 or pos_new != pos_old and (self.data_vector[btn_nr] == 1 or self.data_vector[btn_nr + 1] == 1)):
             return 1
+        self.gui_play_sound_method()
+        time.sleep(0.05)
         self.__change_active_position(pos_new, pos_old)
+        time.sleep(0.05)
         return self.__check_game_over(self.__stone_set_and_fall(pos_new, pos_old))
 
     def __change_active_position(self, pos_new: int, pos_old: int):
@@ -624,29 +625,26 @@ class GameLogic(object):
     def __stone_set_and_fall(self, pos_new: int, pos_old: int) -> int:
         """
         Senden der Informationen des Buttons, ausführen der FallAnimation (leeres Feld = 0).
+        Fallanimation wird nur ausgeführt, wenn die Spalte noch nicht gefüllt ist.
+        Ansonsten kann der Spieler noch einmal setzen, bis das einsetzen eines Steins möglich ist.
         :param pos_new: Neue Position des Steins
         :param pos_old: Alte Position des Steins
         :return: unterstes, leeres Feld
         """
         last_empty_field = 0
         self.data_vector[pos_new] = 0
-        self.current_index_in_data = pos_new + (
-                self.rows - 1) * self.columns_total  # Position wird auf die letzte Zeile der aktuellen Spalte geschoben
+        self.current_index_in_data = pos_new + (self.rows - 1) * self.columns_total
 
-        while last_empty_field < self.rows:  # Solange die obere Zeile nicht ueberschritten wird:
-            if self.__position_check(1):  # Wenn 'data' an der aktuellen Position 1 ist:
-                last_empty_field = last_empty_field + 1  # -> Erhoehe Zaehlvariable um 1
-                self.current_index_in_data = self.current_index_in_data - self.columns_total  # → Erhoehe die aktuelle Position um eine Zeile nach oben
-            else:  # Sonst:
-                # Diese If-Anweisung prueft, ob die aktuell erreichte Position der urspruenglichen Position (oberste Zeile) entspricht
-                # Diese Abfage ist wichtig, da sonst die Matrix an der aktuellen Position auf 1 und danach gleich wieder auf 0 gesetzt wird
-                # dadurch koennte man niemals die obere Zeile beschreiben
-                if self.current_index_in_data != pos_old:  # Wenn die aktuelle Position nicht der urspruenglichen Position entspricht (heisst: aktuelle Position hat noch nicht wieder die obere Zeile erreicht):
-                    self.data_vector[
-                        pos_old] = 0  # -> Setze 'data' der alten Position auf 0 (LED in der oberen Zeile ausschalten, ausser diese ist das letzte freie Feld in der Spalte)
-                    self.__fall_animation(last_empty_field)  # -> Funktionsaufruf, Fallanimation
-                self.data_vector[self.current_index_in_data] = 1  # -> Setze 'data' der aktuellen Position auf 1
-                break  # -> Beende Schleife
+        while last_empty_field < self.rows:
+            if self.__position_check(1):
+                last_empty_field = last_empty_field + 1
+                self.current_index_in_data = self.current_index_in_data - self.columns_total
+            else:
+                if self.current_index_in_data != pos_old:
+                    self.data_vector[pos_old] = 0
+                    self.__fall_animation(last_empty_field)
+                self.data_vector[self.current_index_in_data] = 1
+                break
         return last_empty_field
 
     def __check_game_over(self, last_empty_field: int) -> int:
@@ -725,12 +723,13 @@ class GameLogic(object):
     #                      PvE Environment Actions                            #
     # ------------------------------------------------------------------------#
 
-    # todo implement easy and hard pve actions
+    # todo implement hard pve actions
     def __environment_action(self) -> None:
         """
         Run environment actions if game mode is PvE
         :return: None
         """
+
         def __environment_easy() -> None:
             """
             The Easy Environment Actions. Just randomly press a button.
@@ -741,6 +740,10 @@ class GameLogic(object):
                                                              self.current_index_in_data)
 
         def __environment_hard() -> None:
+            """
+            The Hard Environment Actions. Some kind of intelligence.
+            :return: None
+            """
             pass
 
         if self.pve_difficulty == 1:
@@ -757,6 +760,7 @@ class GameLogic(object):
         Stop running game -> stop game instance
         :return: None
         """
+        self.__reset_game_instance()
         self.thread_is_running = not self.thread_is_running
 
     def set_mode_and_difficulty(self, mode: int, difficulty: int = None) -> None:
@@ -784,6 +788,14 @@ class GameLogic(object):
         :return: None
         """
         self.gui_update_method = gui_update_method
+
+    def set_gui_play_sound_method(self, gui_play_sound_method) -> None:
+        """
+        Set the Method to play game sound
+        :param gui_play_sound_method: Method to play game sound
+        :return: None
+        """
+        self.gui_play_sound_method = gui_play_sound_method
 
     def __reset_game_instance(self) -> None:
         """

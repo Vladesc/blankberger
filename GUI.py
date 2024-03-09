@@ -11,19 +11,18 @@ from GameLogic import GameLogic
 class GUI(object):
 
     def __init__(self):
-        self.game_instance = GameLogic()  # todo einkommentieren, für real stuff
+        self.game_instance = GameLogic()
         self.active_game_thread = None
 
         self.fenster = Tk()
         self.fenster.title(Constants.WINDOW_TITLE)
         self.fenster.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
         pygame.init()
-        # pygame.mixer.music.load('sounds/FallenderStein.mp3') #todo SOUND STUFF
 
         self.current_round_number = 0
         self.spieler1_eingabefeld = None
         self.spieler2_eingabefeld = None
-        self.game_mode_container = IntVar()  # todo 0 = 1v1 1=PvE
+        self.game_mode_container = IntVar()
         self.game_difficulty_container = IntVar()
         self.sound_state_container = IntVar()
 
@@ -71,19 +70,6 @@ class GUI(object):
             self.game_mode_container.set(0)
             self.game_difficulty_container.set(0)
             self.sound_state_container.set(0)
-
-        def ctrl_sound_state_change() -> None:
-            """
-            Change the value of the sound state data container "sound_state_container".
-            :return: None
-            """
-            if self.sound_state_container.get() == 0:
-                print("Es sollte Musik laufen!")  # todo rm debug msg
-                # pygame.mixer.music.play(-1) #todo SOUND STUFF
-                # pygame.mixer.music.set_volume(.5) #todo SOUND STUFF
-            else:
-                print("Jetzt läuft keine Musik!")  # todo rm debug msg
-                pygame.mixer.music.stop()
 
         def ctrl_game_mode_change() -> None:
             """
@@ -156,10 +142,10 @@ class GUI(object):
         sound_Label = Label(self.fenster, text=Constants.GAME_SOUND_LABEL)
         radio_sound_on = Radiobutton(self.fenster, text=Constants.GAME_SOUND_LABEL_ON, padx=20,
                                      variable=self.sound_state_container,
-                                     value=0, command=ctrl_sound_state_change)
+                                     value=0)
         radio_sound_off = Radiobutton(self.fenster, text=Constants.GAME_SOUND_LABEL_OFF, padx=20,
                                       variable=self.sound_state_container,
-                                      value=1, command=ctrl_sound_state_change)
+                                      value=1, command=pygame.mixer.music.stop)
 
         spielregeln_button = Button(self.fenster, text=Constants.GAME_RULES_BUTTON, command=self.__rules_window)
         spielregeln_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
@@ -172,7 +158,6 @@ class GUI(object):
         shutdown_system_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
 
         build_grid()
-        ctrl_sound_state_change()
         reset_game_container_values()
 
     def __game_window(self) -> None:
@@ -188,29 +173,89 @@ class GUI(object):
             :return: None
             """
             self.game_instance.stop()
-            spiele_fenster.destroy()
+            close_top_window()
 
         def window_show_active_p0() -> None:
+            """
+            Show the active Player 0 in the game window
+            :return: None
+            """
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
                 cplayer=self.spieler1_eingabefeld.get())
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
+            window_show_active()
 
         def window_show_active_p1() -> None:
+            """
+            Show the active Player 1 in the game window
+            :return: None
+            """
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
                 cplayer=self.spieler2_eingabefeld.get())
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
+            window_show_active()
+
+        def window_show_active()->None:
+            """
+            Duplicate content fix for window_show_active p0 and p1
+            :return: None
+            """
+            beenden_button1.grid(row=1, column=0)
+            if not self.sound_state_container.get():
+                pygame.mixer.music.stop()
+                pygame.mixer.music.load('sounds/FallenderStein.mp3')
 
         def window_show_start() -> None:
+            """
+            Show start/load screen in the game window and play the start sound.
+            :return: None
+            """
             spieler_name_anzeigen_label['text'] = random.choice(Constants.GAME_CURRENT_PLAYER_LABEL_START)
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_START)
+            beenden_button1.grid_forget()
+            if not self.sound_state_container.get():
+                pygame.mixer.music.load('sounds/SpielStart.mp3')
+                pygame.mixer.music.play(loops=-1)
+
+        def window_show_end_p0() -> None:
+            """
+            Show the winner in the game window and play the end sound.
+            :return: None
+            """
+            spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL_END.format(
+                cplayer=self.spieler1_eingabefeld.get())
+            window_show_end()
+
+        def window_show_end_p1() -> None:
+            """
+            Show the winner in the game window and play the end sound.
+            :return: None
+            """
+            spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL_END.format(
+                cplayer=self.spieler2_eingabefeld.get())
+            window_show_end()
+
+        def window_show_end() -> None:
+            """
+            Duplicate content fix for window_show_end p0 and p1
+            :return: None
+            """
+            spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_END)
+            spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_END)
+            beenden_button1.grid_forget()
+            if not self.sound_state_container.get():
+                pygame.mixer.music.load('sounds/SpielEnde.mp3')
+                pygame.mixer.music.play(loops=0)
 
         window_show_options = {
             0: window_show_active_p0,
             1: window_show_active_p1,
             2: window_show_start,
+            3: window_show_end_p0,
+            4: window_show_end_p1,
         }
 
         def show_window_content(show_option: int) -> None:
@@ -221,16 +266,25 @@ class GUI(object):
             """
             window_show_options[show_option]()
 
+        def play_sound() -> None:
+            """
+            Plays the actual loaded soundFile (used by GameLogic Thread)
+            :return: None
+            """
+            if not self.sound_state_container.get():
+                pygame.mixer.music.play(loops=0, start=0.2)
+
         def close_top_window() -> None:
             """
             Close the running game window and show the main menu window.
             :return: None
             """
+            pygame.mixer.music.stop()
             spiele_fenster.destroy()
 
         def build_grid() -> None:
             """
-            Set position of gui elements inside the grid.
+            Set initial position of gui elements inside the grid.
             :return: None
             """
             spiele_fenster.grid_rowconfigure(0, weight=1)
@@ -239,6 +293,7 @@ class GUI(object):
             spieler_name_anzeigen_label.grid(row=0, column=0)
             beenden_button1.grid(row=1, column=0)
 
+        pygame.mixer.music.set_volume(.5)
         spiele_fenster = tkinter.Toplevel(self.fenster)
         spiele_fenster.title(Constants.WINDOW_TITLE_RUNNING_GAME)
         spiele_fenster.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
@@ -252,6 +307,7 @@ class GUI(object):
         self.active_game_thread = threading.Thread(target=self.game_instance.run_game)
         self.game_instance.set_mode_and_difficulty(self.game_mode_container.get(), self.game_difficulty_container.get())
         self.game_instance.set_gui_update_method(show_window_content)
+        self.game_instance.set_gui_play_sound_method(play_sound)
         self.game_instance.set_destroy_game_gui(close_top_window)
         self.active_game_thread.start()
 
@@ -327,24 +383,7 @@ class GUI(object):
         Shutdown the running operating system.
         :return: None
         """
-        print("Shutting down OS")  # todo implement os shutdown function
+        print("Shutting down OS")
 
-
-## todo [done] GUI Schick machen... Schrift größer, Hintergrundfarbe f. Spieler setzen
-## todo [done] In GUI und GameLogic alle Methoden, die nicht von außen gebraucht werden mit __ verstecken
-## todo [done] Konstanten auslagern
-## todo [done] Methoden Doku und Kommentare weg
-## todo [done] Spielregeln und Info Buttons aktivieren und weitere Ansichten hierfür implementieren (mit "Back" Button)
-## todo [done] InfoPage formatieren
-## todo [done] RadioButton für Schwierigkeitsstufe MITTEL kann gelöscht werden
-## todo [done] Spielregeln einbinden
-## todo [done] Add Computer Player Actions... EASY
-## todo die drei Sounds implementieren
-## todo Add Computer Player Actions... HEAVY
-## todo Fix Durchlauftext bei Start des Spiels (oder schauen, wie er mit Musik wirkt)
-## todo (optional) Check how to show Bildschirmtastatur
-## todo (optional) Check how to fullscreen (ohne Titelleiste und ohne Icons)
-## todo (optional) Check how to hide mouse
-## todo Add EasterEgg...
 if __name__ == "__main__":
     gui = GUI()
