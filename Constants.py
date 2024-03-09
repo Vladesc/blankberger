@@ -42,7 +42,7 @@ GAME_CURRENT_PLAYER_LABEL_VLADESC: Final = ("So preiset den Herrn in Neulatein: 
                                             "\nOh Herrum, schenkenum unsum deinum Segenum. "
                                             "\nAaameeenum. "
                                             "\n\nDir, {cplayer}, \nsei die Kraft des Gottimperators gewährt."
-                                            "\n\nSpieler {cplayer} hat gewonnen."
+                                            "\n\n{cplayer} geht Siegreich hervor. "
                                             "\n- Vladesc")
 GAME_CURRENT_PLAYER_LABEL_START: Final = [
     "Möge die Macht mit Dir sein. \n- Christopher Robin",
