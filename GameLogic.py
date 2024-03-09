@@ -51,6 +51,9 @@ class GameLogic(object):
         self.pve_difficulty = 0
         self.current_player_number: int = 0
         self.win_check_container = [0, 0, 0, 0]
+        self.vladesc_ref = '0612'
+        self.vladesc_p0 = ""
+        self.vladesc_p1 = ""
 
     def __gpio_setup(self) -> None:
         """
@@ -587,6 +590,35 @@ class GameLogic(object):
         self.data_vector[fall_pos_old] = 0
 
     # ------------------------------------------------------------------------#
+    #                          EasterEgg                                      #
+    # ------------------------------------------------------------------------#
+    def __vladesc_win_screen(self) -> None:
+        self.gui_update_method(5 if self.current_player_number == 0 else 6)
+        for x in range(0, 9):
+            self.__blink_screen(0.25, 0, self.data_vector)
+            for i in range(0, 4):
+                self.data_vector[self.win_check_container[i]] = not self.data_vector[self.win_check_container[i]]
+        self.__blink_screen(4, 0.5, self.__sample(3 + self.current_player_number))
+
+    def __vladesc_add(self, btn_nr: int) -> None:
+        if self.game_mode == 1:
+            return
+        if self.current_player_number == 0:
+            self.vladesc_p0 = self.vladesc_p0 + str(int(btn_nr / 2)) if len(self.vladesc_p0) != len(
+                self.vladesc_ref) else ""
+        else:
+            self.vladesc_p1 = self.vladesc_p1 + str(int(btn_nr / 2)) if len(self.vladesc_p1) != len(
+                self.vladesc_ref) else ""
+
+    def __vladesc_check(self) -> bool:
+        if self.game_mode == 1:
+            return False
+        if self.current_player_number == 0:
+            return self.vladesc_p0 == self.vladesc_ref
+        else:
+            return self.vladesc_p1 == self.vladesc_ref
+
+    # ------------------------------------------------------------------------#
     #                          BtnHandling (new)                              #
     # ------------------------------------------------------------------------#
     def __handle_button_input(self, btn_nr: int, pos_old: int) -> int:
@@ -605,6 +637,7 @@ class GameLogic(object):
                 or pos_new != pos_old and (self.data_vector[btn_nr] == 1 or self.data_vector[btn_nr + 1] == 1)):
             return 1
         self.gui_play_sound_method()
+        self.__vladesc_add(btn_nr)
         time.sleep(0.05)
         self.__change_active_position(pos_new, pos_old)
         time.sleep(0.05)
@@ -671,6 +704,11 @@ class GameLogic(object):
         :param last_empty_field:
         :return: 1 = true 0 = false
         """
+        if self.__vladesc_check():
+            self.__vladesc_win_screen()
+            time.sleep(5)
+            self.__end_game()
+            return 0
         if self.__win_check(last_empty_field) == 1:
             self.__win_screen()
             self.__end_game()
