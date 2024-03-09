@@ -593,6 +593,7 @@ class GameLogic(object):
         """
         Verarbeiten der Eingabe eines Buttons. Dabei wird kombiniert die Position der aktiven LED auf die Position des Buttons gesetzt
         sowie die Anzeige der Fallanimation gestartet.
+        Hinweis: Zwei Sleeps mit 0.05, damit der Sound besser abgespielt wird/passt.
         :param btn_nr: Nummer des gedrückten Buttons
         :param pos_old: Alte, aktive Position, die resettet werden muss.
         :return: None
@@ -604,7 +605,9 @@ class GameLogic(object):
                 or pos_new != pos_old and (self.data_vector[btn_nr] == 1 or self.data_vector[btn_nr + 1] == 1)):
             return 1
         self.gui_play_sound_method()
+        time.sleep(0.05)
         self.__change_active_position(pos_new, pos_old)
+        time.sleep(0.05)
         return self.__check_game_over(self.__stone_set_and_fall(pos_new, pos_old))
 
     def __change_active_position(self, pos_new: int, pos_old: int):

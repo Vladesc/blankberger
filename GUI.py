@@ -182,6 +182,8 @@ class GUI(object):
             """
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
                 cplayer=self.spieler1_eingabefeld.get())
+            spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
+            spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
             window_show_active()
 
         def window_show_active_p1() -> None:
@@ -191,6 +193,8 @@ class GUI(object):
             """
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
                 cplayer=self.spieler2_eingabefeld.get())
+            spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
+            spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
             window_show_active()
 
         def window_show_active()->None:
@@ -198,8 +202,6 @@ class GUI(object):
             Duplicate content fix for window_show_active p0 and p1
             :return: None
             """
-            spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
-            spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
             beenden_button1.grid(row=1, column=0)
             if not self.sound_state_container.get():
                 pygame.mixer.music.stop()
