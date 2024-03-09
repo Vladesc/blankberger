@@ -161,20 +161,31 @@ class MockEnvWinCheck:
         :param check_vector:
         :return: Nummer des Buttons, der ausgelöst werden soll
         """
-        # check Player win in two turns
-        check_player_number = 0
-        for manipulate_row in range(int(self.columns_total / 2)):
-            manipulated_vector = self.environment_manipulate_vector(check_vector.copy(), manipulate_row,
-                                                                    check_player_number)
-            if manipulated_vector is None:
-                continue
+
+        # check_player_number = 0
+        def win_check_for_player(check_player_number: int):
+            print("checking player", check_player_number)
+            # check Player win in two turns
             for check_column in range(int(self.columns_total / 2)):
-                if self.environment_win_check(manipulated_vector.copy(), check_column, check_player_number) == 1:
-                    return manipulate_row
+                if self.environment_win_check(check_vector.copy(), check_column, check_player_number) == 1:
+                    print("1 turn ", check_player_number, " win ", check_column)
+                    return check_column
+            for manipulate_row in range(int(self.columns_total / 2)):
+                manipulated_vector = self.environment_manipulate_vector(check_vector.copy(), manipulate_row,
+                                                                        check_player_number)
+                if manipulated_vector is None:
+                    continue
+                for check_column in range(int(self.columns_total / 2)):
+                    if self.environment_win_check(manipulated_vector.copy(), check_column, check_player_number) == 1:
+                        print("2 turn ", check_player_number, " win ", manipulate_row)
+                        return manipulate_row
+            return -1
+        """
         # check Computer win in one turn
         check_player_number = 1
         for check_column in range(int(self.columns_total / 2)):
             if self.environment_win_check(check_vector.copy(), check_column, check_player_number) == 1:
+                print("1 turn e win ", check_column)
                 return check_column
         # check Computer win in two turns
         for manipulate_row in range(int(self.columns_total / 2)):
@@ -184,9 +195,15 @@ class MockEnvWinCheck:
                 continue
             for check_column in range(int(self.columns_total / 2)):
                 if self.environment_win_check(manipulated_vector.copy(), check_column, check_player_number) == 1:
+                    print("2 turn e win ", manipulate_row)
                     return manipulate_row
         # Random set stone
         return randrange(int(self.columns_total / 2))
+        """
+        # Random set stone
+        press_btn = win_check_for_player(0)
+        press_btn = win_check_for_player(1) if press_btn == -1 else press_btn
+        return randrange(int(self.columns_total / 2)) if press_btn == -1 else press_btn
 
 
 if __name__ == '__main__':
@@ -199,11 +216,11 @@ if __name__ == '__main__':
                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     """
     data_vector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                   0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0]
+                   0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1,
+                   0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+                   0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0]
     mock = MockEnvWinCheck()
 
     print("press button: ", mock.env_check(data_vector))

@@ -731,7 +731,7 @@ class GameLogic(object):
             :return: None
             """
             self.reset_game = self.__handle_button_input(self.__environment_select_button(self.data_vector),
-                                                             self.current_index_in_data)
+                                                         self.current_index_in_data)
 
         if self.pve_difficulty == 1:
             __environment_hard()
@@ -752,12 +752,12 @@ class GameLogic(object):
         :param check_vector:
         :return: Nummer des Buttons, der ausgelöst werden soll
         """
-        def win_check_for_player(check_player_number:int):
-            # check win in one turn
+
+        def win_check_for_player(check_player_number: int):
+            # check Player win in two turns
             for check_column in range(int(self.columns_total / 2)):
                 if self.environment_win_check(check_vector.copy(), check_column, check_player_number) == 1:
                     return check_column
-            # check win in two turns
             for manipulate_row in range(int(self.columns_total / 2)):
                 manipulated_vector = self.environment_manipulate_vector(check_vector.copy(), manipulate_row,
                                                                         check_player_number)
@@ -767,10 +767,10 @@ class GameLogic(object):
                     if self.environment_win_check(manipulated_vector.copy(), check_column, check_player_number) == 1:
                         return manipulate_row
             return -1
-        press_button = win_check_for_player(0)
-        press_button = win_check_for_player(1) if press_button == -1 else press_button
-        # Random set stone
-        return randrange(int(self.columns_total / 2)) if press_button == -1 else press_button
+
+        press_btn = win_check_for_player(0)
+        press_btn = win_check_for_player(1) if press_btn == -1 else press_btn
+        return randrange(int(self.columns_total / 2)) if press_btn == -1 else press_btn
 
     def environment_manipulate_vector(self, check_vector: list[int], set_x: int, player_check: int) -> None | list[int]:
         """

@@ -135,7 +135,7 @@ class GUI(object):
                                    text=Constants.GAME_MODE_PVP_DIFFICULTY_HARD,
                                    variable=self.game_difficulty_container,
                                    padx=20,
-                                   value=2)
+                                   value=1)
 
         start_button = Button(self.fenster, text=Constants.GAME_START_BUTTON, command=self.__start_game_instance)
         start_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
