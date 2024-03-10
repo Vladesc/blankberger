@@ -920,8 +920,8 @@ class GameLogic(object):
         :param difficulty: Schwierigkeit des Computergegners 0=easy 1=hard
         :return: None
         """
-        self.game_mode = mode
-        self.pve_difficulty = difficulty
+        self.game_mode = [mode].copy()[0]
+        self.pve_difficulty = [difficulty].copy()[0]
 
     def set_destroy_game_gui(self, close_game_gui_method) -> None:
         """
@@ -987,7 +987,7 @@ class GameLogic(object):
                 for btn_index in range(len(self.input_button_from_left)):
                     if self.game_mode == 1 and self.current_player_number == 1:
                         self.__environment_action()
-                    elif self.game_mode == 2:
+                    elif self.game_mode == 2 and self.thread_is_running:
                         self.__environment_action()
                     else:
                         if self.__button(self.input_button_from_left[btn_index]):
