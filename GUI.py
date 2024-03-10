@@ -1,3 +1,4 @@
+import os
 import random
 import tkinter
 from tkinter import *
@@ -444,7 +445,7 @@ class GUI(object):
         Shutdown the running operating system.
         :return: None
         """
-        print("Shutting down OS")
+        os.system("sudo shutdown -h now")
 
 
 if __name__ == "__main__":
