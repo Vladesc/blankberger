@@ -548,11 +548,9 @@ class GameLogic(object):
         if self.game_mode == 1:
             return
         if self.current_player_number == 0:
-            self.vladesc_p0 = self.vladesc_p0 + str(int(btn_nr / 2)) if len(self.vladesc_p0) != len(
-                self.vladesc_ref) else ""
+            self.vladesc_p0 = self.vladesc_p0 + str(int(btn_nr / 2)-1) if len(self.vladesc_p0) != len(self.vladesc_ref) else ""
         else:
-            self.vladesc_p1 = self.vladesc_p1 + str(int(btn_nr / 2)) if len(self.vladesc_p1) != len(
-                self.vladesc_ref) else ""
+            self.vladesc_p1 = self.vladesc_p1 + str(int(btn_nr / 2)) if len(self.vladesc_p1) != len(self.vladesc_ref) else ""
 
     def __vladesc_check(self) -> bool:
         if self.game_mode == 1:
@@ -707,19 +705,18 @@ class GameLogic(object):
     def __environment_action(self) -> int:
         """
         Run environment actions if game mode is PvE
-        :return: 1 end handling
+        :return: 0 = end round; 1 = run further
         """
         actual_player = [self.current_player_number].copy()
         while self.current_player_number == actual_player[0]:
             if self.pve_difficulty == 0:
-                self.reset_game = self.__handle_button_input(
+                return self.__handle_button_input(
                     self.__environment_select_button(self.data_vector.copy(), 40) * 2,
                     self.current_index_in_data)
             else:
-                self.reset_game = self.__handle_button_input(
+                return self.__handle_button_input(
                     self.__environment_select_button(self.data_vector.copy(), 0) * 2,
                     self.current_index_in_data)
-        return not self.reset_game
 
     def __environment_select_button(self, check_vector: list[int], easy_percentage: int) -> int:
         """
@@ -912,7 +909,7 @@ class GameLogic(object):
         :return: None
         """
         self.__reset_game_instance()
-        self.thread_is_running = not self.thread_is_running
+        self.thread_is_running = 0
 
     def set_mode_and_difficulty(self, mode: int, difficulty: int = None) -> None:
         """
@@ -969,6 +966,8 @@ class GameLogic(object):
         clean output of shift register and send sample(7) to output.
         :return: None
         """
+        self.vladesc_p1 = ""
+        self.vladesc_p0 = ""
         self.thread_is_running = 1
         self.__output_enable()
         self.__clear_shift_register()
@@ -988,8 +987,7 @@ class GameLogic(object):
                 for btn_index in range(len(self.input_button_from_left)):
                     if ((self.game_mode == 1 and self.current_player_number == 1)
                             or (self.game_mode == 2 and self.thread_is_running)):
-                        if self.__environment_action():
-                            break
+                        self.reset_game = self.__environment_action()
                     else:
                         if self.__button(self.input_button_from_left[btn_index]):
                             self.reset_game = self.__handle_button_input(btn_index * 2, self.current_index_in_data)

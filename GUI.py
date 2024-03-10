@@ -70,7 +70,6 @@ class GUI(object):
             """
             self.game_mode_container.set(0)
             self.game_difficulty_container.set(0)
-            self.sound_state_container.set(0)
             self.spieler1_eingabefeld.delete(0, END)
             self.spieler2_eingabefeld.delete(0, END)
             self.spieler1_eingabefeld.insert(0, Constants.GAME_PLAYER_1_PLACEHOLDER)
@@ -168,6 +167,7 @@ class GUI(object):
         shutdown_system_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
 
         build_grid()
+        self.sound_state_container.set(0)
         reset_game_container_values()
 
     def __game_window(self) -> None:
