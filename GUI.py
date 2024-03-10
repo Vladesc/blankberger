@@ -15,6 +15,7 @@ class GUI(object):
         self.active_game_thread = None
 
         self.fenster = Tk()
+        self.fenster.config(cursor="none")
         self.fenster.title(Constants.WINDOW_TITLE)
         self.fenster.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
         pygame.init()
