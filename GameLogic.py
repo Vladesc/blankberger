@@ -259,19 +259,49 @@ class GameLogic(object):
                              1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0,
                              1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
         elif sample_nr == 6:
-            sample_vector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile1
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile2
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile3
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile4
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile5
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Zeile6
+            sample_vector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,
+                             0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile1
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+                             0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile2
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,
+                             0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile3
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                             0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile4
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,
+                             0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile5
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Zeile6
         elif sample_nr == 7:
-            sample_vector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # Zeile1
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # Zeile2
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # Zeile3
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # Zeile4
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # Zeile5
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Zeile6
+            sample_vector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1,
+                             0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
+                             0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile1
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
+                             0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile2
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+                             0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
+                             0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile3
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+                             0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
+                             0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile4
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1,
+                             0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+                             0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  # Zeile5
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Zeile6
         return sample_vector
 
     def __position_check(self, level: int) -> int:
@@ -291,7 +321,6 @@ class GameLogic(object):
                       )
         return self.state
 
-    # todo so umbauen, das ich die Methode auch auf ein fiktiven data_vektor ausführen kann. (für PvE hard mode)
     def __win_check(self, current_row: int) -> int:
         """
         Funktion ueberprueft, ob sich horizontal, vertikal oder diagonal "4 in einer Reihe" befinden.
@@ -412,14 +441,14 @@ class GameLogic(object):
             for i in range(0, 4):
                 self.data_vector[self.win_check_container[i]] = not self.data_vector[self.win_check_container[i]]
 
-        self.__blink_screen(4, 0.5,
-                            self.__sample(3 + self.current_player_number))
+        self.__blink_screen(4, 0.5, self.__sample(3 + self.current_player_number))
 
     def __draw_screen(self) -> None:
         """
         Funktion ruft fuer 4sec eine blinkende Unentschiedenanzeige (Sample(5)) mit 0.5sec Blinkintervall auf
         :return: None
         """
+        self.gui_update_method(7)
         self.__blink_screen(4, 0.5, self.__sample(5))
 
     def __blink_screen(self, time_length: float | int, interval: float | int, data: list[int]) -> None:
@@ -519,11 +548,9 @@ class GameLogic(object):
         if self.game_mode == 1:
             return
         if self.current_player_number == 0:
-            self.vladesc_p0 = self.vladesc_p0 + str(int(btn_nr / 2)) if len(self.vladesc_p0) != len(
-                self.vladesc_ref) else ""
+            self.vladesc_p0 = self.vladesc_p0 + str(int(btn_nr / 2)-1) if len(self.vladesc_p0) != len(self.vladesc_ref) else ""
         else:
-            self.vladesc_p1 = self.vladesc_p1 + str(int(btn_nr / 2)) if len(self.vladesc_p1) != len(
-                self.vladesc_ref) else ""
+            self.vladesc_p1 = self.vladesc_p1 + str(int(btn_nr / 2)) if len(self.vladesc_p1) != len(self.vladesc_ref) else ""
 
     def __vladesc_check(self) -> bool:
         if self.game_mode == 1:
@@ -543,7 +570,7 @@ class GameLogic(object):
         Hinweis: Zwei Sleeps mit 0.05, damit der Sound besser abgespielt wird/passt.
         :param btn_nr: Nummer des gedrückten Buttons
         :param pos_old: Alte, aktive Position, die resettet werden muss.
-        :return: None
+        :return: 1 if game over; 0 if game not over
         """
         pos_new = btn_nr + self.current_player_number
         if (type(pos_new) is not int
@@ -669,40 +696,208 @@ class GameLogic(object):
                 self.current_index_in_data = self.current_index_in_data + 2
                 pass
             else:
-                self.data_vector[self.current_index_in_data] = 0  ## hier auf 1 setzen, playerstein zu beleuchten.
+                self.data_vector[self.current_index_in_data] = 0
                 break
 
     # ------------------------------------------------------------------------#
     #                      PvE Environment Actions                            #
     # ------------------------------------------------------------------------#
-
-    # todo implement hard pve actions
-    def __environment_action(self) -> None:
+    def __environment_action(self) -> int:
         """
         Run environment actions if game mode is PvE
-        :return: None
+        :return: 0 = end round; 1 = run further
+        """
+        actual_player = [self.current_player_number].copy()
+        while self.current_player_number == actual_player[0]:
+            if self.pve_difficulty == 0:
+                return self.__handle_button_input(
+                    self.__environment_select_button(self.data_vector.copy(), 40) * 2,
+                    self.current_index_in_data)
+            else:
+                return self.__handle_button_input(
+                    self.__environment_select_button(self.data_vector.copy(), 0) * 2,
+                    self.current_index_in_data)
+
+    def __environment_select_button(self, check_vector: list[int], easy_percentage: int) -> int:
+        """
+        1. Prüfen, ob der Spieler in der nächsten Runde gewinnen könnte
+            → Ja: Nummer des Buttons zurückgeben und abbruch der Prüfung
+        2. Prüfen, ob der Spieler in den nächsten zwei Runden gewinnen könnte
+            → Ja: Nummer des Buttons zurückgeben und abbruch der Prüfung
+        3. Prüfen, ob der Computer in der nächsten Runde gewinnen könnte
+            → Ja: Nummer des Buttons zurückgeben und abbruch der Prüfung
+        4. Prüfen, ob der Computer in den nächsten zwei Runden gewinnen könnte
+            → Ja: Nummer des Buttons zurückgeben und abbruch der Prüfung
+        5. Rückgabe des ermittelten Wertes oder Random Wert. Hier kommt der Prozentwert zum Einsatz.
+        :param check_vector: Aktueller DataVektor, der geprüft werden soll.
+        :param easy_percentage: Prozentwert (0-100), um wie viel Wahrscheinlichkeit ein Zufallswert zurückgegeben wird.
+        :return: Nummer des Buttons, der ausgelöst werden soll
         """
 
-        def __environment_easy() -> None:
+        def win_check_for_player(check_player_number: int):
             """
-            The Easy Environment Actions. Just randomly press a button.
-            :return: None
+            1. Prüfen, ob der übergebene Player in der nächsten Runde gewinnen könnte
+            2. Prüfen, ob der übergebene Player in der übernächsten Runde gewinnen könnte
+            :param check_player_number:
+            :return:
             """
-            while self.current_player_number == 1:
-                self.reset_game = self.__handle_button_input(randrange(len(self.input_button_from_left)) * 2,
-                                                             self.current_index_in_data)
+            for check_column in range(int(self.columns_total / 2)):
+                if self.environment_win_check(check_vector.copy(), check_column, check_player_number) == 1:
+                    return check_column
+            for manipulate_row in range(int(self.columns_total / 2)):
+                manipulated_vector = self.environment_manipulate_vector(check_vector.copy(), manipulate_row,
+                                                                        check_player_number)
+                if manipulated_vector is None:
+                    continue
+                for check_column in range(int(self.columns_total / 2)):
+                    if self.environment_win_check(manipulated_vector.copy(), check_column, check_player_number) == 1:
+                        return manipulate_row
+            return -1
 
-        def __environment_hard() -> None:
-            """
-            The Hard Environment Actions. Some kind of intelligence.
-            :return: None
-            """
-            pass
-
-        if self.pve_difficulty == 1:
-            __environment_hard()
+        if randrange(1, 100) > easy_percentage:
+            press_btn = win_check_for_player(not self.current_player_number)
+            press_btn = win_check_for_player(self.current_player_number) if press_btn == -1 else press_btn
+            return randrange(int(self.columns_total / 2)) if press_btn == -1 else press_btn
         else:
-            __environment_easy()
+            return randrange(int(self.columns_total / 2))
+
+    def environment_manipulate_vector(self, check_vector: list[int], set_x: int, player_check: int) -> None | list[int]:
+        """
+        Manipulieren des Vektors, um eine zweischichtprüfung zuzulassen.
+        Einfügen eines Steins in der Spalte "set_x" für den Spieler "player_check".
+        :param check_vector:
+        :param set_x: X-Position, von der aus überprüft werden soll
+        :param player_check: 0=Player1, 1=Environment → Für wen soll Gewinn geprüft werden.
+        :return: "None" wenn einfügen nicht möglich, andernfalls Rückgabe des manipulierten Vektors.
+        """
+        position_set = 0
+        check_position = set_x * 2
+        check_row = self.rows - 1
+        while not position_set:
+            if check_row == -1:
+                return None
+            if (check_vector[check_row * self.columns_total + check_position] == 1
+                    or check_vector[check_row * self.columns_total + check_position + 1] == 1):
+                check_row = check_row - 1
+            else:
+                check_vector[check_row * self.columns_total + check_position + player_check] = 1
+                position_set = 1
+        return check_vector
+
+    def environment_win_check(self, check_vector: list[int], set_x: int, player_check: int):
+        """
+        1. Vektor Manipulieren und Einfügen eines Steins in der Spalte "set_x" für den Spieler "player_check".
+        2. Prüfen, ob mit Einfügen dieses Steins der Spieler "player_check" gewinnt.
+        :param check_vector:
+        :param set_x: X-Position, von der aus überprüft werden soll
+        :param player_check: 0=Player1, 1=Environment → Für wen soll Gewinn geprüft werden.
+        :return: 1 = gewinnt; 0 = gewinnt nicht; -1 = geht nicht
+        """
+        position_set = 0
+        current_index_in_vector = 0
+        check_position = set_x * 2
+        check_row = self.rows - 1
+        while not position_set:
+            if check_row == -1:
+                return -1
+            if (check_vector[check_row * self.columns_total + check_position] == 1
+                    or check_vector[check_row * self.columns_total + check_position + 1] == 1):
+                check_row = check_row - 1
+            else:
+                current_index_in_vector = check_row * self.columns_total + check_position + player_check
+                check_vector[current_index_in_vector] = 1
+                position_set = 1
+
+        # --------------------- von Position aus prüfen
+        i = 1
+        led_in_a_row = 1
+        matrix_right_border = check_row * self.columns_total + self.max_index_in_data_row + player_check
+        matrix_left_border = check_row * self.columns_total + player_check
+        env_win_check_container = [current_index_in_vector, 0, 0, 0]
+        # Horizontal nach rechts |0 0 0 0 0 0|
+        while current_index_in_vector + i * 2 <= matrix_right_border:  # |0 0 0 0 0 0|
+            if check_vector[current_index_in_vector + i * 2] == 1:  # |0 0 0 0 0 0|
+                env_win_check_container[led_in_a_row] = current_index_in_vector + i * 2  # |0 x x x x 0|
+                led_in_a_row = led_in_a_row + 1
+                if led_in_a_row == 4:
+                    return 1
+                i = i + 1
+            else:
+                break
+        i = 1
+        # Horizontal nach links
+        while current_index_in_vector - i * 2 >= matrix_left_border:
+            if check_vector[current_index_in_vector - i * 2] == 1:
+                env_win_check_container[led_in_a_row] = current_index_in_vector - i * 2
+                led_in_a_row = led_in_a_row + 1
+                if led_in_a_row == 4:
+                    return 1
+                i = i + 1
+            else:
+                break
+        i = 1
+        led_in_a_row = 1
+        # Vertikal nach unten |0 x 0 0 0 0|
+        while current_index_in_vector + i * self.columns_total < self.rows * self.columns_total:  # |0 x 0 0 0 0|
+            if check_vector[current_index_in_vector + i * self.columns_total] == 1:  # |0 x 0 0 0 0|
+                env_win_check_container[
+                    led_in_a_row] = current_index_in_vector + i * self.columns_total  # |0 x 0 0 0 0|
+                led_in_a_row = led_in_a_row + 1
+                if led_in_a_row == 4:
+                    return 1
+                i = i + 1
+            else:
+                break
+        i = 1
+        led_in_a_row = 1
+        # Diagonal nach rechts steigend |0 0 0 0 x 0|
+        while current_index_in_vector - i * self.columns_total > 0 and current_index_in_vector + i * 2 <= matrix_right_border:  # |0 0 0 x 0 0|
+            if check_vector[current_index_in_vector + i * 2 - i * self.columns_total] == 1:  # |0 0 x 0 0 0|
+                env_win_check_container[
+                    led_in_a_row] = current_index_in_vector + i * 2 - i * self.columns_total  # |0 x 0 0 0 0|
+                led_in_a_row = led_in_a_row + 1
+                if led_in_a_row == 4:
+                    return 1
+                i = i + 1
+            else:
+                break
+        i = 1
+        # Diagonal nach links fallend
+        while current_index_in_vector + i * self.columns_total < self.rows * self.columns_total and current_index_in_vector - i * 2 >= matrix_left_border:
+            if check_vector[current_index_in_vector - i * 2 + i * self.columns_total] == 1:
+                env_win_check_container[led_in_a_row] = current_index_in_vector - i * 2 + i * self.columns_total
+                led_in_a_row = led_in_a_row + 1
+                if led_in_a_row == 4:
+                    return 1
+                i = i + 1
+            else:
+                break
+
+        i = 1
+        led_in_a_row = 1
+        # Diagonal nach rechts fallend |0 x 0 0 0 0|
+        while current_index_in_vector + i * self.columns_total < self.rows * self.columns_total and current_index_in_vector + i * 2 <= matrix_right_border:  # |0 0 x 0 0 0|
+            if check_vector[current_index_in_vector + i * 2 + i * self.columns_total] == 1:  # |0 0 0 x 0 0|
+                env_win_check_container[
+                    led_in_a_row] = current_index_in_vector + i * 2 + i * self.columns_total  # |0 0 0 0 x 0|
+                led_in_a_row = led_in_a_row + 1
+                if led_in_a_row == 4:
+                    return 1
+                i = i + 1
+            else:
+                break
+        i = 1
+        # Diagonal nach links steigend
+        while current_index_in_vector - i * self.columns_total > 0 and current_index_in_vector - i * 2 >= matrix_left_border:
+            if check_vector[current_index_in_vector - i * 2 - i * self.columns_total] == 1:
+                env_win_check_container[led_in_a_row] = current_index_in_vector - i * 2 - i * self.columns_total
+                led_in_a_row = led_in_a_row + 1
+                if led_in_a_row == 4:
+                    return 1
+                i = i + 1
+            else:
+                break
+        return 0
 
     # ------------------------------------------------------------------------#
     #                                 Main                                    #
@@ -714,7 +909,7 @@ class GameLogic(object):
         :return: None
         """
         self.__reset_game_instance()
-        self.thread_is_running = not self.thread_is_running
+        self.thread_is_running = 0
 
     def set_mode_and_difficulty(self, mode: int, difficulty: int = None) -> None:
         """
@@ -723,8 +918,8 @@ class GameLogic(object):
         :param difficulty: Schwierigkeit des Computergegners 0=easy 1=hard
         :return: None
         """
-        self.game_mode = mode
-        self.pve_difficulty = difficulty
+        self.game_mode = [mode].copy()[0]
+        self.pve_difficulty = [difficulty].copy()[0]
 
     def set_destroy_game_gui(self, close_game_gui_method) -> None:
         """
@@ -771,6 +966,8 @@ class GameLogic(object):
         clean output of shift register and send sample(7) to output.
         :return: None
         """
+        self.vladesc_p1 = ""
+        self.vladesc_p0 = ""
         self.thread_is_running = 1
         self.__output_enable()
         self.__clear_shift_register()
@@ -788,8 +985,9 @@ class GameLogic(object):
             while self.reset_game and self.thread_is_running:
                 self.__send_data(self.data_vector)
                 for btn_index in range(len(self.input_button_from_left)):
-                    if self.game_mode == 1 and self.current_player_number == 1:
-                        self.__environment_action()
+                    if ((self.game_mode == 1 and self.current_player_number == 1)
+                            or (self.game_mode == 2 and self.thread_is_running)):
+                        self.reset_game = self.__environment_action()
                     else:
                         if self.__button(self.input_button_from_left[btn_index]):
                             self.reset_game = self.__handle_button_input(btn_index * 2, self.current_index_in_data)

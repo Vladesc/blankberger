@@ -1,5 +1,4 @@
 import random
-import time
 import tkinter
 from tkinter import *
 from tkinter import messagebox
@@ -16,6 +15,7 @@ class GUI(object):
         self.active_game_thread = None
 
         self.fenster = Tk()
+        self.fenster.config(cursor="none")
         self.fenster.title(Constants.WINDOW_TITLE)
         self.fenster.geometry("%dx%d+0+0" % (Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT))
         pygame.init()
@@ -44,8 +44,8 @@ class GUI(object):
             willkommen_label.grid(row=0, column=1)
 
             spielmodus_label.grid(row=1, column=1)
-            radio_oneOnOne.grid(row=2, column=0)
-            radio_oneOnCpu.grid(row=2, column=2)
+            radio_pvp.grid(row=2, column=0)
+            radio_pve.grid(row=2, column=2)
 
             spieler1_label.grid(row=3, column=0)
             self.spieler1_eingabefeld.grid(row=3, column=1)
@@ -54,8 +54,9 @@ class GUI(object):
 
             start_button.grid(row=10, column=1)
 
-            sound_Label.grid(row=11, column=0)
+            sound_label.grid(row=11, column=0)
             radio_sound_on.grid(row=12, column=0)
+            demo_button.grid(row=12, column=2)
             radio_sound_off.grid(row=13, column=0)
 
             spielregeln_button.grid(row=13, column=1)
@@ -70,7 +71,10 @@ class GUI(object):
             """
             self.game_mode_container.set(0)
             self.game_difficulty_container.set(0)
-            self.sound_state_container.set(0)
+            self.spieler1_eingabefeld.delete(0, END)
+            self.spieler2_eingabefeld.delete(0, END)
+            self.spieler1_eingabefeld.insert(0, Constants.GAME_PLAYER_1_PLACEHOLDER)
+            self.spieler2_eingabefeld.insert(0, Constants.GAME_PLAYER_2_PLACEHOLDER)
 
         def ctrl_game_mode_change() -> None:
             """
@@ -85,7 +89,7 @@ class GUI(object):
                 self.spieler2_eingabefeld.grid(row=4, column=1)
                 self.spieler2_eingabefeld.insert(0, Constants.GAME_PLAYER_2_PLACEHOLDER)
 
-                cpuLevel_Label.grid_forget()
+                pve_difficulty_label.grid_forget()
                 radio_leicht.grid_forget()
                 radio_schwer.grid_forget()
             else:
@@ -95,9 +99,14 @@ class GUI(object):
                 self.spieler2_eingabefeld.grid_forget()
                 self.spieler2_eingabefeld.insert(0, Constants.GAME_ENVIRONMENT_PLACEHOLDER)
 
-                cpuLevel_Label.grid(row=5, column=1)
+                pve_difficulty_label.grid(row=5, column=1)
                 radio_leicht.grid(row=6, column=1)
                 radio_schwer.grid(row=7, column=1)
+
+        def run_demo_window():
+            self.__start_demo_instance()
+            reset_game_container_values()
+            ctrl_game_mode_change()
 
         spielmodus_label = Label(self.fenster, text=Constants.GAME_MODE_LABEL)
         willkommen_label = Label(self.fenster, text=Constants.GAME_WELCOME_LABEL)
@@ -108,23 +117,20 @@ class GUI(object):
         self.spieler1_eingabefeld = Entry(self.fenster, bd=5, width=40)
         self.spieler2_eingabefeld = Entry(self.fenster, bd=5, width=40)
 
-        self.spieler1_eingabefeld.insert(0, Constants.GAME_PLAYER_1_PLACEHOLDER)
-        self.spieler2_eingabefeld.insert(0, Constants.GAME_PLAYER_2_PLACEHOLDER)
+        radio_pvp = Radiobutton(self.fenster,
+                                text=Constants.GAME_MODE_PVP_LABEL,
+                                padx=20,
+                                variable=self.game_mode_container,
+                                command=ctrl_game_mode_change,
+                                value=0)
+        radio_pve = Radiobutton(self.fenster,
+                                text=Constants.GAME_MODE_PVE_LABEL,
+                                padx=20,
+                                variable=self.game_mode_container,
+                                command=ctrl_game_mode_change,
+                                value=1)
 
-        radio_oneOnOne = Radiobutton(self.fenster,
-                                     text=Constants.GAME_MODE_PVP_LABEL,
-                                     padx=20,
-                                     variable=self.game_mode_container,
-                                     command=ctrl_game_mode_change,
-                                     value=0)
-        radio_oneOnCpu = Radiobutton(self.fenster,
-                                     text=Constants.GAME_MODE_PVE_LABEL,
-                                     padx=20,
-                                     variable=self.game_mode_container,
-                                     command=ctrl_game_mode_change,
-                                     value=1)
-
-        cpuLevel_Label = Label(self.fenster, text=Constants.GAME_MODE_PVP_DIFFICULTY_CHOOSE)
+        pve_difficulty_label = Label(self.fenster, text=Constants.GAME_MODE_PVP_DIFFICULTY_CHOOSE)
 
         radio_leicht = Radiobutton(self.fenster,
                                    text=Constants.GAME_MODE_PVP_DIFFICULTY_EASY,
@@ -135,12 +141,15 @@ class GUI(object):
                                    text=Constants.GAME_MODE_PVP_DIFFICULTY_HARD,
                                    variable=self.game_difficulty_container,
                                    padx=20,
-                                   value=2)
+                                   value=1)
 
         start_button = Button(self.fenster, text=Constants.GAME_START_BUTTON, command=self.__start_game_instance)
         start_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
 
-        sound_Label = Label(self.fenster, text=Constants.GAME_SOUND_LABEL)
+        demo_button = Button(self.fenster, text=Constants.GAME_DEMO_BUTTON, command=run_demo_window)
+        demo_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
+
+        sound_label = Label(self.fenster, text=Constants.GAME_SOUND_LABEL)
         radio_sound_on = Radiobutton(self.fenster, text=Constants.GAME_SOUND_LABEL_ON, padx=20,
                                      variable=self.sound_state_container,
                                      value=0)
@@ -159,6 +168,7 @@ class GUI(object):
         shutdown_system_button.config(width=Constants.GAME_BTN_SIZE_WIDTH, height=Constants.GAME_BTN_SIZE_HEIGHT)
 
         build_grid()
+        self.sound_state_container.set(0)
         reset_game_container_values()
 
     def __game_window(self) -> None:
@@ -182,7 +192,7 @@ class GUI(object):
             :return: None
             """
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
-                cplayer=self.spieler1_eingabefeld.get())
+                cplayer=spielernamen[0])
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_1)
             window_show_active()
@@ -193,12 +203,12 @@ class GUI(object):
             :return: None
             """
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL.format(
-                cplayer=self.spieler2_eingabefeld.get())
+                cplayer=spielernamen[1])
             spieler_name_anzeigen_label.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
             spiele_fenster.configure(bg=Constants.GAME_COLOR_BACKGROUND_PLAYER_2)
             window_show_active()
 
-        def window_show_active()->None:
+        def window_show_active() -> None:
             """
             Duplicate content fix for window_show_active p0 and p1
             :return: None
@@ -227,7 +237,7 @@ class GUI(object):
             :return: None
             """
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL_END.format(
-                cplayer=self.spieler1_eingabefeld.get())
+                cplayer=spielernamen[0])
             window_show_end()
 
         def window_show_end_p1() -> None:
@@ -236,7 +246,15 @@ class GUI(object):
             :return: None
             """
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL_END.format(
-                cplayer=self.spieler2_eingabefeld.get())
+                cplayer=spielernamen[1])
+            window_show_end()
+
+        def window_show_end_patt() -> None:
+            """
+            Show patt in the game window and play the end sound.
+            :return: None
+            """
+            spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PATT_LABEL_END
             window_show_end()
 
         def window_show_end() -> None:
@@ -257,7 +275,7 @@ class GUI(object):
             :return: None
             """
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL_VLADESC.format(
-                cplayer=self.spieler1_eingabefeld.get())
+                cplayer=spielernamen[0])
             window_show_vladesc()
 
         def window_show_vladesc_p1() -> None:
@@ -266,7 +284,7 @@ class GUI(object):
             :return: None
             """
             spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PLAYER_LABEL_VLADESC.format(
-                cplayer=self.spieler2_eingabefeld.get())
+                cplayer=spielernamen[1])
             window_show_vladesc()
 
         def window_show_vladesc() -> None:
@@ -288,6 +306,7 @@ class GUI(object):
             4: window_show_end_p1,
             5: window_show_vladesc_p0,
             6: window_show_vladesc_p1,
+            7: window_show_end_patt,
         }
 
         def show_window_content(show_option: int) -> None:
@@ -325,6 +344,7 @@ class GUI(object):
             spieler_name_anzeigen_label.grid(row=0, column=0)
             beenden_button1.grid(row=1, column=0)
 
+        spielernamen = [self.spieler1_eingabefeld.get(), self.spieler2_eingabefeld.get()].copy()
         pygame.mixer.music.set_volume(.5)
         spiele_fenster = tkinter.Toplevel(self.fenster)
         spiele_fenster.title(Constants.WINDOW_TITLE_RUNNING_GAME)
@@ -396,6 +416,15 @@ class GUI(object):
         game_info.wm_overrideredirect(True)
         build_grid()
 
+    def __start_demo_instance(self):
+        self.spieler1_eingabefeld.delete(0, END)
+        self.spieler2_eingabefeld.delete(0, END)
+        self.spieler1_eingabefeld.insert(0, Constants.GAME_ENVIRONMENT_PLACEHOLDER)
+        self.spieler2_eingabefeld.insert(0, Constants.GAME_ENVIRONMENT2_PLACEHOLDER)
+        self.game_mode_container.set(2)
+        self.game_difficulty_container.set(1)
+        self.__start_game_instance()
+
     def __start_game_instance(self):
         spieler_namen = (self.spieler1_eingabefeld.get(), self.spieler2_eingabefeld.get())
         if self.game_mode_container.get() == 0:
@@ -416,6 +445,7 @@ class GUI(object):
         :return: None
         """
         print("Shutting down OS")
+
 
 if __name__ == "__main__":
     gui = GUI()
