@@ -248,6 +248,14 @@ class GUI(object):
                 cplayer=spielernamen[1])
             window_show_end()
 
+        def window_show_end_patt() -> None:
+            """
+            Show patt in the game window and play the end sound.
+            :return: None
+            """
+            spieler_name_anzeigen_label['text'] = Constants.GAME_CURRENT_PATT_LABEL_END
+            window_show_end()
+
         def window_show_end() -> None:
             """
             Duplicate content fix for window_show_end p0 and p1
@@ -297,6 +305,7 @@ class GUI(object):
             4: window_show_end_p1,
             5: window_show_vladesc_p0,
             6: window_show_vladesc_p1,
+            7: window_show_end_patt,
         }
 
         def show_window_content(show_option: int) -> None:

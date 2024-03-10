@@ -441,14 +441,14 @@ class GameLogic(object):
             for i in range(0, 4):
                 self.data_vector[self.win_check_container[i]] = not self.data_vector[self.win_check_container[i]]
 
-        self.__blink_screen(4, 0.5,
-                            self.__sample(3 + self.current_player_number))
+        self.__blink_screen(4, 0.5, self.__sample(3 + self.current_player_number))
 
     def __draw_screen(self) -> None:
         """
         Funktion ruft fuer 4sec eine blinkende Unentschiedenanzeige (Sample(5)) mit 0.5sec Blinkintervall auf
         :return: None
         """
+        self.gui_update_method(7)
         self.__blink_screen(4, 0.5, self.__sample(5))
 
     def __blink_screen(self, time_length: float | int, interval: float | int, data: list[int]) -> None:
@@ -572,7 +572,7 @@ class GameLogic(object):
         Hinweis: Zwei Sleeps mit 0.05, damit der Sound besser abgespielt wird/passt.
         :param btn_nr: Nummer des gedrückten Buttons
         :param pos_old: Alte, aktive Position, die resettet werden muss.
-        :return: None
+        :return: 1 if game over; 0 if game not over
         """
         pos_new = btn_nr + self.current_player_number
         if (type(pos_new) is not int
@@ -704,10 +704,10 @@ class GameLogic(object):
     # ------------------------------------------------------------------------#
     #                      PvE Environment Actions                            #
     # ------------------------------------------------------------------------#
-    def __environment_action(self) -> None:
+    def __environment_action(self) -> int:
         """
         Run environment actions if game mode is PvE
-        :return: None
+        :return: 1 end handling
         """
         actual_player = [self.current_player_number].copy()
         while self.current_player_number == actual_player[0]:
@@ -719,6 +719,7 @@ class GameLogic(object):
                 self.reset_game = self.__handle_button_input(
                     self.__environment_select_button(self.data_vector.copy(), 0) * 2,
                     self.current_index_in_data)
+        return not self.reset_game
 
     def __environment_select_button(self, check_vector: list[int], easy_percentage: int) -> int:
         """
@@ -985,10 +986,10 @@ class GameLogic(object):
             while self.reset_game and self.thread_is_running:
                 self.__send_data(self.data_vector)
                 for btn_index in range(len(self.input_button_from_left)):
-                    if self.game_mode == 1 and self.current_player_number == 1:
-                        self.__environment_action()
-                    elif self.game_mode == 2 and self.thread_is_running:
-                        self.__environment_action()
+                    if ((self.game_mode == 1 and self.current_player_number == 1)
+                            or (self.game_mode == 2 and self.thread_is_running)):
+                        if self.__environment_action():
+                            break
                     else:
                         if self.__button(self.input_button_from_left[btn_index]):
                             self.reset_game = self.__handle_button_input(btn_index * 2, self.current_index_in_data)
