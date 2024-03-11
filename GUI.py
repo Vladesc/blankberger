@@ -62,7 +62,7 @@ class GUI(object):
 
             spielregeln_button.grid(row=13, column=1)
             info_button.grid(row=13, column=2)
-            end_application_button.grid(row=15, column=1)
+            end_application_button.grid(row=14, column=1)
             shutdown_system_button.grid(row=15, column=2)
 
         def reset_game_container_values() -> None:
