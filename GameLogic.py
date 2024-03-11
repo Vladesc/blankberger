@@ -548,7 +548,7 @@ class GameLogic(object):
         if self.game_mode == 1:
             return
         if self.current_player_number == 0:
-            self.vladesc_p0 = self.vladesc_p0 + str(int(btn_nr / 2)-1) if len(self.vladesc_p0) != len(self.vladesc_ref) else ""
+            self.vladesc_p0 = self.vladesc_p0 + str(int(btn_nr / 2)) if len(self.vladesc_p0) != len(self.vladesc_ref) else ""
         else:
             self.vladesc_p1 = self.vladesc_p1 + str(int(btn_nr / 2)) if len(self.vladesc_p1) != len(self.vladesc_ref) else ""
 
